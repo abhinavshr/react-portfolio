@@ -1,24 +1,37 @@
+// Example routing configuration
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLogin from './pages/admins/AdminLogin';
-import HomePage from './pages/users/home';
-import './App.css';
 import AdminDashboard from './pages/admins/AdminDashboard';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
   return (
     <Router>
-      <div className="App">
-        <Routes>
-          <Route path="/" element={<Navigate to="/home" replace />} />
-          
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          
-          <Route path="*" element={<Navigate to="/admin/login" replace />} />
-        </Routes>
-      </div>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/admin/login" element={<AdminLogin />} />
+        
+        {/* Protected routes */}
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+        
+        {/* Add more protected routes as needed */}
+        <Route 
+          path="/admin/*" 
+          element={
+            <ProtectedRoute>
+              {/* Your admin layout or specific components */}
+            </ProtectedRoute>
+          } 
+        />
+      </Routes>
     </Router>
   );
 }
