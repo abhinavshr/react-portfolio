@@ -1,17 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
 import { useNavigate } from "react-router-dom";
+import { addProject, fetchCategories } from "../../../services/projectService";
 
 const AddProject = () => {
   const [active, setActive] = useState("Projects");
-
-  const categories = [
-    { id: 1, name: "Web Development" },
-    { id: 2, name: "Mobile App" },
-    { id: 3, name: "Machine Learning" },
-    { id: 4, name: "Blockchain" },
-  ];
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -27,13 +23,65 @@ const AddProject = () => {
 
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const cats = await fetchCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+      }
+    };
+    getCategories();
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+
+    if (name === "status" && value !== "completed") {
+      setForm((prev) => ({ ...prev, [name]: value, end_date: "" }));
+    } else {
+      setForm((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleBackClick = () => {
     navigate(-1);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
+      alert("Please fill in all required fields.");
+      setLoading(false);
+      return;
+    }
+
+    if (form.status === "completed" && !form.end_date) {
+      alert("Please provide an end date for completed projects.");
+      setLoading(false);
+      return;
+    }
+
+    if (form.end_date && new Date(form.end_date) <= new Date(form.start_date)) {
+      alert("End date must be after the start date.");
+      setLoading(false);
+      return;
+    }
+
+
+    try {
+      const response = await addProject(form);
+      alert(`Project added successfully! Response: ${JSON.stringify(response)}`);
+      navigate(-1);
+    } catch (error) {
+      console.error("Error adding project:", error);
+      alert(error.message || "Failed to add project");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -53,7 +101,7 @@ const AddProject = () => {
 
         <div className="section">
           <h2>Basic Information</h2>
-          <form className="project-form">
+          <form className="project-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
                 <label>Project Name *</label>
@@ -133,6 +181,8 @@ const AddProject = () => {
                   name="end_date"
                   value={form.end_date}
                   onChange={handleChange}
+                  disabled={form.status !== "completed"}
+                  required={form.status === "completed"}
                 />
               </div>
             </div>
@@ -171,16 +221,20 @@ const AddProject = () => {
                 />
               </div>
             </div>
-          </form>
-        </div>
 
-        <div className="action-buttons">
-          <button className="create-btn" disabled>
-            Create Project
-          </button>
-          <button className="cancel-btn" onClick={handleBackClick}>
-            Cancel
-          </button>
+            <div className="action-buttons">
+              <button className="create-btn" type="submit" disabled={loading}>
+                {loading ? "Creating..." : "Create Project"}
+              </button>
+              <button
+                className="cancel-btn"
+                type="button"
+                onClick={handleBackClick}
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </div>
