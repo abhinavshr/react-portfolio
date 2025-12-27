@@ -5,6 +5,7 @@ import AdminDashboard from './pages/admins/AdminDashboard';
 import AdminPorject from './pages/admins/projects/AdminProject';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AddProject from './pages/admins/projects/AddProject';
+import EditProject from './pages/admins/projects/EditProject';
 
 function App() {
   return (
@@ -12,43 +13,52 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
-        
+
         {/* Protected routes */}
-        <Route 
-          path="/admin/dashboard" 
+        <Route
+          path="/admin/dashboard"
           element={
             <ProtectedRoute>
               <AdminDashboard />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        <Route 
-          path="/admin/projects" 
+        <Route
+          path="/admin/projects"
           element={
             <ProtectedRoute>
               <AdminPorject />
             </ProtectedRoute>
-          } 
+          }
         />
 
-        <Route 
-          path="/admin/add-project" 
+        <Route
+          path="/admin/add-project"
           element={
             <ProtectedRoute>
               <AddProject />
             </ProtectedRoute>
-          } 
+          }
         />
-        
+
+        <Route
+          path="/admin/edit-project/:id"
+          element={
+            <ProtectedRoute>
+              <EditProject />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Add more protected routes as needed */}
-        <Route 
-          path="/admin/*" 
+        <Route
+          path="/admin/*"
           element={
             <ProtectedRoute>
               {/* Your admin layout or specific components */}
             </ProtectedRoute>
-          } 
+          }
         />
       </Routes>
     </Router>

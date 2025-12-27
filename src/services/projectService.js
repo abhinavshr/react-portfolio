@@ -28,6 +28,15 @@ export const addProject = async (projectData) => {
   }
 };
 
+export const updateProject = async (id, projectData) => {
+  try {
+    const response = await api.put(`/admin/projects/${id}`, projectData);
+    return response.data; 
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update project" };
+  }
+};
+
 
 export const fetchCategories = async () => {
   try {
