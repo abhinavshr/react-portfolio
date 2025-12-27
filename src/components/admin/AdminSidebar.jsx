@@ -50,6 +50,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Dashboard") {
       navigate("/admin/dashboard");
     }
+    if (item === "Projects") {
+      navigate("/admin/projects");
+    }
   };
 
   return (

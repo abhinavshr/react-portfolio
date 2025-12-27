@@ -1,0 +1,211 @@
+.admin-layout {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 32px;
+    background: #f8fafc;
+    overflow-x: auto;
+}
+
+.projects-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.projects-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+}
+
+.projects-header p {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #64748b;
+}
+
+.add-project-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.add-project-btn:hover {
+    background: #1d4ed8;
+}
+
+.search-card {
+    background: #ffffff;
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.search-card input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    outline: none;
+}
+
+.search-card input:focus {
+    border-color: #2563eb;
+}
+
+.table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+thead {
+    background: #f1f5f9;
+}
+
+th {
+    padding: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+    text-align: left;
+}
+
+td {
+    padding: 14px;
+    font-size: 14px;
+    color: #334155;
+    border-top: 1px solid #e2e8f0;
+    vertical-align: middle;
+}
+
+.project-name {
+    font-weight: 500;
+    color: #0f172a;
+}
+
+.project-desc {
+    max-width: 280px;
+    color: #475569;
+}
+
+.link-btn {
+    display: inline-block;
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    background: #e0f2fe;
+    color: #0369a1;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.link-btn:hover {
+    background: #bae6fd;
+}
+
+.link-btn.github {
+    background: #ede9fe;
+    color: #5b21b6;
+}
+
+.link-btn.github:hover {
+    background: #ddd6fe;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 8px;
+}
+
+.actions button:last-child {
+    margin-right: 0;
+}
+
+.actions button:hover {
+    transform: scale(1.1);
+}
+
+@media (max-width: 1024px) {
+    .project-desc {
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 20px;
+    }
+
+    th,
+    td {
+        font-size: 13px;
+        padding: 12px;
+    }
+
+    .projects-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: transparent;
+    font-size: 16px;
+}
+
+.icon-btn.edit {
+    color: #2563eb;
+}
+
+.icon-btn.edit:hover {
+    background: #e0f2fe;
+}
+
+.icon-btn.delete {
+    color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+    background: #fee2e2;
+}
