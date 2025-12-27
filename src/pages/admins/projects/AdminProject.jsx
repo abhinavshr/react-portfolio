@@ -1,33 +1,42 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
-
-const projectsData = [
-    {
-        title: "Project1",
-        description: "Project1 Description",
-        tech_stack: "HTML",
-        live_link: "https://www.facebook.com/",
-        github_link: "https://www.facebook.com/",
-    },
-    {
-        title: "Portfolio Website",
-        description: "Personal portfolio website",
-        tech_stack: "React, CSS",
-        live_link: "https://example.com",
-        github_link: "https://github.com/example",
-    },
-];
+import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
+import { viewAllProjects } from "../../../services/projectService";
 
 const AdminProjects = () => {
     const [active, setActive] = useState("Projects");
     const [search, setSearch] = useState("");
+    const [projects, setProjects] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    const filteredProjects = projectsData.filter(
+    // Status color mapping
+    const statusColors = {
+        active: "status-active",
+        completed: "status-completed",
+        in_progress: "status-in-progress",
+        on_hold: "status-on-hold",
+    };
+
+    useEffect(() => {
+        fetchProjects();
+    }, []);
+
+    const fetchProjects = async () => {
+        try {
+            const data = await viewAllProjects();
+            setProjects(data.projects || data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const filteredProjects = projects.filter(
         (project) =>
-            project.title.toLowerCase().includes(search.toLowerCase()) ||
-            project.tech_stack.toLowerCase().includes(search.toLowerCase())
+            project.title?.toLowerCase().includes(search.toLowerCase()) ||
+            project.tech_stack?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
@@ -57,61 +66,90 @@ const AdminProjects = () => {
 
                 {/* Table */}
                 <div className="table-card">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>PROJECT TITLE</th>
-                                <th>DESCRIPTION</th>
-                                <th>TECH STACK</th>
-                                <th>LIVE</th>
-                                <th>GITHUB</th>
-                                <th>ACTIONS</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {filteredProjects.map((project, index) => (
-                                <tr key={index}>
-                                    <td className="project-name">{project.title}</td>
-                                    <td className="project-desc">{project.description}</td>
-                                    <td>{project.tech_stack}</td>
-
-                                    <td>
-                                        <a
-                                            href={project.live_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="link-btn"
-                                        >
-                                            Live
-                                        </a>
-                                    </td>
-
-                                    <td>
-                                        <a
-                                            href={project.github_link}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="link-btn github"
-                                        >
-                                            GitHub
-                                        </a>
-                                    </td>
-
-                                    <td className="actions">
-                                        <button className="icon-btn edit" title="Edit">
-                                            <FiEdit2 />
-                                        </button>
-
-                                        <button className="icon-btn delete" title="Delete">
-                                            <FiTrash2 />
-                                        </button>
-                                    </td>
-
+                    {loading ? (
+                        <div className="empty-state">Loading projects...</div>
+                    ) : filteredProjects.length === 0 ? (
+                        <div className="empty-state">
+                            <h3>No projects added</h3>
+                            <p>Click “Add Project” to create your first project.</p>
+                        </div>
+                    ) : (
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>PROJECT TITLE</th>
+                                    <th>TECH STACK</th>
+                                    <th>LIVE</th>
+                                    <th>GITHUB</th>
+                                    <th>STATUS</th>
+                                    <th>START DATE</th>
+                                    <th>ACTIONS</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+                                {filteredProjects.map((project, index) => (
+                                    <tr key={index}>
+                                        <td className="project-name">{project.title}</td>
+                                        <td>{project.tech_stack}</td>
+
+                                        <td>
+                                            {project.live_link ? (
+                                                <a
+                                                    href={project.live_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="link-btn"
+                                                >
+                                                    Live
+                                                </a>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            {project.github_link ? (
+                                                <a
+                                                    href={project.github_link}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="link-btn github"
+                                                >
+                                                    GitHub
+                                                </a>
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+
+                                        <td>
+                                            <span
+                                                className={`status-badge ${statusColors[project.status]
+                                                    }`}
+                                            >
+                                                {project.status.replace("_", " ")}
+                                            </span>
+                                        </td>
+
+                                        <td>{project.start_date ? project.start_date.slice(0, 10) : "-"}</td>
+
+                                        <td className="actions">
+                                            <button className="icon-btn view" title="View">
+                                                <FiEye />
+                                            </button>
+                                            <button className="icon-btn edit" title="Edit">
+                                                <FiEdit2 />
+                                            </button>
+                                            <button className="icon-btn delete" title="Delete">
+                                                <FiTrash2 />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             </main>
         </div>

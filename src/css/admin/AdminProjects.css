@@ -207,5 +207,76 @@ td {
 }
 
 .icon-btn.delete:hover {
-    background: #fee2e2;
+    background: #fee2e2;    
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+
+.status-active {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background-color: #d1fae5; 
+    color: #065f46;
+}
+
+.status-in-progress {
+    background-color: #fef3c7; 
+    color: #78350f;
+}
+
+.status-on-hold {
+    background-color: #fee2e2; 
+    color: #991b1b;
+}
+
+.actions .icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    margin-right: 0.5rem;
+}
+
+.actions .icon-btn.view {
+    color: #3b82f6;
+}
+
+.actions .icon-btn.edit {
+    color: #10b981;
+}
+
+.actions .icon-btn.delete {
+    color: #ef4444;
+}
+
+.link-btn {
+    color: #3b82f6;
+    text-decoration: underline;
+}
+
+.link-btn.github {
+    color: #111827;
 }
