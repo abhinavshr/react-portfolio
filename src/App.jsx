@@ -1,10 +1,10 @@
-// Example routing configuration
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLogin from './pages/admins/AdminLogin';
 import AdminDashboard from './pages/admins/AdminDashboard';
 import AdminPorject from './pages/admins/projects/AdminProject';
 import ProtectedRoute from './routes/ProtectedRoute';
+import AddProject from './pages/admins/projects/AddProject';
 
 function App() {
   return (
@@ -28,6 +28,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminPorject />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/add-project" 
+          element={
+            <ProtectedRoute>
+              <AddProject />
             </ProtectedRoute>
           } 
         />
