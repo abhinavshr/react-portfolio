@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AdminLogin from './pages/admins/AdminLogin';
 import AdminDashboard from './pages/admins/AdminDashboard';
+import AdminPorject from './pages/admins/projects/AdminProject';
 import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
@@ -18,6 +19,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/projects" 
+          element={
+            <ProtectedRoute>
+              <AdminPorject />
             </ProtectedRoute>
           } 
         />
