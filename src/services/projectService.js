@@ -9,6 +9,15 @@ export const viewAllProjects = async () => {
   }
 };
 
+export const viewProjectById = async (id) => {
+  try {
+    const response = await api.get(`/admin/projects/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch project" };
+  }
+};
+
 
 export const addProject = async (projectData) => {
   try {
