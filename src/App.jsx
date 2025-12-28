@@ -6,6 +6,7 @@ import AdminPorject from './pages/admins/projects/AdminProject';
 import ProtectedRoute from './routes/ProtectedRoute';
 import AddProject from './pages/admins/projects/AddProject';
 import EditProject from './pages/admins/projects/EditProject';
+import AdminProjectImages from './pages/admins/ProjectImage/AdminProjectImages';
 
 function App() {
   return (
@@ -47,6 +48,15 @@ function App() {
           element={
             <ProtectedRoute>
               <EditProject />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/project-images"
+          element={
+            <ProtectedRoute>
+              <AdminProjectImages />
             </ProtectedRoute>
           }
         />
