@@ -2,19 +2,23 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
-import { viewAllProjects, viewProjectById } from "../../../services/projectService";
+import { 
+  viewAllProjects, 
+  viewProjectById, 
+  deleteProject 
+} from "../../../services/projectService";
 import { useNavigate } from "react-router-dom";
 import ViewProjectModal from "./ViewProjectModel";
+import Swal from 'sweetalert2';
 
 const AdminProjects = () => {
   const [active, setActive] = useState("Projects");
   const [search, setSearch] = useState("");
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
+  
   const navigate = useNavigate();
 
   const statusColors = {
@@ -39,25 +43,47 @@ const AdminProjects = () => {
     }
   };
 
-const handleViewProject = async (id) => {
-  try {
-    const response = await viewProjectById(id);
-    
-    let projectData;
-    if (response.project) {
-      projectData = response.project;
-    } else if (response.data) {
-      projectData = response.data;
-    } else {
-      projectData = response;
+  const handleViewProject = async (id) => {
+    try {
+      const project = await viewProjectById(id);
+      setSelectedProject(project);
+      setShowModal(true);
+    } catch (error) {
+      console.error(error);
     }
-    
-    setSelectedProject(projectData);
-    setShowModal(true);
-  } catch (error) {
-    console.error("Error fetching project:", error);
+  };
+
+  const handleDeleteProject = async (id, title) => {
+  const result = await Swal.fire({
+    title: 'Are you sure?',
+    text: `You are about to delete "${title}". This action cannot be undone!`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await deleteProject(id);
+      Swal.fire(
+        'Deleted!',
+        'Project has been deleted successfully.',
+        'success'
+      );
+      fetchProjects();
+    } catch (error) {
+      Swal.fire(
+        'Error!',
+        error.message || 'Failed to delete project',
+        'error'
+      );
+    }
   }
 };
+
 
   const filteredProjects = projects.filter(
     (project) =>
@@ -102,6 +128,7 @@ const handleViewProject = async (id) => {
           ) : filteredProjects.length === 0 ? (
             <div className="empty-state">
               <h3>No projects found</h3>
+              <p>Try a different search term or add a new project</p>
             </div>
           ) : (
             <table>
@@ -186,7 +213,11 @@ const handleViewProject = async (id) => {
                         <FiEdit2 />
                       </button>
 
-                      <button className="icon-btn delete" title="Delete">
+                      <button 
+                        className="icon-btn delete" 
+                        title="Delete"
+                        onClick={() => handleDeleteProject(project.id, project.title)}
+                      >
                         <FiTrash2 />
                       </button>
                     </td>
@@ -205,7 +236,6 @@ const handleViewProject = async (id) => {
             statusColors={statusColors}
           />
         )}
-
       </main>
     </div>
   );

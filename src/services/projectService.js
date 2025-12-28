@@ -37,6 +37,14 @@ export const updateProject = async (id, projectData) => {
   }
 };
 
+export const deleteProject = async (id) => {
+  try {
+    const response = await api.delete(`/admin/projects/${id}`);
+    return response.data; 
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete project" };
+  }
+};
 
 export const fetchCategories = async () => {
   try {
