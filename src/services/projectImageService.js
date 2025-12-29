@@ -9,6 +9,16 @@ export const viewAllProjectImages = async () => {
   }
 };
 
+export const getProjectImageById = async (id) => {
+  try {
+    const response = await api.get(`/admin/project-images/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch project image" };
+  }
+};
+
+
 export const fetchProjectsDropdown = async () => {
   try {
     const response = await api.get("/admin/projects-dropdown");
@@ -36,5 +46,25 @@ export const uploadProjectImage = async ({ project_id, image_name, image }) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to upload project image" };
+  }
+};
+
+export const editProjectImage = async ({ id, project_id, image_name, image }) => {
+  try {
+    const formData = new FormData();
+    formData.append("project_id", project_id);
+    formData.append("image_name", image_name);
+
+    if (image) {
+      formData.append("image", image);
+    }
+
+    const response = await api.post(`/admin/project-images/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to edit project image" };
   }
 };
