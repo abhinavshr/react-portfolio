@@ -68,3 +68,12 @@ export const editProjectImage = async ({ id, project_id, image_name, image }) =>
     throw error.response?.data || { message: "Failed to edit project image" };
   }
 };
+
+export const deleteProjectImage = async (id) => {
+  try {
+    const response = await api.delete(`/admin/project-images/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete project image" };
+  }
+};

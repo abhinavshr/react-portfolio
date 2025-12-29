@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Upload, Edit, Trash2, X } from "lucide-react";
 import "../../../css/admin/ProjectImage/AdminProjectImages.css";
-import { viewAllProjectImages } from "../../../services/projectImageService";
+import { viewAllProjectImages, deleteProjectImage } from "../../../services/projectImageService";
 import { useNavigate } from "react-router-dom";
+import Swal from 'sweetalert2';
 
 const AdminProjectImages = () => {
     const [active, setActive] = useState("Project Images");
@@ -22,7 +23,7 @@ const AdminProjectImages = () => {
         try {
             setLoading(true);
             const response = await viewAllProjectImages();
-            setImages(response.data || response); // adjust if API returns `data`
+            setImages(response.data || response);
         } catch (err) {
             setError(err.message || "Failed to fetch project images");
         } finally {
@@ -33,6 +34,40 @@ const AdminProjectImages = () => {
     const handleClickUpload = () => {
         navigate("/admin/project-images/add");
     };
+
+    const handleDelete = async (id, image) => {
+        const title = `${image.project?.title} - ${image.image_name}`;
+
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete "${title}". This action cannot be undone!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteProjectImage(id);
+                Swal.fire(
+                    'Deleted!',
+                    `Project image "${title}" has been deleted.`,
+                    'success'
+                );
+                fetchProjectImages();
+            } catch (err) {
+                Swal.fire(
+                    'Error!',
+                    err.message || 'Failed to delete image',
+                    'error'
+                );
+            }
+        }
+    };
+
 
     return (
         <div className="admin-layout">
@@ -97,7 +132,10 @@ const AdminProjectImages = () => {
                                         >
                                             <Edit size={16} /> Edit
                                         </button>
-                                        <button className="delete-btn">
+                                        <button
+                                            className="delete-btn"
+                                            onClick={() => handleDelete(image.id, image)}
+                                        >
                                             <Trash2 size={16} /> Delete
                                         </button>
                                     </div>
