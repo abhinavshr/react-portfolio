@@ -53,6 +53,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Projects") {
       navigate("/admin/projects");
     }
+    if (item === "Project Images") {
+      navigate("/admin/project-images");
+    }
   };
 
   return (
