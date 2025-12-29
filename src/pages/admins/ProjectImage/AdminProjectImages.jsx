@@ -3,6 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Upload, Edit, Trash2, X } from "lucide-react";
 import "../../../css/admin/ProjectImage/AdminProjectImages.css";
 import { viewAllProjectImages } from "../../../services/projectImageService";
+import { useNavigate } from "react-router-dom";
 
 const AdminProjectImages = () => {
     const [active, setActive] = useState("Project Images");
@@ -10,12 +11,17 @@ const AdminProjectImages = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    // 🔥 Fullscreen state
+    const navigate = useNavigate();
+
     const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         fetchProjectImages();
     }, []);
+
+    const handleClickUpload = () => {
+        navigate("/admin/add/project-images");
+    };
 
     const fetchProjectImages = async () => {
         try {
@@ -37,13 +43,13 @@ const AdminProjectImages = () => {
                 <div className="admin-project-images-page">
 
                     {/* Header */}
-                    <div className="header">
+                    <div className="projectimage-header">
                         <div>
                             <h1>Project Images</h1>
                             <p>Manage images for your projects</p>
                         </div>
 
-                        <button className="upload-btn">
+                        <button className="upload-btn" onClick={handleClickUpload}>
                             <Upload size={20} style={{ marginRight: "8px" }} />
                             Upload to Project
                         </button>
