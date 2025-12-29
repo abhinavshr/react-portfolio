@@ -195,3 +195,45 @@
   border-radius: 8px;
   background: #fff;
 }
+
+.clickable-image {
+    cursor: pointer;
+}
+
+.image-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.image-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    text-align: center;
+}
+
+.image-modal-content img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
+
+.close-btn {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+}
+
+.modal-info {
+    color: #fff;
+    margin-top: 12px;
+}
