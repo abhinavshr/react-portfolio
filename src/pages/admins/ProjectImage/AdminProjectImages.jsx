@@ -12,27 +12,26 @@ const AdminProjectImages = () => {
     const [error, setError] = useState("");
 
     const navigate = useNavigate();
-
     const [selectedImage, setSelectedImage] = useState(null);
 
     useEffect(() => {
         fetchProjectImages();
     }, []);
 
-    const handleClickUpload = () => {
-        navigate("/admin/add/project-images");
-    };
-
     const fetchProjectImages = async () => {
         try {
             setLoading(true);
             const response = await viewAllProjectImages();
-            setImages(response.data);
+            setImages(response.data || response); // adjust if API returns `data`
         } catch (err) {
             setError(err.message || "Failed to fetch project images");
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleClickUpload = () => {
+        navigate("/admin/project-images/add");
     };
 
     return (
@@ -42,7 +41,6 @@ const AdminProjectImages = () => {
             <main className="admin-content">
                 <div className="admin-project-images-page">
 
-                    {/* Header */}
                     <div className="projectimage-header">
                         <div>
                             <h1>Project Images</h1>
@@ -55,7 +53,6 @@ const AdminProjectImages = () => {
                         </button>
                     </div>
 
-                    {/* Filter */}
                     <div className="filter">
                         <span>Filter by project:</span>
                         <select className="filter-select" disabled>
@@ -63,21 +60,18 @@ const AdminProjectImages = () => {
                         </select>
                     </div>
 
-                    {/* Loading */}
                     {loading && (
                         <div className="empty-state">
                             <p>Loading images...</p>
                         </div>
                     )}
 
-                    {/* Error */}
                     {error && (
                         <div className="empty-state error">
                             <p>{error}</p>
                         </div>
                     )}
 
-                    {/* Images Grid */}
                     {!loading && images.length > 0 && (
                         <div className="projects-grid">
                             {images.map((image) => (
@@ -90,16 +84,17 @@ const AdminProjectImages = () => {
                                     />
 
                                     <div className="project-info">
-                                        <p className="project-name">
-                                            {image.project?.title}
-                                        </p>
-                                        <p className="project-caption">
-                                            {image.image_name}
-                                        </p>
+                                        <p className="project-name">{image.project?.title}</p>
+                                        <p className="project-caption">{image.image_name}</p>
                                     </div>
 
                                     <div className="project-actions">
-                                        <button className="edit-btn">
+                                        <button
+                                            className="edit-btn"
+                                            onClick={() =>
+                                                navigate(`/admin/edit/project-images/${image.id}`)
+                                            }
+                                        >
                                             <Edit size={16} /> Edit
                                         </button>
                                         <button className="delete-btn">
@@ -111,7 +106,6 @@ const AdminProjectImages = () => {
                         </div>
                     )}
 
-                    {/* Empty */}
                     {!loading && images.length === 0 && (
                         <div className="empty-state">
                             <p>No images available</p>
