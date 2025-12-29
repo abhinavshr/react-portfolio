@@ -32,7 +32,7 @@ const AdminProjectImages = () => {
     };
 
     const handleClickUpload = () => {
-        navigate("/admin/project-images/add");
+        navigate("/admin/add/project-images");
     };
 
     const handleDelete = async (id, image) => {
