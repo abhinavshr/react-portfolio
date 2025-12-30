@@ -35,3 +35,12 @@ export const updateSkill = async (id, skillData) => {
     throw error.response?.data || { message: "Failed to update skill" };
   }
 };
+
+export const deleteSkill = async (id) => {
+  try {
+    const response = await api.delete(`/admin/skills/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete skill" };
+  }
+};
