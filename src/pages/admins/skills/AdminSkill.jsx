@@ -59,6 +59,10 @@ const AdminSkill = () => {
                     <AddSkillModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
+                        onSkillAdded={() => {
+                            fetchSkills();
+                            setIsModalOpen(false);
+                        }}
                     />
                 </div>
 
