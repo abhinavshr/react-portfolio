@@ -3,6 +3,7 @@ import { FiX } from "react-icons/fi";
 import Select from "react-select";
 import { fetchCategories } from "../../../services/projectService";
 import "../../../css/admin/skills/AddSkillModal.css";
+import { addSkill } from "../../../services/skillService";
 
 const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
@@ -32,18 +33,28 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!category) return; // extra safety
-    onSkillAdded({
-      name,
-      level: Number(level),
-      category: category.value,
-    });
-    onClose();
-    setName("");
-    setLevel(50);
-    setCategory(null);
+
+    if (!category) return; 
+
+    try {
+      await addSkill({
+        name,
+        level: Number(level),
+        category_id: category.value,
+      });
+
+      if (onSkillAdded) onSkillAdded();
+
+      setName("");
+      setLevel(50);
+      setCategory(null);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message || "Failed to add skill");
+    }
   };
 
   return (
