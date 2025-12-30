@@ -4,7 +4,9 @@
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  padding-top: 80px;
+  padding-bottom: 120px;
   z-index: 1000;
 }
 
@@ -91,11 +93,13 @@
   appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: linear-gradient(to right,
-      #2563eb 0%,
-      #2563eb var(--percent),
-      #e5e7eb var(--percent),
-      #e5e7eb 100%);
+  background: linear-gradient(
+    to right,
+    #2563eb 0%,
+    #2563eb var(--percent),
+    #e5e7eb var(--percent),
+    #e5e7eb 100%
+  );
   outline: none;
 }
 
