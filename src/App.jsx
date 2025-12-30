@@ -9,6 +9,7 @@ import EditProject from './pages/admins/projects/EditProject';
 import AdminProjectImages from './pages/admins/ProjectImage/AdminProjectImages';
 import AddProjectImages from './pages/admins/ProjectImage/AddProjectImage';
 import EditProjectImages from './pages/admins/ProjectImage/EditProjectImage';
+import AdminSkill from './pages/admins/skills/AdminSkill';
 
 function App() {
   return (
@@ -77,6 +78,15 @@ function App() {
           element={
             <ProtectedRoute>
               <EditProjectImages />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/skills"
+          element={
+            <ProtectedRoute>
+              <AdminSkill />
             </ProtectedRoute>
           }
         />
