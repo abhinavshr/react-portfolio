@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
-import { viewAllSkills } from "../../../services/skillService";
+import { viewAllSkills, deleteSkill } from "../../../services/skillService";
 import "../../../css/admin/skills/AdminSkill.css";
 import AddSkillModal from "./AddSkillModal";
 import EditSkillModal from "./EditSkillModal";
+import Swal from "sweetalert2";
 
 const AdminSkill = () => {
     const [active, setActive] = useState("Skills");
@@ -40,6 +41,30 @@ const AdminSkill = () => {
             console.error("Failed to fetch skills:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (skillId, skillName) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: `You are about to delete "${skillName}". This action cannot be undone!`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel',
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteSkill(skillId);
+                Swal.fire('Deleted!', `"${skillName}" has been deleted.`, 'success');
+                fetchSkills(); // Refresh the skill list
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', err.message || 'Failed to delete skill.', 'error');
+            }
         }
     };
 
@@ -113,7 +138,10 @@ const AdminSkill = () => {
                                                         <FiEdit2 />
                                                     </button>
 
-                                                    <button className="icon-btn delete">
+                                                    <button
+                                                        className="icon-btn delete"
+                                                        onClick={() => handleDelete(skill.id, skill.name)}
+                                                    >
                                                         <FiTrash2 />
                                                     </button>
                                                 </td>
