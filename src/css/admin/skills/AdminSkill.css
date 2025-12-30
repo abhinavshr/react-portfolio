@@ -1,0 +1,143 @@
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden; 
+}
+
+.admin-skill {
+  padding: 24px;
+}
+
+/* Header */
+.admin-skill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.admin-skill-header h1 {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+
+.admin-skill-header p {
+  color: #6b7280;
+}
+
+.add-skill-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-skill-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Skill Card */
+.skill-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.skill-category {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* Table */
+.skill-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.skill-table th {
+  text-align: left;
+  font-size: 13px;
+  color: #6b7280;
+  padding-bottom: 10px;
+}
+
+.skill-table td {
+  padding: 12px 0;
+  vertical-align: middle;
+}
+
+/* Skill Level */
+.skill-level-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skill-bar {
+  width: 420px;
+  height: 8px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  background: #2563eb;
+  border-radius: 6px;
+}
+
+.skill-percent {
+  font-weight: 500;
+  min-width: 40px;
+}
+
+/* Actions */
+.skill-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.icon-btn.edit {
+  color: #2563eb;
+}
+
+.icon-btn.delete {
+  color: #dc2626;
+}
+
+.skill-table th:first-child,
+.skill-table td:first-child {
+  width: 25%;
+}
+
+.skill-table th:nth-child(2),
+.skill-table td:nth-child(2) {
+  width: 55%;
+}
+
+.skill-table th:last-child,
+.skill-table td:last-child {
+  width: 20%;
+}
