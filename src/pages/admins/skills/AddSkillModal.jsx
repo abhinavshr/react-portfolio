@@ -1,29 +1,49 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
+import Select from "react-select";
+import { fetchCategories } from "../../../services/projectService";
 import "../../../css/admin/skills/AddSkillModal.css";
 
 const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
-  const [level, setLevel] = useState(50);
-  const [category, setCategory] = useState("");
+  const [level, setLevel] = useState(0);
+  const [category, setCategory] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
-  const categories = [
-    "Frontend Development",
-    "Backend Development",
-    "Database",
-    "DevOps",
-    "Other",
-  ];
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const loadCategories = async () => {
+      try {
+        setLoadingCategories(true);
+        const res = await fetchCategories();
+        const data = res?.data ?? res ?? [];
+        setCategories(data.map((cat) => ({ value: cat.id ?? cat, label: cat.name ?? cat })));
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    loadCategories();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSkillAdded({ name, level, category });
+    if (!category) return; // extra safety
+    onSkillAdded({
+      name,
+      level: Number(level),
+      category: category.value,
+    });
     onClose();
     setName("");
     setLevel(50);
-    setCategory("");
+    setCategory(null);
   };
 
   return (
@@ -50,7 +70,6 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
             />
           </label>
 
-          {/* LEVEL */}
           <label>
             Level (0–100%) *
             <input
@@ -63,6 +82,7 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
                 const clean = Math.max(0, Math.min(100, Number(level)));
                 setLevel(isNaN(clean) ? 0 : clean);
               }}
+              required
             />
           </label>
 
@@ -81,18 +101,14 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
           <label>
             Category *
-            <select
+            <Select
               value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              required
-            >
-              <option value="">Select category</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+              onChange={setCategory}
+              options={categories}
+              isLoading={loadingCategories}
+              placeholder={loadingCategories ? "Loading categories..." : "Select category"}
+              isClearable
+            />
           </label>
 
           <div className="modal-actions">
