@@ -17,3 +17,21 @@ export const addSkill = async (skillData) => {
     throw error.response?.data || { message: "Failed to add skill" };
   }
 };
+
+export const viewSkillById = async (id) => {
+  try {
+    const response = await api.get(`/admin/skills/${id}`);
+    return response.data.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch skill" };
+  }
+};
+
+export const updateSkill = async (id, skillData) => {
+  try {
+    const response = await api.put(`/admin/skills/${id}`, skillData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update skill" };
+  }
+};

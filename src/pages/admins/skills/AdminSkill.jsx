@@ -4,13 +4,16 @@ import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
 import { viewAllSkills } from "../../../services/skillService";
 import "../../../css/admin/skills/AdminSkill.css";
 import AddSkillModal from "./AddSkillModal";
-
+import EditSkillModal from "./EditSkillModal";
 
 const AdminSkill = () => {
     const [active, setActive] = useState("Skills");
     const [skillsByCategory, setSkillsByCategory] = useState({});
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedSkillId, setSelectedSkillId] = useState(null);
 
     useEffect(() => {
         fetchSkills();
@@ -40,7 +43,6 @@ const AdminSkill = () => {
         }
     };
 
-
     return (
         <div className="admin-layout">
             <AdminSidebar active={active} setActive={setActive} />
@@ -66,7 +68,6 @@ const AdminSkill = () => {
                     />
                 </div>
 
-                {/* Loading State */}
                 {loading ? (
                     <div className="empty-state">Loading skills...</div>
                 ) : (
@@ -102,9 +103,16 @@ const AdminSkill = () => {
                                                 </td>
 
                                                 <td className="skill-actions">
-                                                    <button className="icon-btn edit">
+                                                    <button
+                                                        className="icon-btn edit"
+                                                        onClick={() => {
+                                                            setSelectedSkillId(skill.id);
+                                                            setIsEditModalOpen(true);
+                                                        }}
+                                                    >
                                                         <FiEdit2 />
                                                     </button>
+
                                                     <button className="icon-btn delete">
                                                         <FiTrash2 />
                                                     </button>
@@ -116,6 +124,15 @@ const AdminSkill = () => {
                             </div>
                         ))}
                     </>
+                )}
+
+                {isEditModalOpen && selectedSkillId && (
+                    <EditSkillModal
+                        isOpen={isEditModalOpen}
+                        skillId={selectedSkillId}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onSkillUpdated={() => fetchSkills()}
+                    />
                 )}
             </main>
         </div>
