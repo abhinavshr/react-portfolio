@@ -60,7 +60,7 @@ const AdminSkill = () => {
             try {
                 await deleteSkill(skillId);
                 Swal.fire('Deleted!', `"${skillName}" has been deleted.`, 'success');
-                fetchSkills(); // Refresh the skill list
+                fetchSkills(); 
             } catch (err) {
                 console.error(err);
                 Swal.fire('Error', err.message || 'Failed to delete skill.', 'error');

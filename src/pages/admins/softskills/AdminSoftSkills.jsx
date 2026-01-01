@@ -1,105 +1,88 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { FiEdit2, FiTrash2, FiPlus } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
 import "../../../css/admin/softskills/AdminSoftSkills.css";
+import { viewAllSoftSkills } from "../../../services/softSkillService";
 
 const AdminSoftSkills = () => {
-  return (
-    <div className="admin-layout">
-      <AdminSidebar active="Skills" />
+    const [active, setActive] = useState("Soft Skills");
+    const [softSkills, setSoftSkills] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-      <main className="admin-content admin-soft-skill">
-        {/* Header */}
-        <div className="soft-skill-header">
-          <div>
-            <h1>Soft Skills</h1>
-            <p>Manage your interpersonal and professional skills</p>
-          </div>
+    useEffect(() => {
+        fetchSoftSkills();
+    }, []);
 
-          <button className="add-soft-skill-btn">
-            <FiPlus /> Add Soft Skill
-          </button>
-        </div>
+    const fetchSoftSkills = async () => {
+        try {
+            const response = await viewAllSoftSkills();
+            setSoftSkills(response.data || []);
+        } catch (error) {
+            console.error("Failed to fetch soft skills:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        {/* Skill Cards */}
-        <div className="soft-skill-grid">
-          {softSkills.map((skill) => (
-            <div className="soft-skill-card" key={skill.id}>
-              
-              <div className="soft-skill-card-header">
-                <h3>{skill.name}</h3>
+    return (
+        <div className="admin-layout">
+            <AdminSidebar active={active} setActive={setActive} />
 
-                <div className="soft-skill-actions">
-                  <FiEdit2 />
-                  <FiTrash2 />
+            <main className="admin-content admin-soft-skill">
+                {/* Header */}
+                <div className="soft-skill-header">
+                    <div>
+                        <h1>Soft Skills</h1>
+                        <p>Manage your interpersonal and professional skills</p>
+                    </div>
+
+                    <button className="add-soft-skill-btn">
+                        <FiPlus /> Add Soft Skill
+                    </button>
                 </div>
-              </div>
 
-              <div className="soft-skill-progress">
-                <div className="progress-bar">
-                  <div
-                    className="progress-fill"
-                    style={{ width: `${skill.level}%` }}
-                  />
+                {/* Loading */}
+                {loading && <p>Loading soft skills...</p>}
+
+                {/* Empty State */}
+                {!loading && softSkills.length === 0 && (
+                    <p>No soft skills found.</p>
+                )}
+
+                {/* Skill Cards */}
+                <div className="soft-skill-grid">
+                    {softSkills.map((skill) => (
+                        <div className="soft-skill-card" key={skill.id}>
+
+                            <div className="soft-skill-card-header">
+                                <h3>{skill.name}</h3>
+
+                                <div className="soft-skill-actions">
+                                    <FiEdit2 title="Edit" />
+                                    <FiTrash2 title="Delete" />
+                                    <FiEye title="View" />
+                                </div>
+                            </div>
+
+                            <div className="soft-skill-progress">
+                                <div className="progress-bar">
+                                    <div
+                                        className="progress-fill"
+                                        style={{ width: `${skill.level}%` }}
+                                    />
+                                </div>
+                                <span>{skill.level}%</span>
+                            </div>
+
+                            <p className="soft-skill-description">
+                                {skill.description || "No description provided."}
+                            </p>
+                        </div>
+                    ))}
                 </div>
-                <span>{skill.level}%</span>
-              </div>
-
-              <p className="soft-skill-description">
-                {skill.description}
-              </p>
-            </div>
-          ))}
+            </main>
         </div>
-      </main>
-    </div>
-  );
+    );
 };
 
 export default AdminSoftSkills;
-
-/* Static Data */
-const softSkills = [
-  {
-    id: 1,
-    name: "Leadership",
-    level: 90,
-    description:
-      "Experience leading cross-functional teams and mentoring junior developers",
-  },
-  {
-    id: 2,
-    name: "Communication",
-    level: 95,
-    description:
-      "Strong written and verbal communication skills, presenting to stakeholders",
-  },
-  {
-    id: 3,
-    name: "Problem Solving",
-    level: 88,
-    description:
-      "Analytical thinking and creative solutions to complex technical challenges",
-  },
-  {
-    id: 4,
-    name: "Teamwork",
-    level: 92,
-    description:
-      "Collaborative approach to working with diverse teams across time zones",
-  },
-  {
-    id: 5,
-    name: "Time Management",
-    level: 85,
-    description:
-      "Efficient prioritization and meeting deadlines in fast-paced environments",
-  },
-  {
-    id: 6,
-    name: "Adaptability",
-    level: 93,
-    description:
-      "Quick learner, comfortable with changing requirements and new technologies",
-  },
-];
