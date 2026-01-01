@@ -1,25 +1,40 @@
 import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/softskills/AddSoftSkillModal.css";
+import { addSoftSkill } from "../../../services/softSkillService"; 
 
-const AddSoftSkillModal = ({ isOpen, onClose }) => {
+const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState(0); 
+  const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({
-      name,
-      description,
-      level,
-    });
-    alert("Soft skill submitted! Check console.");
-    setName("");
-    setDescription("");
-    setLevel(0); 
+
+    const skillData = { name, description, level };
+
+    try {
+      setLoading(true);
+      const response = await addSoftSkill(skillData);
+      console.log("Skill added:", response);
+      alert("Soft skill added successfully!");
+
+      setName("");
+      setDescription("");
+      setLevel(0);
+
+      if (onSkillAdded) onSkillAdded(response);
+
+      onClose();
+    } catch (error) {
+      console.error("Error adding soft skill:", error);
+      alert(error.message || "Failed to add soft skill");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,8 +103,8 @@ const AddSoftSkillModal = ({ isOpen, onClose }) => {
             <button type="button" className="softskill-btn-cancel" onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className="softskill-btn-add">
-              Add
+            <button type="submit" className="softskill-btn-add" disabled={loading}>
+              {loading ? "Adding..." : "Add"}
             </button>
           </div>
         </form>
