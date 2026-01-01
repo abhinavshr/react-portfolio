@@ -59,6 +59,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Skills") {
       navigate("/admin/skills");
     }
+    if (item === "Soft Skills") {
+      navigate("/admin/soft-skills");
+    }
   };
 
   return (
