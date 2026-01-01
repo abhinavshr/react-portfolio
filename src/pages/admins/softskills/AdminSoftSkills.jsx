@@ -3,18 +3,24 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
 import "../../../css/admin/softskills/AdminSoftSkills.css";
 import { viewAllSoftSkills } from "../../../services/softSkillService";
-import AddSoftSkillModal from "./AddSoftSkillModal"; 
+import AddSoftSkillModal from "./AddSoftSkillModal";
+import ViewSoftSkillModal from "./ViewSoftSkillModal ";
 
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
   const [softSkills, setSoftSkills] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false); 
+
+  // Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [selectedSkillId, setSelectedSkillId] = useState(null);
 
   useEffect(() => {
     fetchSoftSkills();
   }, []);
 
+  // Fetch all soft skills
   const fetchSoftSkills = async () => {
     try {
       const response = await viewAllSoftSkills();
@@ -26,23 +32,30 @@ const AdminSoftSkills = () => {
     }
   };
 
-  const handleAddSoftSkill = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
+  // Add Modal Handlers
+  const handleAddSoftSkill = () => setIsAddModalOpen(true);
+  const handleCloseAddModal = () => setIsAddModalOpen(false);
   const handleSoftSkillAdded = () => {
     fetchSoftSkills();
-    setIsModalOpen(false);
+    setIsAddModalOpen(false);
+  };
+
+  // View Modal Handlers
+  const handleViewSoftSkill = (id) => {
+    setSelectedSkillId(id);
+    setIsViewModalOpen(true);
+  };
+  const handleCloseViewModal = () => {
+    setSelectedSkillId(null);
+    setIsViewModalOpen(false);
   };
 
   return (
     <div className="admin-layout">
+      {/* Sidebar */}
       <AdminSidebar active={active} setActive={setActive} />
 
+      {/* Main Content */}
       <main className="admin-content admin-soft-skill">
         {/* Header */}
         <div className="soft-skill-header">
@@ -62,7 +75,7 @@ const AdminSoftSkills = () => {
         {/* Empty State */}
         {!loading && softSkills.length === 0 && <p>No soft skills found.</p>}
 
-        {/* Skill Cards */}
+        {/* Soft Skill Cards */}
         <div className="soft-skill-grid">
           {softSkills.map((skill) => (
             <div className="soft-skill-card" key={skill.id}>
@@ -71,7 +84,7 @@ const AdminSoftSkills = () => {
                 <div className="soft-skill-actions">
                   <FiEdit2 title="Edit" />
                   <FiTrash2 title="Delete" />
-                  <FiEye title="View" />
+                  <FiEye title="View" onClick={() => handleViewSoftSkill(skill.id)} />
                 </div>
               </div>
 
@@ -95,10 +108,19 @@ const AdminSoftSkills = () => {
 
       {/* Add Soft Skill Modal */}
       <AddSoftSkillModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
         onSkillAdded={handleSoftSkillAdded}
       />
+
+      {/* View Soft Skill Modal */}
+      {isViewModalOpen && selectedSkillId && (
+        <ViewSoftSkillModal
+          isOpen={isViewModalOpen}
+          onClose={handleCloseViewModal}
+          skillId={selectedSkillId}
+        />
+      )}
     </div>
   );
 };
