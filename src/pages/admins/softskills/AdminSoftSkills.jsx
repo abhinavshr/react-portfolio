@@ -4,7 +4,8 @@ import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
 import "../../../css/admin/softskills/AdminSoftSkills.css";
 import { viewAllSoftSkills } from "../../../services/softSkillService";
 import AddSoftSkillModal from "./AddSoftSkillModal";
-import ViewSoftSkillModal from "./ViewSoftSkillModal ";
+import ViewSoftSkillModal from "./ViewSoftSkillModal";
+import EditSoftSkillModal from "./EditSoftSkillModal"; 
 
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
@@ -14,6 +15,7 @@ const AdminSoftSkills = () => {
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSkillId, setSelectedSkillId] = useState(null);
 
   useEffect(() => {
@@ -50,6 +52,20 @@ const AdminSoftSkills = () => {
     setIsViewModalOpen(false);
   };
 
+  // Edit Modal Handlers
+  const handleEditSoftSkill = (id) => {
+    setSelectedSkillId(id);
+    setIsEditModalOpen(true);
+  };
+  const handleCloseEditModal = () => {
+    setSelectedSkillId(null);
+    setIsEditModalOpen(false);
+  };
+  const handleSoftSkillUpdated = () => {
+    fetchSoftSkills();
+    setIsEditModalOpen(false);
+  };
+
   return (
     <div className="admin-layout">
       {/* Sidebar */}
@@ -82,7 +98,7 @@ const AdminSoftSkills = () => {
               <div className="soft-skill-card-header">
                 <h3>{skill.name}</h3>
                 <div className="soft-skill-actions">
-                  <FiEdit2 title="Edit" />
+                  <FiEdit2 title="Edit" onClick={() => handleEditSoftSkill(skill.id)} />
                   <FiTrash2 title="Delete" />
                   <FiEye title="View" onClick={() => handleViewSoftSkill(skill.id)} />
                 </div>
@@ -119,6 +135,16 @@ const AdminSoftSkills = () => {
           isOpen={isViewModalOpen}
           onClose={handleCloseViewModal}
           skillId={selectedSkillId}
+        />
+      )}
+
+      {/* Edit Soft Skill Modal */}
+      {isEditModalOpen && selectedSkillId && (
+        <EditSoftSkillModal
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          skillId={selectedSkillId}
+          onSkillUpdated={handleSoftSkillUpdated}
         />
       )}
     </div>
