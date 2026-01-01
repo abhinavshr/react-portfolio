@@ -1,0 +1,135 @@
+.softskill-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 80px;
+  padding-bottom: 120px;
+  z-index: 1000;
+}
+
+.softskill-modal-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px 30px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+.softskill-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.softskill-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.softskill-modal-subtitle {
+  margin: 8px 0 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.softskill-modal-form label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.softskill-modal-form input,
+.softskill-modal-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 14px;
+  outline: none;
+}
+
+.softskill-modal-form input:focus,
+.softskill-modal-form textarea:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.softskill-level-slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.softskill-level-slider {
+  flex: 1;
+  appearance: none;
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    #2563eb 0%,
+    #2563eb var(--percent),
+    #e5e7eb var(--percent),
+    #e5e7eb 100%
+  );
+  outline: none;
+}
+
+.softskill-level-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+.softskill-level-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #2563eb;
+  cursor: pointer;
+}
+
+.softskill-level-percent {
+  font-size: 14px;
+  font-weight: 500;
+  color: #2563eb;
+  min-width: 40px;
+  text-align: right;
+}
+
+.softskill-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.softskill-btn-cancel {
+  padding: 8px 16px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #374151;
+}
+
+.softskill-btn-add {
+  padding: 8px 16px;
+  background: #4f46e5;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  cursor: pointer;
+}
