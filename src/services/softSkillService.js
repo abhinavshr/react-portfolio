@@ -26,3 +26,12 @@ export const getSoftSkillById = async (id) => {
     throw error.response?.data || { message: "Failed to fetch soft skill" };
   }
 };
+
+export const updateSoftSkill = async (id, skillData) => {
+  try {
+    const response = await api.put(`/admin/soft-skills/${id}`, skillData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update soft skill" };
+  }
+};
