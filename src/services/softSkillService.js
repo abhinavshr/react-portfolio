@@ -35,3 +35,12 @@ export const updateSoftSkill = async (id, skillData) => {
     throw error.response?.data || { message: "Failed to update soft skill" };
   }
 };
+
+export const deleteSoftSkill = async (id) => {
+  try {
+    const response = await api.delete(`/admin/soft-skills/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete soft skill" };
+  }
+};

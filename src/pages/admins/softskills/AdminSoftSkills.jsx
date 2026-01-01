@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
+import Swal from "sweetalert2";
 import "../../../css/admin/softskills/AdminSoftSkills.css";
-import { viewAllSoftSkills } from "../../../services/softSkillService";
+import { viewAllSoftSkills, deleteSoftSkill } from "../../../services/softSkillService";
 import AddSoftSkillModal from "./AddSoftSkillModal";
 import ViewSoftSkillModal from "./ViewSoftSkillModal";
-import EditSoftSkillModal from "./EditSoftSkillModal"; 
+import EditSoftSkillModal from "./EditSoftSkillModal";
 
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
@@ -66,6 +67,31 @@ const AdminSoftSkills = () => {
     setIsEditModalOpen(false);
   };
 
+  // Delete Handler with Swal
+  const handleDeleteSoftSkill = async (id, title) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete "${title}". This action cannot be undone!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteSoftSkill(id);
+        Swal.fire("Deleted!", `"${title}" has been deleted.`, "success");
+        fetchSoftSkills();
+      } catch (error) {
+        console.error("Failed to delete skill:", error);
+        Swal.fire("Error!", error.message || "Failed to delete soft skill.", "error");
+      }
+    }
+  };
+
   return (
     <div className="admin-layout">
       {/* Sidebar */}
@@ -99,7 +125,10 @@ const AdminSoftSkills = () => {
                 <h3>{skill.name}</h3>
                 <div className="soft-skill-actions">
                   <FiEdit2 title="Edit" onClick={() => handleEditSoftSkill(skill.id)} />
-                  <FiTrash2 title="Delete" />
+                  <FiTrash2
+                    title="Delete"
+                    onClick={() => handleDeleteSoftSkill(skill.id, skill.name)}
+                  />
                   <FiEye title="View" onClick={() => handleViewSoftSkill(skill.id)} />
                 </div>
               </div>
