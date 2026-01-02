@@ -11,12 +11,16 @@ import {
 import "../../../css/admin/educations/AdminEducation.css";
 import Swal from "sweetalert2";
 import { viewAllEducations } from "../../../services/educationService";
+import AddEducationModal from "./AddEducationModal";
+
 
 const AdminEducation = () => {
     const [active, setActive] = useState("Education");
     const [educations, setEducations] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
+    const [openAddModal, setOpenAddModal] = useState(false);
 
     useEffect(() => {
         fetchEducations();
@@ -48,7 +52,6 @@ const AdminEducation = () => {
         });
 
         if (result.isConfirmed) {
-            // TODO: call delete API here
             Swal.fire("Deleted!", "Education has been deleted.", "success");
         }
     };
@@ -67,7 +70,11 @@ const AdminEducation = () => {
                             <p>Manage your educational background</p>
                         </div>
 
-                        <button className="add-education-btn">
+                        {/* Add Education Button */}
+                        <button
+                            className="add-education-btn"
+                            onClick={() => setOpenAddModal(true)}
+                        >
                             <Plus size={18} /> Add Education
                         </button>
                     </div>
@@ -144,6 +151,14 @@ const AdminEducation = () => {
                     )}
 
                 </div>
+                {/* Add Education Modal */}
+                <AddEducationModal
+                    isOpen={openAddModal}
+                    onClose={() => setOpenAddModal(false)}
+                    onAdd={(data) => {
+                        console.log("Education Data:", data);
+                    }}
+                />
             </main>
         </div>
     );
