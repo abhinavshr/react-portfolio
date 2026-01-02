@@ -42,7 +42,6 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
       console.log("Education added:", response);
       alert("Education added successfully!");
 
-      // Reset form
       setFormData({
         institution: "",
         level: "",

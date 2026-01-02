@@ -12,6 +12,7 @@ import "../../../css/admin/educations/AdminEducation.css";
 import Swal from "sweetalert2";
 import { viewAllEducations } from "../../../services/educationService";
 import AddEducationModal from "./AddEducationModal";
+import ViewEducationModal from "./ViewEducationModal";
 
 
 const AdminEducation = () => {
@@ -21,6 +22,18 @@ const AdminEducation = () => {
     const [error, setError] = useState("");
 
     const [openAddModal, setOpenAddModal] = useState(false);
+    const [selectedEducationId, setSelectedEducationId] = useState(null);
+    const [isViewOpen, setIsViewOpen] = useState(false);
+
+    const handleViewClick = (id) => {
+        setSelectedEducationId(id);
+        setIsViewOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsViewOpen(false);
+        setSelectedEducationId(null);
+    };
 
     useEffect(() => {
         fetchEducations();
@@ -104,7 +117,11 @@ const AdminEducation = () => {
                                     </h2>
 
                                     <div className="education-actions">
-                                        <button className="icon-btn view" title="View">
+                                        <button
+                                            className="icon-btn view"
+                                            title="View"
+                                            onClick={() => handleViewClick(edu.id)}
+                                        >
                                             <Eye size={18} />
                                         </button>
 
@@ -156,6 +173,13 @@ const AdminEducation = () => {
                     isOpen={openAddModal}
                     onClose={() => setOpenAddModal(false)}
                     onEducationAdded={() => fetchEducations()}
+                />
+
+                {/* View Education Modal */}
+                <ViewEducationModal
+                    isOpen={isViewOpen}
+                    onClose={handleCloseModal}
+                    educationId={selectedEducationId}
                 />
             </main>
         </div>
