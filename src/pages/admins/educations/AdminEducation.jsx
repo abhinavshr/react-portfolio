@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "../../../css/admin/educations/AdminEducation.css";
 import Swal from "sweetalert2";
-import { viewAllEducations } from "../../../services/educationService";
+import { viewAllEducations, deleteEducation } from "../../../services/educationService";
 import AddEducationModal from "./AddEducationModal";
 import ViewEducationModal from "./ViewEducationModal";
 import EditEducationModal from "./EditEducationModal";
@@ -56,7 +56,6 @@ const AdminEducation = () => {
             setLoading(true);
             const response = await viewAllEducations();
 
-            // Works for both: { data: [] } or direct []
             setEducations(response.data || response);
         } catch (err) {
             setError(err.message || "Failed to fetch educations");
@@ -78,7 +77,13 @@ const AdminEducation = () => {
         });
 
         if (result.isConfirmed) {
-            Swal.fire("Deleted!", "Education has been deleted.", "success");
+            try {
+                await deleteEducation(edu.id);
+                Swal.fire("Deleted!", "Education has been deleted.", "success");
+                fetchEducations();
+            } catch (error) {
+                Swal.fire("Error!", error.message || "Failed to delete education", "error");
+            }
         }
     };
 
@@ -199,6 +204,7 @@ const AdminEducation = () => {
                     educationId={selectedEducationId}
                 />
 
+                {/* Edit Education Modal */}
                 <EditEducationModal
                     isOpen={isEditOpen}
                     onClose={handleCloseEdit}
