@@ -137,3 +137,37 @@
 .edu-icon {
   color: #2563eb;
 }
+
+.education-duration {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.calendar-icon {
+  color: #64748b;
+}
+
+.dot {
+  margin: 0 6px;
+}
+
+.education-description {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+
+  
+  display: -webkit-box;        
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+
+  display: box;                
+  box-orient: vertical;
+  line-clamp: 2;               
+}
