@@ -13,6 +13,7 @@ import Swal from "sweetalert2";
 import { viewAllEducations } from "../../../services/educationService";
 import AddEducationModal from "./AddEducationModal";
 import ViewEducationModal from "./ViewEducationModal";
+import EditEducationModal from "./EditEducationModal";
 
 
 const AdminEducation = () => {
@@ -24,6 +25,7 @@ const AdminEducation = () => {
     const [openAddModal, setOpenAddModal] = useState(false);
     const [selectedEducationId, setSelectedEducationId] = useState(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
 
     const handleViewClick = (id) => {
         setSelectedEducationId(id);
@@ -33,6 +35,16 @@ const AdminEducation = () => {
     const handleCloseModal = () => {
         setIsViewOpen(false);
         setSelectedEducationId(null);
+    };
+
+    const handleCloseEdit = () => {
+        setIsEditOpen(false);
+        setSelectedEducationId(null);
+    };
+
+    const handleEditClick = (id) => {
+        setSelectedEducationId(id);
+        setIsEditOpen(true);
     };
 
     useEffect(() => {
@@ -52,6 +64,7 @@ const AdminEducation = () => {
             setLoading(false);
         }
     };
+
 
     const handleDelete = async (edu) => {
         const result = await Swal.fire({
@@ -125,7 +138,11 @@ const AdminEducation = () => {
                                             <Eye size={18} />
                                         </button>
 
-                                        <button className="icon-btn edit" title="Edit">
+                                        <button
+                                            className="icon-btn edit"
+                                            title="Edit"
+                                            onClick={() => handleEditClick(edu.id)}
+                                        >
                                             <Edit size={18} />
                                         </button>
 
@@ -180,6 +197,13 @@ const AdminEducation = () => {
                     isOpen={isViewOpen}
                     onClose={handleCloseModal}
                     educationId={selectedEducationId}
+                />
+
+                <EditEducationModal
+                    isOpen={isEditOpen}
+                    onClose={handleCloseEdit}
+                    educationId={selectedEducationId}
+                    onEducationUpdated={fetchEducations}
                 />
             </main>
         </div>
