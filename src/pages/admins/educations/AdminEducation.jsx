@@ -155,9 +155,7 @@ const AdminEducation = () => {
                 <AddEducationModal
                     isOpen={openAddModal}
                     onClose={() => setOpenAddModal(false)}
-                    onAdd={(data) => {
-                        console.log("Education Data:", data);
-                    }}
+                    onEducationAdded={() => fetchEducations()}
                 />
             </main>
         </div>
