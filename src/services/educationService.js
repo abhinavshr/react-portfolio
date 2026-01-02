@@ -8,3 +8,12 @@ export const viewAllEducations = async () => {
         throw error.response?.data || { message: "Failed to fetch educations" };
     }
 };
+
+export const addEducation = async (educationData) => {
+  try {
+    const response = await api.post("/admin/educations", educationData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to add education" };
+  }
+};
