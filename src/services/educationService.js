@@ -35,3 +35,12 @@ export const updateEducation = async (id, educationData) => {
     throw error.response?.data || { message: "Failed to update education" };
   }
 };
+
+export const deleteEducation = async (id) => {
+  try {
+    const response = await api.delete(`/admin/educations/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete education" };
+  }
+};
