@@ -1,0 +1,139 @@
+.admin-education {
+  padding: 30px;
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+.education-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.education-header h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.education-header p {
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.add-education-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.add-education-btn:hover {
+  background: #1e4ed8;
+}
+
+/* Card */
+.education-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.education-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.education-card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.education-card h4 {
+  margin: 8px 0 4px;
+  font-weight: 500;
+  color: #334155;
+}
+
+.education-date {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.education-card p {
+  margin-top: 14px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+/* Actions */
+.card-actions {
+  display: flex;
+  gap: 12px;
+  font-size: 18px;
+  color: #64748b;
+  cursor: pointer;
+}
+
+.card-actions svg:hover {
+  color: #2563eb;
+}
+
+.education-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  background: #f1f5f9;
+}
+
+.icon-btn.view:hover {
+  color: #2563eb;
+}
+
+.icon-btn.edit:hover {
+  color: #16a34a;
+}
+
+.icon-btn.delete:hover {
+  color: #dc2626;
+}
+
+.education-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.edu-icon {
+  color: #2563eb;
+}

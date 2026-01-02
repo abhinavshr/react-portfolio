@@ -11,6 +11,7 @@ import AddProjectImages from './pages/admins/ProjectImage/AddProjectImage';
 import EditProjectImages from './pages/admins/ProjectImage/EditProjectImage';
 import AdminSkill from './pages/admins/skills/AdminSkill';
 import AdminSoftSkill from './pages/admins/softskills/AdminSoftSkills';
+import AdminEducation from './pages/admins/educations/AdminEducation';
 
 function App() {
   return (
@@ -97,6 +98,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminSoftSkill />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/education"
+          element={
+            <ProtectedRoute>
+              <AdminEducation />
             </ProtectedRoute>
           }
         />
