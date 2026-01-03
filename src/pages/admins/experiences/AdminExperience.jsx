@@ -4,11 +4,14 @@ import { Plus, Edit, Trash2, Eye, Briefcase, Calendar, MapPin } from "lucide-rea
 import "../../../css/admin/experiences/AdminExperience.css";
 import Swal from "sweetalert2";
 import { viewAllExperiences } from "../../../services/experienceService";
+import AddExperienceModal from "./AddExperienceModal";
 
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchExperiences = async () => {
@@ -59,8 +62,12 @@ const AdminExperience = () => {
               <h1>Experience</h1>
               <p>Manage your work experience</p>
             </div>
-            <button className="add-experience-btn">
-              <Plus size={18} /> Add Experience
+            <button
+              className="add-experience-btn"
+              onClick={() => setIsModalOpen(true)}
+            >
+              <Plus size={18} />
+              Add Experience
             </button>
           </div>
           {loading && <p>Loading experiences...</p>}
@@ -99,6 +106,10 @@ const AdminExperience = () => {
               </div>
             ))}
         </div>
+        <AddExperienceModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
       </main>
     </div>
   );
