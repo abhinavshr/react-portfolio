@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { viewAllExperiences } from "../../../services/experienceService";
 import AddExperienceModal from "./AddExperienceModal";
 import ViewExperienceModal from "./ViewExperienceModal";
+import EditExperienceModal from "./EditExperienceModal";
 
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
@@ -15,6 +16,7 @@ const AdminExperience = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedExperienceId, setSelectedExperienceId] = useState(null);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fetchExperiences = async () => {
     setLoading(true);
@@ -86,7 +88,13 @@ const AdminExperience = () => {
                     >
                       <Eye size={28} />
                     </button>
-                    <button className="icon-btn edit">
+                    <button
+                      className="icon-btn edit"
+                      onClick={() => {
+                        setSelectedExperienceId(exp.id);
+                        setEditModalOpen(true);
+                      }}
+                    >
                       <Edit size={28} />
                     </button>
                     <button className="icon-btn delete" onClick={() => handleDelete(exp)}>
@@ -120,6 +128,12 @@ const AdminExperience = () => {
           experienceId={selectedExperienceId}
         />
 
+        <EditExperienceModal
+          isOpen={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          experienceId={selectedExperienceId}
+          onExperienceUpdated={fetchExperiences}
+        />
       </main>
     </div>
   );
