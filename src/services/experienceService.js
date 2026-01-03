@@ -32,3 +32,11 @@ export const addExperience = async (experienceData) => {
   }
 };
 
+export const updateExperience = async (id, experienceData) => {
+  try {
+    const response = await api.put(`/admin/experiences/${id}`, experienceData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update experience" };
+  }
+};
