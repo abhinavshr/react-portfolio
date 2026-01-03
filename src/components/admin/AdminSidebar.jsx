@@ -65,6 +65,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Education") {
       navigate("/admin/education");
     }
+    if (item === "Experience") {
+      navigate("/admin/experience");
+    }
   };
 
   return (
