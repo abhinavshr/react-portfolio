@@ -1,17 +1,15 @@
 .admin-layout {
   display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.admin-layout {
-  display: flex;
-  height: 100vh;
-  overflow: hidden; 
+  width: 100%;
+  min-height: 100vh;
+  background: #f8fafc;
 }
 
 .admin-skill {
-  padding: 24px;
+  flex: 1;
+  padding: 32px;
+  background: #f8fafc;
+  overflow-x: auto;
 }
 
 /* Header */
@@ -23,25 +21,30 @@
 }
 
 .admin-skill-header h1 {
-  font-size: 26px;
-  margin-bottom: 4px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0;
 }
 
 .admin-skill-header p {
-  color: #6b7280;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #64748b;
 }
 
 .add-skill-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
   background: #2563eb;
-  color: #fff;
+  color: #ffffff;
   border: none;
   padding: 10px 16px;
   border-radius: 8px;
-  cursor: pointer;
+  font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
 }
 
 .add-skill-btn:hover {
@@ -51,82 +54,51 @@
 /* Skill Card */
 .skill-card {
   background: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .skill-category {
-  font-size: 18px;
-  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #0f172a;
 }
 
 /* Table */
 .skill-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.skill-table thead {
+  background: #f8fafc;
 }
 
 .skill-table th {
   text-align: left;
-  font-size: 13px;
-  color: #6b7280;
-  padding-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  padding: 14px 0;
+  letter-spacing: 0.05em;
 }
 
 .skill-table td {
-  padding: 12px 0;
+  padding: 16px 0;
   vertical-align: middle;
+  font-size: 15px;
+  color: #334155;
 }
 
-/* Skill Level */
-.skill-level-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+.skill-table tbody tr:not(:last-child) {
+  border-bottom: 1px solid #e5e7eb;
 }
 
-.skill-bar {
-  width: 420px;
-  height: 8px;
-  background: #e5e7eb;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.skill-bar-fill {
-  height: 100%;
-  background: #2563eb;
-  border-radius: 6px;
-}
-
-.skill-percent {
-  font-weight: 500;
-  min-width: 40px;
-}
-
-/* Actions */
-.skill-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.icon-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.icon-btn.edit {
-  color: #2563eb;
-}
-
-.icon-btn.delete {
-  color: #dc2626;
-}
-
+/* Column widths */
 .skill-table th:first-child,
 .skill-table td:first-child {
   width: 25%;
@@ -134,10 +106,82 @@
 
 .skill-table th:nth-child(2),
 .skill-table td:nth-child(2) {
-  width: 55%;
+  width: 60%;
 }
 
 .skill-table th:last-child,
 .skill-table td:last-child {
-  width: 20%;
+  width: 15%;
+}
+
+/* Skill Level */
+.skill-level-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.skill-bar {
+  width: 100%;
+  max-width: 520px;
+  height: 10px;
+  background: #e5e7eb;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  border-radius: 999px;
+}
+
+.skill-percent {
+  min-width: 42px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Actions */
+.skill-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.icon-btn.edit {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.icon-btn.edit:hover {
+  background: #bbf7d0;
+}
+
+.icon-btn.delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+  background: #fecaca;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
 }
