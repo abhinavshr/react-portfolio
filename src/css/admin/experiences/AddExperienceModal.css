@@ -1,0 +1,121 @@
+/* Overlay */
+.experience-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Modal Box */
+.experience-modal-box {
+  background: #fff;
+  width: 600px;
+  max-width: 95%;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Header */
+.experience-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.experience-modal-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.experience-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+}
+
+/* Subtitle */
+.experience-modal-subtitle {
+  margin: 8px 0 20px;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Form */
+.experience-modal-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 14px;
+}
+
+.experience-modal-form input,
+.experience-modal-form textarea {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 14px;
+  background: #f9fafb;
+}
+
+.experience-modal-form input:focus,
+.experience-modal-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+}
+
+/* Two column row */
+.experience-row {
+  display: flex;
+  gap: 14px;
+}
+
+.experience-row label {
+  flex: 1;
+}
+
+/* Checkbox */
+.experience-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 10px;
+  font-weight: 400;
+}
+
+/* Actions */
+.experience-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.experience-btn-cancel {
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  cursor: pointer;
+}
+
+.experience-btn-add {
+  padding: 8px 20px;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.experience-btn-add:hover {
+  background: #1d4ed8;
+}

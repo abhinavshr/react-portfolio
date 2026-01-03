@@ -8,3 +8,4 @@ export const viewAllExperiences = async () => {
         throw error.response?.data || { message: "Failed to fetch experiences" };
     }
 };
+
