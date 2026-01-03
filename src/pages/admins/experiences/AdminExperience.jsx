@@ -3,7 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Eye, Briefcase, Calendar, MapPin } from "lucide-react";
 import "../../../css/admin/experiences/AdminExperience.css";
 import Swal from "sweetalert2";
-import { viewAllExperiences } from "../../../services/experienceService";
+import { viewAllExperiences, deleteExperience } from "../../../services/experienceService";
 import AddExperienceModal from "./AddExperienceModal";
 import ViewExperienceModal from "./ViewExperienceModal";
 import EditExperienceModal from "./EditExperienceModal";
@@ -35,20 +35,26 @@ const AdminExperience = () => {
   }, []);
 
   const handleDelete = async (exp) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `You are about to delete "${exp.company_name}"`,
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
-    });
-    if (result.isConfirmed) {
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: `You are about to delete "${exp.company_name}"`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#d33",
+    cancelButtonColor: "#3085d6",
+    confirmButtonText: "Yes, delete it!"
+  });
+
+  if (result.isConfirmed) {
+    try {
+      await deleteExperience(exp.id);
       Swal.fire("Deleted!", "Experience has been deleted.", "success");
-      setExperiences(experiences.filter((e) => e.id !== exp.id));
+      fetchExperiences();
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to delete experience", "error");
     }
-  };
+  }
+};
 
   return (
     <div className="admin-layout">
