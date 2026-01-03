@@ -5,6 +5,7 @@ import "../../../css/admin/experiences/AdminExperience.css";
 import Swal from "sweetalert2";
 import { viewAllExperiences } from "../../../services/experienceService";
 import AddExperienceModal from "./AddExperienceModal";
+import ViewExperienceModal from "./ViewExperienceModal";
 
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
@@ -12,6 +13,8 @@ const AdminExperience = () => {
   const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedExperienceId, setSelectedExperienceId] = useState(null);
 
   const fetchExperiences = async () => {
     setLoading(true);
@@ -45,15 +48,6 @@ const AdminExperience = () => {
     }
   };
 
-  const handleView = (exp) => {
-    Swal.fire({
-      title: exp.role,
-      text: exp.description,
-      icon: "info",
-      confirmButtonText: "Close"
-    });
-  };
-
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
@@ -83,7 +77,13 @@ const AdminExperience = () => {
                     {exp.role}
                   </h2>
                   <div className="experience-actions">
-                    <button className="icon-btn view" onClick={() => handleView(exp)}>
+                    <button
+                      className="icon-btn view"
+                      onClick={() => {
+                        setSelectedExperienceId(exp.id);
+                        setViewModalOpen(true);
+                      }}
+                    >
                       <Eye size={28} />
                     </button>
                     <button className="icon-btn edit">
@@ -112,6 +112,12 @@ const AdminExperience = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           onExperienceAdded={() => fetchExperiences()}
+        />
+
+        <ViewExperienceModal
+          isOpen={viewModalOpen}
+          onClose={() => setViewModalOpen(false)}
+          experienceId={selectedExperienceId}
         />
 
       </main>

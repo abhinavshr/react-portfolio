@@ -102,9 +102,14 @@
 .experience-btn-cancel {
   padding: 8px 18px;
   border-radius: 8px;
-  background: #fff;
+  background: #dc2626;
+  color: #fff;
   border: 1px solid #d1d5db;
   cursor: pointer;
+}
+
+.experience-btn-cancel:hover {
+  background: #e57676;
 }
 
 .experience-btn-add {
