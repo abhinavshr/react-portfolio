@@ -1,0 +1,233 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.experience-container {
+  flex: 1;
+  overflow-x: hidden;
+}
+
+.experience-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.experience-header h1 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.experience-header p {
+  margin-top: 6px;
+  color: #64748b;
+}
+
+.add-experience-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.add-experience-btn:hover {
+  background: #1e4ed8;
+}
+
+.experience-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.experience-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.experience-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.experience-icon {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.experience-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px; 
+  width: 40px;  
+  height: 40px; 
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.icon-btn.view {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.icon-btn.view:hover {
+  background: #bfdbfe;
+  transform: translateY(-1px);
+}
+
+.icon-btn.edit {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.icon-btn.edit:hover {
+  background: #bbf7d0;
+  transform: translateY(-1px);
+}
+
+.icon-btn.delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+  background: #fca5a5;
+  transform: translateY(-1px);
+}
+
+
+.experience-icon {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.company {
+  margin: 6px 0;
+  font-weight: 500;
+  color: #334155;
+}
+
+.experience-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0;
+  color: #64748b;
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.description {
+  margin-top: 12px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.experience-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.icon-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.icon-btn.view {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.icon-btn.view:hover {
+  background: #bfdbfe;
+  transform: translateY(-1px);
+}
+
+.icon-btn.edit {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.icon-btn.edit:hover {
+  background: #bbf7d0;
+  transform: translateY(-1px);
+}
+
+.icon-btn.delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+  background: #fca5a5;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .experience-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .add-experience-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .experience-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .icon-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

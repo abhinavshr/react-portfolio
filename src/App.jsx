@@ -12,6 +12,7 @@ import EditProjectImages from './pages/admins/ProjectImage/EditProjectImage';
 import AdminSkill from './pages/admins/skills/AdminSkill';
 import AdminSoftSkill from './pages/admins/softskills/AdminSoftSkills';
 import AdminEducation from './pages/admins/educations/AdminEducation';
+import AdminExperience from './pages/admins/experiences/AdminExperience';
 
 function App() {
   return (
@@ -107,6 +108,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminEducation />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/experience"
+          element={
+            <ProtectedRoute>
+              <AdminExperience />
             </ProtectedRoute>
           }
         />
