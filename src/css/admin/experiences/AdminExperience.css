@@ -153,12 +153,22 @@
   font-weight: 500;
 }
 
-.description {
+.experience-description {
   margin-top: 12px;
   font-size: 14px;
   color: #475569;
   line-height: 1.6;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+
+  display: box; 
+  box-orient: vertical;
+  line-clamp: 2; 
 }
+
 
 .experience-actions {
   display: flex;
