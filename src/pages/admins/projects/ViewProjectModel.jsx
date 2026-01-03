@@ -1,117 +1,133 @@
 import React from "react";
-import { FiExternalLink, FiGithub, FiCalendar, FiCode, FiFolder, FiClock, FiGlobe } from "react-icons/fi";
+import { FiX, FiExternalLink, FiGithub } from "react-icons/fi";
 import "../../../css/admin/ViewProjectModal.css";
 
-const ViewProjectModal = ({ project, onClose, statusColors }) => {
-  if (!project) return null;
+const ViewProjectModal = ({ isOpen, onClose, project }) => {
+  if (!isOpen || !project) return null;
 
-  // Format tech stack into array if it's a string
-  const techStackArray = project.tech_stack 
-    ? project.tech_stack.split(',').map(tech => tech.trim())
+  const formatDate = (dateStr, fallback = "-") => {
+    if (!dateStr) return fallback;
+    return new Date(dateStr).toISOString().slice(0, 10);
+  };
+
+  const statusColors = {
+    active: "status-active",
+    completed: "status-completed",
+    in_progress: "status-in-progress",
+    on_hold: "status-on-hold",
+  };
+
+  const techStackList = project?.tech_stack
+    ? project.tech_stack.split(",").map((tech) => tech.trim())
     : [];
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div className="modal-header">
-          <h2>{project.title}</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+    <div className="project-modal-overlay">
+      <div className="project-modal-box">
+        {/* Modal Header */}
+        <div className="project-modal-header">
+          <h2>View Project</h2>
+          <button className="project-close-btn" onClick={onClose}>
+            <FiX size={20} />
+          </button>
         </div>
 
-        {/* Description */}
-        <div className="modal-description">
-          <span className="description-label">Description</span>
-          <div className="description-content">
-            {project.description || "No description available"}
-          </div>
-        </div>
+        {/* Project Details */}
+        <p className="project-modal-subtitle">Project Details</p>
+        <div className="project-modal-form">
+          <label>
+            Title
+            <input type="text" value={project.title || "Untitled Project"} readOnly />
+          </label>
 
-        {/* Project Details Grid */}
-        <div className="modal-grid">
-          {/* Tech Stack */}
-          <div className="modal-grid-item">
-            <strong>
-              <FiCode style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              Tech Stack
-            </strong>
-            {techStackArray.length > 0 ? (
+          <label>
+            Description
+            <textarea
+              value={project.description || "No description available"}
+              readOnly
+              rows={4}
+            />
+          </label>
+
+          <div className="project-info-grid">
+            {/* Tech Stack */}
+            <div className="project-info-card">
+              <strong>Tech Stack</strong>
               <div className="tech-stack-list">
-                {techStackArray.map((tech, index) => (
-                  <span key={index} className="tech-tag">{tech}</span>
-                ))}
+                {techStackList.length > 0 ? (
+                  techStackList.map((tech, idx) => (
+                    <span key={idx} className="tech-tag">{tech}</span>
+                  ))
+                ) : (
+                  <p>-</p>
+                )}
               </div>
-            ) : (
-              <p>-</p>
-            )}
+            </div>
+
+            {/* Category */}
+            <div className="project-info-card">
+              <strong>Category</strong>
+              <p>{project.category?.name || "-"}</p>
+            </div>
+
+            {/* Status */}
+            <div className="project-info-card">
+              <strong>Status</strong>
+              <span className={`status-badge ${statusColors[project.status] || ""}`}>
+                {project.status ? project.status.replace("_", " ") : "Not Specified"}
+              </span>
+            </div>
+
+            {/* Start Date */}
+            <div className="project-info-card">
+              <strong>Start Date</strong>
+              <p>{formatDate(project.start_date)}</p>
+            </div>
+
+            {/* End Date */}
+            <div className="project-info-card">
+              <strong>End Date</strong>
+              <p>{project.end_date ? formatDate(project.end_date) : "Ongoing"}</p>
+            </div>
           </div>
 
-          {/* Category */}
-          <div className="modal-grid-item">
-            <strong>
-              <FiFolder style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              Category
-            </strong>
-            <p>{project.category?.name || project.category || "-"}</p>
+          {/* Project Links */}
+          <div className="project-links">
+            <strong>Project Links</strong>
+            <div className="project-links-list">
+              {project.live_link ? (
+                <a
+                  href={project.live_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-link-btn"
+                >
+                  <FiExternalLink /> Live Site
+                </a>
+              ) : (
+                <p>No live link available</p>
+              )}
+
+              {project.github_link ? (
+                <a
+                  href={project.github_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="project-link-btn"
+                >
+                  <FiGithub /> GitHub
+                </a>
+              ) : (
+                <p>No GitHub link available</p>
+              )}
+            </div>
           </div>
 
-          {/* Status */}
-          <div className="modal-grid-item">
-            <strong>
-              <FiClock style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              Status
-            </strong>
-            <span
-              className={`status-badge ${
-                project.status ? statusColors[project.status] : "status-in-progress"
-              }`}
-            >
-              {project.status ? project.status.replace("_", " ") : "Not Specified"}
-            </span>
-          </div>
-
-          {/* Start Date */}
-          <div className="modal-grid-item">
-            <strong>
-              <FiCalendar style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              Start Date
-            </strong>
-            <p className="date-item">
-              {project.start_date?.slice(0, 10) || "-"}
-            </p>
-          </div>
-
-          {/* End Date */}
-          <div className="modal-grid-item">
-            <strong>
-              <FiCalendar style={{ marginRight: '6px', verticalAlign: 'middle' }} />
-              End Date
-            </strong>
-            <p className="date-item">
-              {project.end_date?.slice(0, 10) || "Ongoing"}
-            </p>
-          </div>
-        </div>
-
-        {/* Project Links */}
-        <div className="modal-links-section">
-          <span className="links-label">Project Links</span>
-          <div className="modal-links">
-            {project.live_link && (
-              <a href={project.live_link} target="_blank" rel="noreferrer">
-                <FiGlobe /> Live Site
-              </a>
-            )}
-            {project.github_link && (
-              <a href={project.github_link} target="_blank" rel="noreferrer">
-                <FiGithub /> GitHub Repository
-              </a>
-            )}
-            {!project.live_link && !project.github_link && (
-              <p style={{ color: '#999', fontStyle: 'italic' }}>
-                No links available
-              </p>
-            )}
+          {/* Modal Actions */}
+          <div className="project-modal-actions">
+            <button className="project-btn-cancel" onClick={onClose}>
+              Close
+            </button>
           </div>
         </div>
       </div>
