@@ -40,3 +40,12 @@ export const updateExperience = async (id, experienceData) => {
     throw error.response?.data || { message: "Failed to update experience" };
   }
 };
+
+export const deleteExperience = async (id) => {
+  try {
+    const response = await api.delete(`/admin/experiences/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete experience" };
+  }
+};
