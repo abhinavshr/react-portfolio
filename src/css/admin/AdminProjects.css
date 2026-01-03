@@ -138,7 +138,16 @@ td {
 }
 
 .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     white-space: nowrap;
+}
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .actions button {
@@ -279,4 +288,29 @@ td {
 
 .link-btn.github {
     color: #111827;
+}
+
+.text-clamp {
+    display: inline-block;
+    max-width: 280px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.text-clamp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+
+    line-clamp: 1;
+
+    -webkit-line-clamp: 1;
+
+    overflow: hidden;
+    max-width: 280px;
+}
+
+
+.tech-clamp {
+    max-width: 280px;
 }

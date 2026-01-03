@@ -2,14 +2,10 @@ import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
-import { 
-  viewAllProjects, 
-  viewProjectById, 
-  deleteProject 
-} from "../../../services/projectService";
+import { viewAllProjects, viewProjectById, deleteProject } from "../../../services/projectService";
 import { useNavigate } from "react-router-dom";
 import ViewProjectModal from "./ViewProjectModel";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 
 const AdminProjects = () => {
   const [active, setActive] = useState("Projects");
@@ -18,7 +14,7 @@ const AdminProjects = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  
+
   const navigate = useNavigate();
 
   const statusColors = {
@@ -37,7 +33,7 @@ const AdminProjects = () => {
       const data = await viewAllProjects();
       setProjects(data.projects || data);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching projects:", error);
     } finally {
       setLoading(false);
     }
@@ -45,8 +41,8 @@ const AdminProjects = () => {
 
   const handleViewProject = async (id) => {
     try {
-      const project = await viewProjectById(id);
-      setSelectedProject(project);
+      const response = await viewProjectById(id);
+      setSelectedProject(response.project);
       setShowModal(true);
     } catch (error) {
       console.error(error);
@@ -54,36 +50,27 @@ const AdminProjects = () => {
   };
 
   const handleDeleteProject = async (id, title) => {
-  const result = await Swal.fire({
-    title: 'Are you sure?',
-    text: `You are about to delete "${title}". This action cannot be undone!`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#d33',
-    cancelButtonColor: '#3085d6',
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel'
-  });
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete "${title}". This action cannot be undone!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
 
-  if (result.isConfirmed) {
-    try {
-      await deleteProject(id);
-      Swal.fire(
-        'Deleted!',
-        'Project has been deleted successfully.',
-        'success'
-      );
-      fetchProjects();
-    } catch (error) {
-      Swal.fire(
-        'Error!',
-        error.message || 'Failed to delete project',
-        'error'
-      );
+    if (result.isConfirmed) {
+      try {
+        await deleteProject(id);
+        Swal.fire("Deleted!", "Project has been deleted successfully.", "success");
+        fetchProjects();
+      } catch (error) {
+        Swal.fire("Error!", error.message || "Failed to delete project", "error");
+      }
     }
-  }
-};
-
+  };
 
   const filteredProjects = projects.filter(
     (project) =>
@@ -96,22 +83,16 @@ const AdminProjects = () => {
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
-        {/* Header */}
         <div className="projects-header">
           <div>
             <h1>Projects</h1>
             <p>Manage all your portfolio projects</p>
           </div>
-
-          <button
-            className="add-project-btn"
-            onClick={() => navigate("/admin/add-project")}
-          >
+          <button className="add-project-btn" onClick={() => navigate("/admin/add-project")}>
             + Add Project
           </button>
         </div>
 
-        {/* Search */}
         <div className="search-card">
           <input
             type="text"
@@ -121,7 +102,6 @@ const AdminProjects = () => {
           />
         </div>
 
-        {/* Table */}
         <div className="table-card">
           {loading ? (
             <div className="empty-state">Loading projects...</div>
@@ -147,17 +127,17 @@ const AdminProjects = () => {
               <tbody>
                 {filteredProjects.map((project) => (
                   <tr key={project.id}>
-                    <td className="project-name">{project.title}</td>
-                    <td>{project.tech_stack}</td>
+                    <td className="project-name">
+                      <span className="text-clamp">{project.title}</span>
+                    </td>
+
+                    <td>
+                      <span className="text-clamp tech-clamp">{project.tech_stack}</span>
+                    </td>
 
                     <td>
                       {project.live_link ? (
-                        <a
-                          href={project.live_link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link-btn"
-                        >
+                        <a href={project.live_link} target="_blank" rel="noreferrer" className="link-btn">
                           Live
                         </a>
                       ) : (
@@ -167,12 +147,7 @@ const AdminProjects = () => {
 
                     <td>
                       {project.github_link ? (
-                        <a
-                          href={project.github_link}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="link-btn github"
-                        >
+                        <a href={project.github_link} target="_blank" rel="noreferrer" className="link-btn github">
                           GitHub
                         </a>
                       ) : (
@@ -181,43 +156,21 @@ const AdminProjects = () => {
                     </td>
 
                     <td>
-                      <span
-                        className={`status-badge ${statusColors[project.status]}`}
-                      >
-                        {project.status.replace("_", " ")}
+                      <span className={`status-badge ${statusColors[project.status] || ""}`}>
+                        {project.status?.replace("_", " ") || "Not Specified"}
                       </span>
                     </td>
 
-                    <td>
-                      {project.start_date
-                        ? project.start_date.slice(0, 10)
-                        : "-"}
-                    </td>
+                    <td>{project.start_date ? project.start_date.slice(0, 10) : "-"}</td>
 
                     <td className="actions">
-                      <button
-                        className="icon-btn view"
-                        title="View"
-                        onClick={() => handleViewProject(project.id)}
-                      >
+                      <button className="icon-btn view" title="View" onClick={() => handleViewProject(project.id)}>
                         <FiEye />
                       </button>
-
-                      <button
-                        className="icon-btn edit"
-                        title="Edit"
-                        onClick={() =>
-                          navigate(`/admin/edit-project/${project.id}`)
-                        }
-                      >
+                      <button className="icon-btn edit" title="Edit" onClick={() => navigate(`/admin/edit-project/${project.id}`)}>
                         <FiEdit2 />
                       </button>
-
-                      <button 
-                        className="icon-btn delete" 
-                        title="Delete"
-                        onClick={() => handleDeleteProject(project.id, project.title)}
-                      >
+                      <button className="icon-btn delete" title="Delete" onClick={() => handleDeleteProject(project.id, project.title)}>
                         <FiTrash2 />
                       </button>
                     </td>
@@ -228,13 +181,8 @@ const AdminProjects = () => {
           )}
         </div>
 
-        {/* View Modal */}
         {showModal && selectedProject && (
-          <ViewProjectModal
-            project={selectedProject}
-            onClose={() => setShowModal(false)}
-            statusColors={statusColors}
-          />
+          <ViewProjectModal project={selectedProject} isOpen={showModal} onClose={() => setShowModal(false)} />
         )}
       </main>
     </div>
