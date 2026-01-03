@@ -9,3 +9,16 @@ export const viewAllExperiences = async () => {
     }
 };
 
+export const addExperience = async (experienceData) => {
+  try {
+    const response = await api.post(
+      "/admin/experiences",
+      experienceData
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Failed to add experience",
+    };
+  }
+};

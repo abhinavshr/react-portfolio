@@ -13,17 +13,19 @@ const AdminExperience = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchExperiences = async () => {
+    setLoading(true);
+    try {
+      const response = await viewAllExperiences();
+      setExperiences(response.data);
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to fetch experiences", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchExperiences = async () => {
-      try {
-        const response = await viewAllExperiences();
-        setExperiences(response.data);
-      } catch (error) {
-        Swal.fire("Error", error.message || "Failed to fetch experiences", "error");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchExperiences();
   }, []);
 
@@ -78,7 +80,7 @@ const AdminExperience = () => {
                 <div className="experience-card-header">
                   <h2 className="experience-title">
                     <Briefcase className="experience-icon" />
-                    {exp.role.replace(/\s/g, "-").toLowerCase()}
+                    {exp.role}
                   </h2>
                   <div className="experience-actions">
                     <button className="icon-btn view" onClick={() => handleView(exp)}>
@@ -109,7 +111,9 @@ const AdminExperience = () => {
         <AddExperienceModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
+          onExperienceAdded={() => fetchExperiences()}
         />
+
       </main>
     </div>
   );
