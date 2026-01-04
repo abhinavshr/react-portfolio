@@ -13,6 +13,7 @@ import AdminSkill from './pages/admins/skills/AdminSkill';
 import AdminSoftSkill from './pages/admins/softskills/AdminSoftSkills';
 import AdminEducation from './pages/admins/educations/AdminEducation';
 import AdminExperience from './pages/admins/experiences/AdminExperience';
+import AdminCertificate from './pages/admins/certificates/AdminCertificates';
 
 function App() {
   return (
@@ -117,6 +118,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminExperience />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/certificates"
+          element={
+            <ProtectedRoute>
+              <AdminCertificate />
             </ProtectedRoute>
           }
         />

@@ -68,6 +68,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Experience") {
       navigate("/admin/experience");
     }
+    if (item === "Certificates") {
+      navigate("/admin/certificates");
+    }
   };
 
   return (
