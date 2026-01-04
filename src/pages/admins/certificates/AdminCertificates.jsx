@@ -103,7 +103,9 @@ const AdminCertificates = () => {
                                 <p className="certificate-org">{cert.issuer}</p>
 
                                 <div className="certificate-meta">
-                                    <span>Issued: {cert.issue_date}</span>
+                                    <span>
+                                        Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : ""}
+                                    </span>
                                     {cert.credential_id && (
                                         <span>ID: {cert.credential_id}</span>
                                     )}
@@ -127,7 +129,8 @@ const AdminCertificates = () => {
                 {/* AddCertificateModal */}
                 {showAddModal && (
                     <AddCertificateModal
-                        onClose={() => setShowAddModal(false)} 
+                        onClose={() => setShowAddModal(false)}
+                        onSuccess={fetchCertificates}
                     />
                 )}
             </main>
