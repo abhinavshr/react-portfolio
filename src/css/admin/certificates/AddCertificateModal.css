@@ -1,0 +1,89 @@
+.add-certificate-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.add-certificate-modal {
+  background: #fff;
+  width: 520px;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.add-certificate-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.add-certificate-modal-header h2 {
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.add-certificate-modal-header p {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.add-certificate-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.add-certificate-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.add-certificate-form-group label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.add-certificate-form-group label span {
+  color: red;
+}
+
+.add-certificate-form-group input {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 14px;
+}
+
+.add-certificate-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.add-certificate-cancel-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+}
+
+.add-certificate-add-btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
