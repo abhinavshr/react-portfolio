@@ -1,38 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Award, ExternalLink } from "lucide-react";
 import "../../../css/admin/certificates/AdminCertificates.css";
 import Swal from "sweetalert2";
 
+import { viewAllCertificates } from "../../../services/certificatesService";
+
 const AdminCertificates = () => {
   const [active, setActive] = useState("Certificates");
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const certificates = [
-    {
-      id: 1,
-      title: "AWS Certified Solutions Architect",
-      organization: "Amazon Web Services",
-      issued: "June 2024",
-      credentialId: "AWS-12345",
-      verifyUrl: "#"
-    },
-    {
-      id: 2,
-      title: "Google Cloud Professional",
-      organization: "Google Cloud",
-      issued: "March 2024",
-      credentialId: "GCP-67890",
-      verifyUrl: "#"
-    },
-    {
-      id: 3,
-      title: "Certified Kubernetes Administrator",
-      organization: "Cloud Native Computing Foundation",
-      issued: "November 2023",
-      credentialId: "CKA-54321",
-      verifyUrl: "#"
+  // Fetch certificates
+  const fetchCertificates = async () => {
+    try {
+      const res = await viewAllCertificates();
+      setCertificates(res.certificates || []);
+    } catch (error) {
+      Swal.fire("Error", error.message || "Failed to load certificates", "error");
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  useEffect(() => {
+    fetchCertificates();
+  }, []);
 
   const handleDelete = async (cert) => {
     const result = await Swal.fire({
@@ -46,7 +39,9 @@ const AdminCertificates = () => {
     });
 
     if (result.isConfirmed) {
+      // call delete API here later
       Swal.fire("Deleted!", "Certificate has been deleted.", "success");
+      // fetchCertificates();
     }
   };
 
@@ -69,8 +64,15 @@ const AdminCertificates = () => {
             </button>
           </div>
 
+          {/* Loading */}
+          {loading && <p>Loading certificates...</p>}
+
           {/* Cards */}
           <div className="certificates-grid">
+            {!loading && certificates.length === 0 && (
+              <p>No certificates found.</p>
+            )}
+
             {certificates.map((cert) => (
               <div key={cert.id} className="certificate-card">
 
@@ -93,21 +95,25 @@ const AdminCertificates = () => {
                 </div>
 
                 <h3 className="certificate-title">{cert.title}</h3>
-                <p className="certificate-org">{cert.organization}</p>
+                <p className="certificate-org">{cert.issuer}</p>
 
                 <div className="certificate-meta">
-                  <span>Issued: {cert.issued}</span>
-                  <span>ID: {cert.credentialId}</span>
+                  <span>Issued: {cert.issue_date}</span>
+                  {cert.credential_id && (
+                    <span>ID: {cert.credential_id}</span>
+                  )}
                 </div>
 
-                <a
-                  href={cert.verifyUrl}
-                  className="verify-link"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Verify <ExternalLink size={14} />
-                </a>
+                {cert.verification_url && (
+                  <a
+                    href={cert.verification_url}
+                    className="verify-link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Verify <ExternalLink size={14} />
+                  </a>
+                )}
               </div>
             ))}
           </div>
