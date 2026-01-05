@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { addExperience } from "../../../services/experienceService";
+import Swal from "sweetalert2";
 
 const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     const [companyName, setCompanyName] = useState("");
@@ -32,13 +33,18 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
             setLoading(true);
             await addExperience(payload);
 
-            // refresh parent list
+            Swal.fire({
+                icon: "success",
+                title: "Experience Added",
+                text: "Your work experience has been successfully added.",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+
             if (onExperienceAdded) onExperienceAdded();
 
-            // close modal
             onClose();
 
-            // reset form
             setCompanyName("");
             setCompanyLocation("");
             setRole("");
@@ -47,7 +53,11 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
             setCurrent(false);
             setDescription("");
         } catch (error) {
-            alert(error.message || "Failed to add experience");
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: error.response?.data?.message || error.message || "Failed to add experience",
+            });
         } finally {
             setLoading(false);
         }
