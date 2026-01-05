@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { viewEducationById, updateEducation } from "../../../services/educationService";
+import Swal from "sweetalert2"; 
 
 const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }) => {
   const [formData, setFormData] = useState({
@@ -50,29 +51,43 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-      institution: formData.institution,
-      level: formData.level,
-      program: formData.program,
-      start_year: formData.startYear,
-      end_year: formData.endYear,
-      board: formData.board,
-      description: formData.description,
-    };
+  e.preventDefault();
 
-    try {
-      setLoading(true);
-      const response = await updateEducation(educationId, payload);
-      alert("Education updated successfully!");
-      if (onEducationUpdated) onEducationUpdated(response);
-      onClose();
-    } catch (error) {
-      alert(error.message || "Failed to update education");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    institution: formData.institution,
+    level: formData.level,
+    program: formData.program,
+    start_year: formData.startYear,
+    end_year: formData.endYear,
+    board: formData.board,
+    description: formData.description,
   };
+
+  try {
+    setLoading(true);
+
+    const response = await updateEducation(educationId, payload);
+
+    Swal.fire({
+      icon: "success",
+      title: "Updated!",
+      text: "Education updated successfully",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    if (onEducationUpdated) onEducationUpdated(response);
+    onClose();
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error?.message || "Failed to update education",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="edu-modal-overlay">
