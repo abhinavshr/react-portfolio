@@ -17,3 +17,21 @@ export const addCertificate = async (data) => {
     throw error.response?.data || { message: "Failed to add certificate" };
   }
 }
+
+export const viewCertificateById = async (id) => {
+  try {
+    const response = await api.get(`/admin/certificates/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch certificate" };
+  }
+};
+
+export const updateCertificate = async (id, data) => {
+  try {
+    const response = await api.put(`/admin/certificates/${id}`, data);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update certificate" };
+  }
+};
