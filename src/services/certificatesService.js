@@ -35,3 +35,12 @@ export const updateCertificate = async (id, data) => {
     throw error.response?.data || { message: "Failed to update certificate" };
   }
 };
+
+export const deleteCertificate = async (id) => {
+  try {
+    const response = await api.delete(`/admin/certificates/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to delete certificate" };
+  }
+};
