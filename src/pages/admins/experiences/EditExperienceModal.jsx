@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
+import Swal from "sweetalert2";
 
 const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
   const [companyName, setCompanyName] = useState("");
@@ -31,7 +32,11 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
         setCurrent(!!exp.is_current);
         setDescription(exp.description);
       } catch (error) {
-        alert(error.message || "Failed to fetch experience");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.response?.data?.message || error.message || "Failed to fetch experience",
+        });
       } finally {
         setLoadingData(false);
       }
@@ -39,8 +44,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 
     fetchExperience();
   }, [isOpen, experienceId]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,17 +62,28 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       setLoading(true);
       await updateExperience(experienceId, payload);
 
-      // refresh parent list
+      Swal.fire({
+        icon: "success",
+        title: "Experience Updated",
+        text: "Your work experience has been successfully updated.",
+        timer: 2000,
+        showConfirmButton: false,
+      });
+
       if (onExperienceUpdated) onExperienceUpdated();
 
-      // close modal
       onClose();
     } catch (error) {
-      alert(error.message || "Failed to update experience");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.message || error.message || "Failed to update experience",
+      });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="experience-modal-overlay">
