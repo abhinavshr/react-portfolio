@@ -5,6 +5,7 @@ import "../../../css/admin/certificates/AdminCertificates.css";
 import Swal from "sweetalert2";
 import { viewAllCertificates } from "../../../services/certificatesService";
 import AddCertificateModal from "./AddCertificateModal";
+import EditCertificateModal from "./EditCertificateModal";
 
 const AdminCertificates = () => {
     const [active, setActive] = useState("Certificates");
@@ -12,6 +13,8 @@ const AdminCertificates = () => {
     const [loading, setLoading] = useState(true);
 
     const [showAddModal, setShowAddModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [selectedCertificateId, setSelectedCertificateId] = useState(null);
 
     // Fetch certificates
     const fetchCertificates = async () => {
@@ -87,7 +90,13 @@ const AdminCertificates = () => {
                                     </div>
 
                                     <div className="certificate-actions">
-                                        <button className="icon-btn edit">
+                                        <button
+                                            className="icon-btn edit"
+                                            onClick={() => {
+                                                setSelectedCertificateId(cert.id);
+                                                setShowEditModal(true);
+                                            }}
+                                        >
                                             <Edit size={18} />
                                         </button>
                                         <button
@@ -133,6 +142,18 @@ const AdminCertificates = () => {
                         onSuccess={fetchCertificates}
                     />
                 )}
+
+                {showEditModal && (
+                    <EditCertificateModal
+                        certificateId={selectedCertificateId}
+                        onClose={() => setShowEditModal(false)}
+                        onSuccess={() => {
+                            setShowEditModal(false);
+                            fetchCertificates();
+                        }}
+                    />
+                )}
+
             </main>
         </div>
     );
