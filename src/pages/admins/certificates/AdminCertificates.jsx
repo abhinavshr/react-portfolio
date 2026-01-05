@@ -3,7 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Award, ExternalLink } from "lucide-react";
 import "../../../css/admin/certificates/AdminCertificates.css";
 import Swal from "sweetalert2";
-import { viewAllCertificates } from "../../../services/certificatesService";
+import { viewAllCertificates, deleteCertificate } from "../../../services/certificatesService";
 import AddCertificateModal from "./AddCertificateModal";
 import EditCertificateModal from "./EditCertificateModal";
 
@@ -43,12 +43,23 @@ const AdminCertificates = () => {
             confirmButtonText: "Yes, delete it!"
         });
 
-        if (result.isConfirmed) {
-            // call delete API here later
+        if (!result.isConfirmed) return;
+
+        try {
+            await deleteCertificate(cert.id);
+
             Swal.fire("Deleted!", "Certificate has been deleted.", "success");
-            // fetchCertificates();
+
+            fetchCertificates();
+        } catch (error) {
+            Swal.fire(
+                "Error",
+                error.message || "Failed to delete certificate",
+                "error"
+            );
         }
     };
+
 
     return (
         <div className="admin-layout">
