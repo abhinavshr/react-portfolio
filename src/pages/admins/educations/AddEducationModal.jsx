@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { addEducation } from "../../../services/educationService";
+import Swal from "sweetalert2";
 
 const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
   const [formData, setFormData] = useState({
@@ -23,45 +24,55 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const payload = {
-      institution: formData.institution,
-      level: formData.level,
-      program: formData.program,
-      board: formData.board,
-      start_year: formData.startYear,
-      end_year: formData.endYear,
-      description: formData.description,
-    };
-
-    try {
-      setLoading(true);
-
-      const response = await addEducation(payload);
-      console.log("Education added:", response);
-      alert("Education added successfully!");
-
-      setFormData({
-        institution: "",
-        level: "",
-        program: "",
-        startYear: "",
-        endYear: "",
-        board: "",
-        description: "",
-      });
-
-      if (onEducationAdded) onEducationAdded(response);
-
-      onClose();
-    } catch (error) {
-      console.error("Error adding education:", error);
-      alert(error.message || "Failed to add education");
-    } finally {
-      setLoading(false);
-    }
+  const payload = {
+    institution: formData.institution,
+    level: formData.level,
+    program: formData.program,
+    board: formData.board,
+    start_year: formData.startYear,
+    end_year: formData.endYear,
+    description: formData.description,
   };
+
+  try {
+    setLoading(true);
+
+    const response = await addEducation(payload);
+
+    Swal.fire({
+      icon: "success",
+      title: "Success!",
+      text: "Education added successfully",
+      timer: 1500,
+      showConfirmButton: false,
+    });
+
+    setFormData({
+      institution: "",
+      level: "",
+      program: "",
+      startYear: "",
+      endYear: "",
+      board: "",
+      description: "",
+    });
+
+    if (onEducationAdded) onEducationAdded(response);
+
+    onClose();
+  } catch (error) {
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: error?.message || "Failed to add education",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="edu-modal-overlay">
