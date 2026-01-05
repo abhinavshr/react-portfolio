@@ -4,6 +4,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { FiUploadCloud } from "react-icons/fi";
 import "../../../css/admin/ProjectImage/AddProjectImage.css";
 import { fetchProjectsDropdown, getProjectImageById, editProjectImage } from "../../../services/projectImageService";
+import Swal from "sweetalert2";
 
 const EditProjectImage = () => {
     const { id } = useParams();
@@ -20,7 +21,7 @@ const EditProjectImage = () => {
         const loadData = async () => {
             try {
                 const res = await getProjectImageById(id);
-                const img = res.data; // <-- access the 'data' object
+                const img = res.data;
 
                 setForm({
                     project_id: img.project_id || "",
@@ -32,7 +33,11 @@ const EditProjectImage = () => {
                 const projectsRes = await fetchProjectsDropdown();
                 setProjects(projectsRes.projects || []);
             } catch (err) {
-                alert(err.message || "Failed to load image");
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: err.message || "Failed to load image",
+                });
             } finally {
                 setProjectsLoading(false);
             }
@@ -40,6 +45,7 @@ const EditProjectImage = () => {
 
         loadData();
     }, [id]);
+
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -62,10 +68,16 @@ const EditProjectImage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!form.project_id || !form.image_name) {
-            alert("Please fill project and image name");
+            Swal.fire({
+                icon: "warning",
+                title: "Missing Information",
+                text: "Please fill project and image name",
+            });
             return;
         }
+
         setLoading(true);
         try {
             await editProjectImage({
@@ -74,16 +86,25 @@ const EditProjectImage = () => {
                 image_name: form.image_name,
                 image: form.image || undefined,
             });
-            alert("Project image updated successfully!");
-            navigate(-1);
+
+            Swal.fire({
+                icon: "success",
+                title: "Updated",
+                text: "Project image updated successfully!",
+                confirmButtonText: "OK",
+            }).then(() => navigate(-1));
+
         } catch (err) {
             console.error(err);
-            alert(err.message || "Failed to update project image");
+            Swal.fire({
+                icon: "error",
+                title: "Update Failed",
+                text: err.message || "Failed to update project image",
+            });
         } finally {
             setLoading(false);
         }
     };
-
 
     return (
         <div className="add-project-image-layout">

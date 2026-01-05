@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "../../../css/admin/ProjectImage/AddProjectImage.css";
 import { FiUploadCloud } from "react-icons/fi";
 import { fetchProjectsDropdown, uploadProjectImage } from "../../../services/projectImageService";
+import Swal from "sweetalert2";
 
 const AddProjectImage = () => {
   const [active, setActive] = useState("Project Images");
@@ -20,13 +21,18 @@ const AddProjectImage = () => {
         const res = await fetchProjectsDropdown();
         setProjects(res.projects || []);
       } catch (err) {
-        alert(err.message || "Failed to load projects");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: err.message || "Failed to load projects",
+        });
       } finally {
         setProjectsLoading(false);
       }
     };
     loadProjects();
   }, []);
+
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -49,10 +55,16 @@ const AddProjectImage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!form.project_id || !form.image || !form.image_name) {
-      alert("Please select project, enter image name, and choose an image");
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Information",
+        text: "Please select project, enter image name, and choose an image",
+      });
       return;
     }
+
     setLoading(true);
     try {
       await uploadProjectImage({
@@ -60,14 +72,24 @@ const AddProjectImage = () => {
         image_name: form.image_name,
         image: form.image,
       });
-      alert("Project image uploaded successfully!");
-      navigate(-1);
+
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Project image uploaded successfully!",
+        confirmButtonText: "OK",
+      }).then(() => navigate(-1));
     } catch (err) {
-      alert(err.message || "Failed to upload project image");
+      Swal.fire({
+        icon: "error",
+        title: "Upload Failed",
+        text: err.message || "Failed to upload project image",
+      });
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="add-project-image-layout">
