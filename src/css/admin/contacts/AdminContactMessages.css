@@ -1,0 +1,236 @@
+/* Layout */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 32px;
+}
+
+/* Container */
+.contact-messages-container {
+  width: 100%;
+}
+
+/* Header */
+.contact-messages-header h1 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.contact-messages-header p {
+  margin-top: 6px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ========================= */
+/* Toolbar Card */
+/* ========================= */
+.contact-toolbar-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  margin: 24px 0;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.contact-toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Search */
+.contact-messages-search {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f1f5f9;
+  padding: 14px 16px;
+  border-radius: 12px;
+}
+
+.contact-messages-search svg {
+  color: #64748b;
+}
+
+.contact-messages-search input {
+  border: none;
+  background: transparent;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+/* Filters */
+.contact-messages-filters {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-btn {
+  padding: 12px 22px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #475569;
+  transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+  background: #f8fafc;
+}
+
+.filter-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* ========================= */
+/* Messages List */
+/* ========================= */
+.contact-messages-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Message Card */
+.contact-message-card {
+  display: flex;
+  justify-content: space-between;
+  padding: 22px;
+  border-radius: 16px;
+  background: #ffffff;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.contact-message-card:hover {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+}
+
+.contact-message-card.unread {
+  background: #f1f7ff;
+}
+
+/* Left */
+.message-left {
+  display: flex;
+  gap: 16px;
+}
+
+/* Avatar */
+.message-avatar {
+  width: 46px;
+  height: 46px;
+  background: #2563eb;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+/* Content */
+.message-content {
+  max-width: 720px;
+}
+
+.message-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unread-dot {
+  width: 8px;
+  height: 8px;
+  background: #2563eb;
+  border-radius: 50%;
+}
+
+.message-email {
+  font-size: 13px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.message-subject {
+  margin: 10px 0 4px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.message-text {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+/* Right */
+.message-right {
+  text-align: right;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 120px;
+}
+
+.message-date {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* Actions */
+.message-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.icon-btn.view {
+  color: #2563eb;
+}
+
+.icon-btn.view:hover {
+  background: #e0e7ff;
+}
+
+.icon-btn.delete {
+  color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+  background: #fee2e2;
+}
