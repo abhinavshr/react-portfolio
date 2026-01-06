@@ -71,6 +71,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Certificates") {
       navigate("/admin/certificates");
     }
+    if (item === "Contacts") {
+      navigate("/admin/contacts");
+    }
   };
 
   return (
