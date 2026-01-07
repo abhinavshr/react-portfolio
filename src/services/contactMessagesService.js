@@ -42,3 +42,16 @@ export const markContactAsRead = async (id) => {
     };
   }
 };
+
+export const deleteContactMessage = async (id) => {
+    try {
+        const response = await api.delete(`/admin/contacts/${id}`, {
+            headers: {
+                Accept: "application/json",
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data || { message: "Failed to delete contact message" };
+    }
+};
