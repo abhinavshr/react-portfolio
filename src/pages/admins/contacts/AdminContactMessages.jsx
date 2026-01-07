@@ -3,7 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Eye, Trash2, Search } from "lucide-react";
 import "../../../css/admin/contacts/AdminContactMessages.css";
 import Swal from "sweetalert2";
-import { viewAllContactMessages } from "../../../services/contactMessagesService";
+import { viewAllContactMessages, deleteContactMessage } from "../../../services/contactMessagesService";
 import ViewContactModal from "./ViewContactModal";
 
 const AdminContactMessages = () => {
@@ -58,13 +58,20 @@ const AdminContactMessages = () => {
       showCancelButton: true,
       confirmButtonColor: "#dc2626",
       cancelButtonColor: "#2563eb",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     });
 
     if (result.isConfirmed) {
-      Swal.fire("Deleted!", "Message has been deleted.", "success");
+      try {
+        await deleteContactMessage(msg.id);
+        Swal.fire("Deleted!", "Message has been deleted.", "success");
+        fetchMessages();
+      } catch (err) {
+        Swal.fire("Error", err.message || "Failed to delete message", "error");
+      }
     }
   };
+
 
   return (
     <div className="admin-layout">
