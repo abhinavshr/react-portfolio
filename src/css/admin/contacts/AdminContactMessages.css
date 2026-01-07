@@ -1,21 +1,30 @@
-/* Layout */
 .admin-layout {
   display: flex;
   min-height: 100vh;
   background: #f8fafc;
 }
 
+.admin-sidebar {
+  width: 280px; 
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  background: #ffffff; 
+  border-right: 1px solid #e2e8f0;
+}
+
 .admin-content {
   flex: 1;
   padding: 32px;
+  overflow-y: auto; 
+  height: 100vh; 
 }
 
-/* Container */
 .contact-messages-container {
   width: 100%;
 }
 
-/* Header */
 .contact-messages-header h1 {
   font-size: 26px;
   font-weight: 600;
@@ -28,9 +37,6 @@
   font-size: 14px;
 }
 
-/* ========================= */
-/* Toolbar Card */
-/* ========================= */
 .contact-toolbar-card {
   background: #ffffff;
   border-radius: 16px;
@@ -46,7 +52,6 @@
   gap: 16px;
 }
 
-/* Search */
 .contact-messages-search {
   flex: 1;
   display: flex;
@@ -70,7 +75,6 @@
   color: #0f172a;
 }
 
-/* Filters */
 .contact-messages-filters {
   display: flex;
   gap: 12px;
@@ -98,15 +102,12 @@
   border-color: #2563eb;
 }
 
-/* ========================= */
-/* Messages List */
-/* ========================= */
+
 .contact-messages-list {
   display: flex;
   flex-direction: column;
 }
 
-/* Message Card */
 .contact-message-card {
   display: flex;
   justify-content: space-between;
@@ -126,13 +127,11 @@
   background: #f1f7ff;
 }
 
-/* Left */
 .message-left {
   display: flex;
   gap: 16px;
 }
 
-/* Avatar */
 .message-avatar {
   width: 46px;
   height: 46px;
@@ -146,7 +145,6 @@
   font-size: 16px;
 }
 
-/* Content */
 .message-content {
   max-width: 720px;
 }
@@ -186,7 +184,6 @@
   line-height: 1.5;
 }
 
-/* Right */
 .message-right {
   text-align: right;
   display: flex;
@@ -200,7 +197,6 @@
   color: #64748b;
 }
 
-/* Actions */
 .message-actions {
   display: flex;
   gap: 12px;

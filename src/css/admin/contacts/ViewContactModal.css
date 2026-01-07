@@ -133,3 +133,14 @@
     transform: translateY(0);
   }
 }
+
+.email-link {
+  color: #2563eb;
+  text-decoration: none; 
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.email-link:hover {
+  text-decoration: underline; 
+}
