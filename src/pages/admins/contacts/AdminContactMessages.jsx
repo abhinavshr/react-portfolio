@@ -4,12 +4,16 @@ import { Eye, Trash2, Search } from "lucide-react";
 import "../../../css/admin/contacts/AdminContactMessages.css";
 import Swal from "sweetalert2";
 import { viewAllContactMessages } from "../../../services/contactMessagesService";
+import ViewContactModal from "./ViewContactModal";
 
 const AdminContactMessages = () => {
   const [active, setActive] = useState("Contacts");
   const [filter, setFilter] = useState("all");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [selectedContactId, setSelectedContactId] = useState(null);
 
   useEffect(() => {
     fetchMessages();
@@ -27,7 +31,7 @@ const AdminContactMessages = () => {
         subject: msg.subject,
         message: msg.message,
         date: msg.created_at,
-        unread: !msg.is_read 
+        unread: !msg.is_read
       }));
 
       setMessages(formatted);
@@ -115,9 +119,8 @@ const AdminContactMessages = () => {
               {filteredMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`contact-message-card ${
-                    msg.unread ? "unread" : ""
-                  }`}
+                  className={`contact-message-card ${msg.unread ? "unread" : ""
+                    }`}
                 >
                   <div className="message-left">
                     <div className="message-avatar">
@@ -142,7 +145,13 @@ const AdminContactMessages = () => {
                     </span>
 
                     <div className="message-actions">
-                      <button className="icon-btn view">
+                      <button
+                        className="icon-btn view"
+                        onClick={() => {
+                          setSelectedContactId(msg.id);
+                          setIsViewOpen(true);
+                        }}
+                      >
                         <Eye size={18} />
                       </button>
                       <button
@@ -158,6 +167,11 @@ const AdminContactMessages = () => {
             </div>
           )}
         </div>
+        <ViewContactModal
+          isOpen={isViewOpen}
+          onClose={() => setIsViewOpen(false)}
+          contactId={selectedContactId}
+        />
       </main>
     </div>
   );
