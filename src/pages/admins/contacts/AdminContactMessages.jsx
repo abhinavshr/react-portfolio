@@ -171,6 +171,7 @@ const AdminContactMessages = () => {
           isOpen={isViewOpen}
           onClose={() => setIsViewOpen(false)}
           contactId={selectedContactId}
+          onRefresh={fetchMessages}
         />
       </main>
     </div>
