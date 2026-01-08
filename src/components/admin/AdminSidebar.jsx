@@ -74,6 +74,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Contacts") {
       navigate("/admin/contacts");
     }
+    if (item === "Settings") {
+      navigate("/admin/settings");
+    }
   };
 
   return (
