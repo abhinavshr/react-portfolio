@@ -1,20 +1,47 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { User, Lock, Upload, Save } from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
-import { viewAdminSettings } from "../../../services/adminSettingService";
+import {
+  viewAdminSettings,
+  updateAdminProfilePhoto
+} from "../../../services/adminSettingService";
 
 const AdminSettings = () => {
   const [active, setActive] = useState("Settings");
   const [admin, setAdmin] = useState(null);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProfile = async () => {
+      try {
+        const res = await viewAdminSettings();
+        setAdmin(res.user);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleUploadClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      await updateAdminProfilePhoto(file);
+
       const res = await viewAdminSettings();
       setAdmin(res.user);
-    };
-    fetchData();
-  }, []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <div className="admin-layout">
@@ -44,10 +71,19 @@ const AdminSettings = () => {
                 </div>
 
                 <div className="photo-actions">
-                  <button className="upload-btn">
+                  <button className="upload-btn" onClick={handleUploadClick}>
                     <Upload size={16} />
                     Upload Photo
                   </button>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    hidden
+                    accept="image/png,image/jpeg,image/jpg,image/gif"
+                    onChange={handleFileChange}
+                  />
+
                   <span className="photo-hint">
                     JPG, PNG or GIF. Max size 2MB.
                   </span>
@@ -57,12 +93,12 @@ const AdminSettings = () => {
               <div className="profile-form">
                 <div className="form-group">
                   <label>Full Name</label>
-                  <input type="text" value={admin?.name || ""} disabled />
+                  <input value={admin?.name || ""} disabled />
                 </div>
 
                 <div className="form-group">
                   <label>Email Address</label>
-                  <input type="email" value={admin?.email || ""} disabled />
+                  <input value={admin?.email || ""} disabled />
                 </div>
               </div>
 
@@ -105,7 +141,6 @@ const AdminSettings = () => {
               </button>
             </div>
           </div>
-
         </div>
       </main>
     </div>
