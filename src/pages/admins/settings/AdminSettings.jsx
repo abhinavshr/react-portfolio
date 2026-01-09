@@ -5,7 +5,8 @@ import "../../../css/admin/settings/AdminSettings.css";
 import {
   viewAdminSettings,
   updateAdminProfilePhoto,
-  updateAdminProfile
+  updateAdminProfile,
+  changeAdminPassword
 } from "../../../services/adminSettingService";
 
 const AdminSettings = () => {
@@ -14,6 +15,10 @@ const AdminSettings = () => {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const fileInputRef = useRef(null);
 
@@ -46,10 +51,28 @@ const AdminSettings = () => {
     setAdmin(res.user);
   };
 
+  const handleChangePassword = async () => {
+    await changeAdminPassword({
+      current_password: currentPassword,
+      new_password: newPassword,
+      new_password_confirmation: confirmPassword
+    });
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
   const isProfileUnchanged =
     admin &&
     name === admin.name &&
     email === admin.email;
+
+  const isPasswordInvalid =
+    !currentPassword ||
+    !newPassword ||
+    !confirmPassword ||
+    newPassword !== confirmPassword;
 
   return (
     <div className="admin-layout">
@@ -62,6 +85,7 @@ const AdminSettings = () => {
             Manage your account settings and preferences
           </p>
 
+          {/* Profile Information */}
           <div className="settings-card">
             <div className="settings-card-header">
               <User size={22} />
@@ -134,6 +158,7 @@ const AdminSettings = () => {
             </div>
           </div>
 
+          {/* Change Password */}
           <div className="settings-card">
             <div className="settings-card-header">
               <Lock size={22} />
@@ -143,22 +168,42 @@ const AdminSettings = () => {
             <div className="password-form">
               <div className="form-group">
                 <label>Current Password</label>
-                <input type="password" />
+                <input
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                />
               </div>
 
               <div className="form-group">
                 <label>New Password</label>
-                <input type="password" />
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
               </div>
 
               <div className="form-group">
                 <label>Confirm New Password</label>
-                <input type="password" />
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
               </div>
             </div>
 
             <div className="update-password">
-              <button className="primary-btn">
+              <button
+                className="primary-btn"
+                disabled={isPasswordInvalid}
+                onClick={handleChangePassword}
+                style={{
+                  opacity: isPasswordInvalid ? 0.6 : 1,
+                  cursor: isPasswordInvalid ? "not-allowed" : "pointer"
+                }}
+              >
                 <Lock size={16} />
                 Update Password
               </button>

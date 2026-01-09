@@ -42,3 +42,23 @@ export const updateAdminProfile = async ({ name, email }) => {
     throw error.response?.data || { message: "Failed to update profile" };
   }
 };
+
+export const changeAdminPassword = async ({
+  current_password,
+  new_password,
+  new_password_confirmation,
+}) => {
+  try {
+    const response = await api.put("/admin/profile/password", {
+      current_password,
+      new_password,
+      new_password_confirmation,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw (
+      error.response?.data || { message: "Failed to change password" }
+    );
+  }
+};
