@@ -29,3 +29,16 @@ export const updateAdminProfilePhoto = async (photo) => {
     throw error.response?.data || { message: "Failed to update profile photo" };
   }
 };
+
+export const updateAdminProfile = async ({ name, email }) => {
+  try {
+    const response = await api.put("/admin/profile", {
+      name,
+      email,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update profile" };
+  }
+};

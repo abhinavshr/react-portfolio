@@ -4,24 +4,26 @@ import { User, Lock, Upload, Save } from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
 import {
   viewAdminSettings,
-  updateAdminProfilePhoto
+  updateAdminProfilePhoto,
+  updateAdminProfile
 } from "../../../services/adminSettingService";
 
 const AdminSettings = () => {
   const [active, setActive] = useState("Settings");
   const [admin, setAdmin] = useState(null);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
-      try {
-        const res = await viewAdminSettings();
-        setAdmin(res.user);
-      } catch (err) {
-        console.error(err);
-      }
+      const res = await viewAdminSettings();
+      setAdmin(res.user);
+      setName(res.user.name);
+      setEmail(res.user.email);
     };
-
     fetchProfile();
   }, []);
 
@@ -33,15 +35,21 @@ const AdminSettings = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    try {
-      await updateAdminProfilePhoto(file);
-
-      const res = await viewAdminSettings();
-      setAdmin(res.user);
-    } catch (err) {
-      console.error(err);
-    }
+    await updateAdminProfilePhoto(file);
+    const res = await viewAdminSettings();
+    setAdmin(res.user);
   };
+
+  const handleSaveProfile = async () => {
+    await updateAdminProfile({ name, email });
+    const res = await viewAdminSettings();
+    setAdmin(res.user);
+  };
+
+  const isProfileUnchanged =
+    admin &&
+    name === admin.name &&
+    email === admin.email;
 
   return (
     <div className="admin-layout">
@@ -93,17 +101,32 @@ const AdminSettings = () => {
               <div className="profile-form">
                 <div className="form-group">
                   <label>Full Name</label>
-                  <input value={admin?.name || ""} disabled />
+                  <input
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
                 </div>
 
                 <div className="form-group">
                   <label>Email Address</label>
-                  <input value={admin?.email || ""} disabled />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
               </div>
 
               <div className="save-profile">
-                <button className="primary-btn">
+                <button
+                  className="primary-btn"
+                  disabled={isProfileUnchanged}
+                  onClick={handleSaveProfile}
+                  style={{
+                    opacity: isProfileUnchanged ? 0.6 : 1,
+                    cursor: isProfileUnchanged ? "not-allowed" : "pointer"
+                  }}
+                >
                   <Save size={16} />
                   Save Profile
                 </button>
@@ -141,6 +164,7 @@ const AdminSettings = () => {
               </button>
             </div>
           </div>
+
         </div>
       </main>
     </div>
