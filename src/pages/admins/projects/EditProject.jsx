@@ -7,11 +7,12 @@ import {
   updateProject,
   fetchCategories
 } from "../../../services/projectService";
+import Swal from "sweetalert2";
 
 const EditProject = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
+
   const [active, setActive] = useState("Projects");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -33,25 +34,18 @@ const EditProject = () => {
     const fetchProjectAndCategories = async () => {
       try {
         setLoading(true);
-        
-        // Fetch categories
+
         const cats = await fetchCategories();
         setCategories(cats);
-        
-        // Fetch project data
+
         const projectData = await viewProjectById(id);
-        
-        // Handle different response structures
         const project = projectData.project || projectData.data || projectData;
-        
-        // Format dates for input fields (YYYY-MM-DD)
+
         const formatDate = (dateString) => {
           if (!dateString) return "";
-          const date = new Date(dateString);
-          return date.toISOString().split('T')[0];
+          return new Date(dateString).toISOString().split("T")[0];
         };
-        
-        // Populate form with project data
+
         setForm({
           title: project.title || "",
           category_id: project.category_id || project.category?.id || "",
@@ -63,16 +57,20 @@ const EditProject = () => {
           live_link: project.live_link || "",
           github_link: project.github_link || "",
         });
-        
       } catch (error) {
         console.error("Failed to fetch data:", error);
-        alert("Failed to load project data");
-        navigate("/admin/projects");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load project data",
+        }).then(() => {
+          navigate("/admin/projects");
+        });
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchProjectAndCategories();
   }, [id, navigate]);
 
@@ -95,30 +93,55 @@ const EditProject = () => {
     setUpdating(true);
 
     if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
-      alert("Please fill in all required fields.");
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Fields",
+        text: "Please fill in all required fields.",
+      });
       setUpdating(false);
       return;
     }
 
     if (form.status === "completed" && !form.end_date) {
-      alert("Please provide an end date for completed projects.");
+      Swal.fire({
+        icon: "warning",
+        title: "End Date Required",
+        text: "Please provide an end date for completed projects.",
+      });
       setUpdating(false);
       return;
     }
 
-    if (form.end_date && form.start_date && new Date(form.end_date) <= new Date(form.start_date)) {
-      alert("End date must be after the start date.");
+    if (
+      form.end_date &&
+      form.start_date &&
+      new Date(form.end_date) <= new Date(form.start_date)
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Date",
+        text: "End date must be after the start date.",
+      });
       setUpdating(false);
       return;
     }
 
     try {
       await updateProject(id, form);
-      alert("Project updated successfully!");
-      navigate("/admin/projects");
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Project updated successfully!",
+      }).then(() => {
+        navigate("/admin/projects");
+      });
     } catch (error) {
       console.error("Error updating project:", error);
-      alert(error.message || "Failed to update project");
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error.message || "Failed to update project",
+      });
     } finally {
       setUpdating(false);
     }
