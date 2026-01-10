@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
-import "../../../css/admin/softskills/AddSoftSkillModal.css"; 
+import Swal from "sweetalert2";
+import "../../../css/admin/softskills/AddSoftSkillModal.css";
 import { getSoftSkillById, updateSoftSkill } from "../../../services/softSkillService";
 
 const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
@@ -10,7 +11,6 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  // Fetch skill data when modal opens
   useEffect(() => {
     if (skillId && isOpen) {
       const fetchSkill = async () => {
@@ -22,8 +22,11 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
           setDescription(skill.description);
           setLevel(skill.level);
         } catch (error) {
-          console.error("Error fetching skill:", error);
-          alert(error.message || "Failed to fetch skill data");
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: error.message || "Failed to fetch skill data"
+          });
           onClose();
         } finally {
           setFetching(false);
@@ -42,17 +45,24 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
     try {
       setLoading(true);
       const response = await updateSoftSkill(skillId, updatedData);
-      console.log("Skill updated:", response);
-      alert("Soft skill updated successfully!");
 
-      // Notify parent
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Soft skill updated successfully.",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
       if (onSkillUpdated) onSkillUpdated(response);
 
-      // Close modal
       onClose();
     } catch (error) {
-      console.error("Error updating skill:", error);
-      alert(error.message || "Failed to update soft skill");
+      Swal.fire({
+        icon: "error",
+        title: "Update Failed",
+        text: error.message || "Failed to update soft skill"
+      });
     } finally {
       setLoading(false);
     }
@@ -103,7 +113,7 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
                   min="0"
                   max="100"
                   value={level}
-                  onChange={(e) => setLevel(e.target.value)}
+                  onChange={(e) => setLevel(Number(e.target.value))}
                   onBlur={() => {
                     const clean = Math.max(0, Math.min(100, Number(level)));
                     setLevel(isNaN(clean) ? 0 : clean);
@@ -125,10 +135,19 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
               </div>
 
               <div className="softskill-modal-actions">
-                <button type="button" className="softskill-btn-cancel" onClick={onClose}>
+                <button
+                  type="button"
+                  className="softskill-btn-cancel"
+                  onClick={onClose}
+                  disabled={loading}
+                >
                   Cancel
                 </button>
-                <button type="submit" className="softskill-btn-add" disabled={loading}>
+                <button
+                  type="submit"
+                  className="softskill-btn-add"
+                  disabled={loading}
+                >
                   {loading ? "Updating..." : "Update"}
                 </button>
               </div>
