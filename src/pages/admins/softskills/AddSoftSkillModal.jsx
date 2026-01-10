@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { FiX } from "react-icons/fi";
+import Swal from "sweetalert2";
 import "../../../css/admin/softskills/AddSoftSkillModal.css";
-import { addSoftSkill } from "../../../services/softSkillService"; 
+import { addSoftSkill } from "../../../services/softSkillService";
 
 const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [level, setLevel] = useState(0); 
+  const [level, setLevel] = useState(0);
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
@@ -19,8 +20,14 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
     try {
       setLoading(true);
       const response = await addSoftSkill(skillData);
-      console.log("Skill added:", response);
-      alert("Soft skill added successfully!");
+
+      Swal.fire({
+        icon: "success",
+        title: "Added!",
+        text: "Soft skill added successfully.",
+        timer: 1500,
+        showConfirmButton: false
+      });
 
       setName("");
       setDescription("");
@@ -30,8 +37,11 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
       onClose();
     } catch (error) {
-      console.error("Error adding soft skill:", error);
-      alert(error.message || "Failed to add soft skill");
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error.message || "Failed to add soft skill"
+      });
     } finally {
       setLoading(false);
     }
@@ -78,7 +88,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               min="0"
               max="100"
               value={level}
-              onChange={(e) => setLevel(e.target.value)}
+              onChange={(e) => setLevel(Number(e.target.value))}
               onBlur={() => {
                 const clean = Math.max(0, Math.min(100, Number(level)));
                 setLevel(isNaN(clean) ? 0 : clean);
@@ -100,10 +110,19 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
           </div>
 
           <div className="softskill-modal-actions">
-            <button type="button" className="softskill-btn-cancel" onClick={onClose}>
+            <button
+              type="button"
+              className="softskill-btn-cancel"
+              onClick={onClose}
+              disabled={loading}
+            >
               Cancel
             </button>
-            <button type="submit" className="softskill-btn-add" disabled={loading}>
+            <button
+              type="submit"
+              className="softskill-btn-add"
+              disabled={loading}
+            >
               {loading ? "Adding..." : "Add"}
             </button>
           </div>
