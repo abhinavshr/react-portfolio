@@ -130,6 +130,7 @@ const AdminSkill = () => {
                                                 <td className="skill-actions">
                                                     <button
                                                         className="icon-btn edit"
+                                                        style={{ fontSize: 18 }}
                                                         onClick={() => {
                                                             setSelectedSkillId(skill.id);
                                                             setIsEditModalOpen(true);
@@ -140,6 +141,7 @@ const AdminSkill = () => {
 
                                                     <button
                                                         className="icon-btn delete"
+                                                        style={{ fontSize: 18 }}
                                                         onClick={() => handleDelete(skill.id, skill.name)}
                                                     >
                                                         <FiTrash2 />
