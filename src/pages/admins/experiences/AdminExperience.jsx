@@ -92,7 +92,7 @@ const AdminExperience = () => {
                         setViewModalOpen(true);
                       }}
                     >
-                      <Eye size={28} />
+                      <Eye size={18} />
                     </button>
                     <button
                       className="icon-btn edit"
@@ -101,10 +101,10 @@ const AdminExperience = () => {
                         setEditModalOpen(true);
                       }}
                     >
-                      <Edit size={28} />
+                      <Edit size={18} />
                     </button>
                     <button className="icon-btn delete" onClick={() => handleDelete(exp)}>
-                      <Trash2 size={28} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </div>
