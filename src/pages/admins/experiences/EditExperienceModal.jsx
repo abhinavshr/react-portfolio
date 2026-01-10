@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
-import { updateExperience, viewExperienceById } from "../../../services/experienceService";
+import {
+  updateExperience,
+  viewExperienceById
+} from "../../../services/experienceService";
 import Swal from "sweetalert2";
 
-const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
+const EditExperienceModal = ({
+  isOpen,
+  onClose,
+  experienceId,
+  onExperienceUpdated
+}) => {
   const [companyName, setCompanyName] = useState("");
   const [companyLocation, setCompanyLocation] = useState("");
   const [role, setRole] = useState("");
@@ -15,7 +23,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
-  // Fetch experience data by ID when modal opens
   useEffect(() => {
     if (!isOpen || !experienceId) return;
 
@@ -24,26 +31,28 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
         setLoadingData(true);
         const response = await viewExperienceById(experienceId);
         const exp = response.data;
-        setCompanyName(exp.company_name);
+
+        setCompanyName(exp.company_name || "");
         setCompanyLocation(exp.company_location || "");
-        setRole(exp.role);
-        setStartDate(exp.start_date);
+        setRole(exp.role || "");
+        setStartDate(exp.start_date || "");
         setEndDate(exp.end_date || "");
         setCurrent(!!exp.is_current);
-        setDescription(exp.description);
+        setDescription(exp.description || "");
       } catch (error) {
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: error.response?.data?.message || error.message || "Failed to fetch experience",
-        });
+        Swal.fire(
+          "Error",
+          error.response?.data?.message || "Failed to fetch experience",
+          "error"
+        );
+        onClose();
       } finally {
         setLoadingData(false);
       }
     };
 
     fetchExperience();
-  }, [isOpen, experienceId]);
+  }, [isOpen, experienceId, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +64,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       start_date: startDate,
       end_date: current ? null : endDate,
       is_current: current,
-      description,
+      description
     };
 
     try {
@@ -65,40 +74,34 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       Swal.fire({
         icon: "success",
         title: "Experience Updated",
-        text: "Your work experience has been successfully updated.",
-        timer: 2000,
-        showConfirmButton: false,
+        timer: 1500,
+        showConfirmButton: false
       });
 
-      if (onExperienceUpdated) onExperienceUpdated();
-
+      onExperienceUpdated?.();
       onClose();
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.response?.data?.message || error.message || "Failed to update experience",
-      });
+      Swal.fire(
+        "Error",
+        error.response?.data?.message || "Failed to update experience",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
   };
 
+  if (!isOpen) return null;
 
   return (
     <div className="experience-modal-overlay">
       <div className="experience-modal-box">
-        {/* Header */}
         <div className="experience-modal-header">
           <h2>Edit Experience</h2>
           <button className="experience-close-btn" onClick={onClose}>
             <FiX size={20} />
           </button>
         </div>
-
-        <p className="experience-modal-subtitle">
-          Update your work experience details
-        </p>
 
         {loadingData ? (
           <p>Loading experience data...</p>
@@ -111,7 +114,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
                   type="text"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="e.g. Tech Corp Inc."
                   required
                 />
               </label>
@@ -122,7 +124,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
                   type="text"
                   value={role}
                   onChange={(e) => setRole(e.target.value)}
-                  placeholder="e.g. Senior Developer"
                   required
                 />
               </label>
@@ -134,7 +135,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
                 type="text"
                 value={companyLocation}
                 onChange={(e) => setCompanyLocation(e.target.value)}
-                placeholder="e.g. San Francisco, CA"
                 required
               />
             </label>
@@ -174,7 +174,6 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
               Description *
               <textarea
                 rows={4}
-                placeholder="Describe your role and achievements..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required

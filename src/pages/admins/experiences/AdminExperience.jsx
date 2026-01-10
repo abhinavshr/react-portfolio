@@ -35,26 +35,26 @@ const AdminExperience = () => {
   }, []);
 
   const handleDelete = async (exp) => {
-  const result = await Swal.fire({
-    title: "Are you sure?",
-    text: `You are about to delete "${exp.company_name}"`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#d33",
-    cancelButtonColor: "#3085d6",
-    confirmButtonText: "Yes, delete it!"
-  });
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `You are about to delete "${exp.company_name}"`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!"
+    });
 
-  if (result.isConfirmed) {
-    try {
-      await deleteExperience(exp.id);
-      Swal.fire("Deleted!", "Experience has been deleted.", "success");
-      fetchExperiences();
-    } catch (error) {
-      Swal.fire("Error", error.message || "Failed to delete experience", "error");
+    if (result.isConfirmed) {
+      try {
+        await deleteExperience(exp.id);
+        Swal.fire("Deleted!", "Experience has been deleted.", "success");
+        fetchExperiences();
+      } catch (error) {
+        Swal.fire("Error", error.message || "Failed to delete experience", "error");
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="admin-layout">
@@ -136,7 +136,10 @@ const AdminExperience = () => {
 
         <EditExperienceModal
           isOpen={editModalOpen}
-          onClose={() => setEditModalOpen(false)}
+          onClose={() => {
+            setEditModalOpen(false);
+            setSelectedExperienceId(null);
+          }}
           experienceId={selectedExperienceId}
           onExperienceUpdated={fetchExperiences}
         />
