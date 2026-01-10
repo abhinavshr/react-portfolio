@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { User, Lock, Upload, Save } from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
+import Swal from "sweetalert2";
 import {
   viewAdminSettings,
   updateAdminProfilePhoto,
@@ -24,10 +25,14 @@ const AdminSettings = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const res = await viewAdminSettings();
-      setAdmin(res.user);
-      setName(res.user.name);
-      setEmail(res.user.email);
+      try {
+        const res = await viewAdminSettings();
+        setAdmin(res.user);
+        setName(res.user.name);
+        setEmail(res.user.email);
+      } catch {
+        Swal.fire("Error", "Failed to load profile", "error");
+      }
     };
     fetchProfile();
   }, []);
@@ -40,27 +45,57 @@ const AdminSettings = () => {
     const file = e.target.files[0];
     if (!file) return;
 
-    await updateAdminProfilePhoto(file);
-    const res = await viewAdminSettings();
-    setAdmin(res.user);
+    try {
+      await updateAdminProfilePhoto(file);
+      const res = await viewAdminSettings();
+      setAdmin(res.user);
+
+      Swal.fire("Success", "Profile photo updated successfully", "success");
+    } catch (err) {
+      Swal.fire(
+        "Error",
+        err?.message || "Failed to update profile photo",
+        "error"
+      );
+    }
   };
 
   const handleSaveProfile = async () => {
-    await updateAdminProfile({ name, email });
-    const res = await viewAdminSettings();
-    setAdmin(res.user);
+    try {
+      await updateAdminProfile({ name, email });
+      const res = await viewAdminSettings();
+      setAdmin(res.user);
+
+      Swal.fire("Success", "Profile updated successfully", "success");
+    } catch (err) {
+      Swal.fire(
+        "Error",
+        err?.message || "Failed to update profile",
+        "error"
+      );
+    }
   };
 
   const handleChangePassword = async () => {
-    await changeAdminPassword({
-      current_password: currentPassword,
-      new_password: newPassword,
-      new_password_confirmation: confirmPassword
-    });
+    try {
+      await changeAdminPassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+        new_password_confirmation: confirmPassword
+      });
 
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+
+      Swal.fire("Success", "Password updated successfully", "success");
+    } catch (err) {
+      Swal.fire(
+        "Error",
+        err?.message || "Failed to update password",
+        "error"
+      );
+    }
   };
 
   const isProfileUnchanged =
@@ -85,7 +120,6 @@ const AdminSettings = () => {
             Manage your account settings and preferences
           </p>
 
-          {/* Profile Information */}
           <div className="settings-card">
             <div className="settings-card-header">
               <User size={22} />
@@ -158,7 +192,6 @@ const AdminSettings = () => {
             </div>
           </div>
 
-          {/* Change Password */}
           <div className="settings-card">
             <div className="settings-card-header">
               <Lock size={22} />
@@ -209,7 +242,6 @@ const AdminSettings = () => {
               </button>
             </div>
           </div>
-
         </div>
       </main>
     </div>
