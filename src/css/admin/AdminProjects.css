@@ -295,3 +295,130 @@ td {
 .tech-clamp {
     max-width: 280px;
 }
+
+
+/* page fade-in */
+.admin-content {
+    animation: fadeSlide 0.5s ease forwards;
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* table row animation */
+tbody tr {
+    animation: rowFade 0.4s ease forwards;
+}
+
+@keyframes rowFade {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* row hover */
+tbody tr:hover {
+    background: #f8fafc;
+    transition: background 0.2s ease;
+}
+
+/* button hover animation */
+.add-project-btn {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.add-project-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
+}
+
+/* icon button animation */
+.icon-btn {
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.icon-btn:hover {
+    transform: scale(1.15);
+}
+
+/* status badge pop */
+.status-badge {
+    animation: badgePop 0.3s ease;
+}
+
+@keyframes badgePop {
+    0% {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* modal fade animation */
+.modal-overlay {
+    animation: modalFade 0.3s ease forwards;
+}
+
+.modal-content {
+    animation: modalScale 0.3s ease forwards;
+}
+
+@keyframes modalFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalScale {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* loading shimmer */
+.empty-state {
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-state::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255,255,255,0.6),
+        transparent
+    );
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
