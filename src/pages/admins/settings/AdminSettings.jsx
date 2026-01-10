@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { User, Lock, Upload, Save } from "lucide-react";
+import {
+  User,
+  Lock,
+  Upload,
+  Save,
+  Eye,
+  EyeOff
+} from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
 import Swal from "sweetalert2";
 import {
@@ -20,6 +27,10 @@ const AdminSettings = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fileInputRef = useRef(null);
 
@@ -49,7 +60,6 @@ const AdminSettings = () => {
       await updateAdminProfilePhoto(file);
       const res = await viewAdminSettings();
       setAdmin(res.user);
-
       Swal.fire("Success", "Profile photo updated successfully", "success");
     } catch (err) {
       Swal.fire(
@@ -65,7 +75,6 @@ const AdminSettings = () => {
       await updateAdminProfile({ name, email });
       const res = await viewAdminSettings();
       setAdmin(res.user);
-
       Swal.fire("Success", "Profile updated successfully", "success");
     } catch (err) {
       Swal.fire(
@@ -120,6 +129,7 @@ const AdminSettings = () => {
             Manage your account settings and preferences
           </p>
 
+          {/* Profile Information */}
           <div className="settings-card">
             <div className="settings-card-header">
               <User size={22} />
@@ -192,6 +202,7 @@ const AdminSettings = () => {
             </div>
           </div>
 
+          {/* Change Password */}
           <div className="settings-card">
             <div className="settings-card-header">
               <Lock size={22} />
@@ -199,31 +210,46 @@ const AdminSettings = () => {
             </div>
 
             <div className="password-form">
-              <div className="form-group">
+              <div className="form-group password-group">
                 <label>Current Password</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                />
+                <div className="password-input">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <span onClick={() => setShowCurrent(!showCurrent)}>
+                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </span>
+                </div>
               </div>
 
-              <div className="form-group">
+              <div className="form-group password-group">
                 <label>New Password</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
+                <div className="password-input">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <span onClick={() => setShowNew(!showNew)}>
+                    {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </span>
+                </div>
               </div>
 
-              <div className="form-group">
+              <div className="form-group password-group">
                 <label>Confirm New Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
+                <div className="password-input">
+                  <input
+                    type={showConfirm ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  <span onClick={() => setShowConfirm(!showConfirm)}>
+                    {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </span>
+                </div>
               </div>
             </div>
 
