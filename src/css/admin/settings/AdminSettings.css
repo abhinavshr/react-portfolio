@@ -158,6 +158,24 @@
   background: #1e40af;
 }
 
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  width: 100%;
+  padding-right: 40px;
+}
+
+.password-input span {
+  position: absolute;
+  right: 12px;
+  top: 60%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #777;
+}
+
 @media (max-width: 768px) {
   .profile-form,
   .password-form {
