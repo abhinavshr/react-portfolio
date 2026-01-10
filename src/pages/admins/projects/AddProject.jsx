@@ -3,6 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
 import { useNavigate } from "react-router-dom";
 import { addProject, fetchCategories } from "../../../services/projectService";
+import Swal from "sweetalert2";
 
 const AddProject = () => {
   const [active, setActive] = useState("Projects");
@@ -30,6 +31,11 @@ const AddProject = () => {
         setCategories(cats);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load categories",
+        });
       }
     };
     getCategories();
@@ -54,31 +60,51 @@ const AddProject = () => {
     setLoading(true);
 
     if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
-      alert("Please fill in all required fields.");
+      Swal.fire({
+        icon: "warning",
+        title: "Missing Fields",
+        text: "Please fill in all required fields.",
+      });
       setLoading(false);
       return;
     }
 
     if (form.status === "completed" && !form.end_date) {
-      alert("Please provide an end date for completed projects.");
+      Swal.fire({
+        icon: "warning",
+        title: "End Date Required",
+        text: "Please provide an end date for completed projects.",
+      });
       setLoading(false);
       return;
     }
 
     if (form.end_date && new Date(form.end_date) <= new Date(form.start_date)) {
-      alert("End date must be after the start date.");
+      Swal.fire({
+        icon: "error",
+        title: "Invalid Date",
+        text: "End date must be after the start date.",
+      });
       setLoading(false);
       return;
     }
 
-
     try {
-      const response = await addProject(form);
-      alert(`Project added successfully! Response: ${JSON.stringify(response)}`);
-      navigate(-1);
+      await addProject(form);
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Project added successfully!",
+      }).then(() => {
+        navigate(-1);
+      });
     } catch (error) {
       console.error("Error adding project:", error);
-      alert(error.message || "Failed to add project");
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: error.message || "Failed to add project",
+      });
     } finally {
       setLoading(false);
     }
@@ -226,11 +252,7 @@ const AddProject = () => {
               <button className="create-btn" type="submit" disabled={loading}>
                 {loading ? "Creating..." : "Create Project"}
               </button>
-              <button
-                className="cancel-btn"
-                type="button"
-                onClick={handleBackClick}
-              >
+              <button className="cancel-btn" type="button" onClick={handleBackClick}>
                 Cancel
               </button>
             </div>
