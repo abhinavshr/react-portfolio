@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Save } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../../css/admin/profiles/AdminProfileAbout.css";
-import { getAdminProfileAbout } from "../../../services/adminProfileAbout";
+import {
+  getAdminProfileAbout,
+  updateAdminBasicInfo,
+} from "../../../services/adminProfileAbout";
 
 const AdminProfileAbout = () => {
   const [active, setActive] = useState("Profile");
@@ -11,12 +14,32 @@ const AdminProfileAbout = () => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
 
+  const [basicInfo, setBasicInfo] = useState({
+    phone_number: "",
+    professional_title: "",
+    tagline: "",
+    about_me: "",
+  });
+
+  const [initialBasicInfo, setInitialBasicInfo] = useState(null);
+
   const fetchProfileAbout = async () => {
     setLoading(true);
     try {
       const response = await getAdminProfileAbout();
+
       setUser(response.user);
       setProfile(response.profile);
+
+      const basicData = {
+        phone_number: response.profile.phone_number || "",
+        professional_title: response.profile.professional_title || "",
+        tagline: response.profile.tagline || "",
+        about_me: response.profile.about_me || "",
+      };
+
+      setBasicInfo(basicData);
+      setInitialBasicInfo(basicData);
     } catch (error) {
       Swal.fire("Error", error.message || "Failed to load profile", "error");
     } finally {
@@ -27,6 +50,32 @@ const AdminProfileAbout = () => {
   useEffect(() => {
     fetchProfileAbout();
   }, []);
+
+  const handleBasicChange = (e) => {
+    const { name, value } = e.target;
+    setBasicInfo((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const isBasicInfoChanged = useMemo(() => {
+    if (!initialBasicInfo) return false;
+    return Object.keys(basicInfo).some(
+      (key) => basicInfo[key] !== initialBasicInfo[key]
+    );
+  }, [basicInfo, initialBasicInfo]);
+
+  const handleSaveBasicInfo = async () => {
+    try {
+      await updateAdminBasicInfo(basicInfo);
+      Swal.fire("Success", "Basic information updated successfully", "success");
+      fetchProfileAbout();
+    } catch (error) {
+      Swal.fire(
+        "Error",
+        error.message || "Failed to update basic info",
+        "error"
+      );
+    }
+  };
 
   if (loading) {
     return (
@@ -74,31 +123,54 @@ const AdminProfileAbout = () => {
           {/* Basic Info */}
           <div className="profile-card">
             <h2>Basic Information</h2>
-            <span className="subtitle">Professional identity and contact details</span>
+            <span className="subtitle">
+              Professional identity and contact details
+            </span>
 
             <div className="grid-2">
               <div className="form-group">
                 <label>Phone Number</label>
-                <input value={profile.phone_number || ""} readOnly />
+                <input
+                  name="phone_number"
+                  value={basicInfo.phone_number}
+                  onChange={handleBasicChange}
+                />
               </div>
 
               <div className="form-group">
                 <label>Professional Title</label>
-                <input value={profile.professional_title || ""} readOnly />
+                <input
+                  name="professional_title"
+                  value={basicInfo.professional_title}
+                  onChange={handleBasicChange}
+                />
               </div>
             </div>
 
             <div className="form-group">
               <label className="admin-about">Tagline</label>
-              <input value={profile.tagline || ""} readOnly />
+              <input
+                name="tagline"
+                value={basicInfo.tagline}
+                onChange={handleBasicChange}
+              />
             </div>
 
             <div className="form-group">
               <label className="admin-about">About Me</label>
-              <textarea rows="4" value={profile.about_me || ""} readOnly />
+              <textarea
+                rows="4"
+                name="about_me"
+                value={basicInfo.about_me}
+                onChange={handleBasicChange}
+              />
             </div>
 
-            <button className="save-btn">
+            <button
+              className="save-btn"
+              onClick={handleSaveBasicInfo}
+              disabled={!isBasicInfoChanged}
+            >
               <Save size={16} />
               Save Basic Info
             </button>
@@ -126,11 +198,6 @@ const AdminProfileAbout = () => {
                 <input value={profile.technologies_used} readOnly />
               </div>
             </div>
-
-            <button className="save-btn">
-              <Save size={16} />
-              Save Statistics
-            </button>
           </div>
 
           {/* Social Links */}
@@ -142,27 +209,19 @@ const AdminProfileAbout = () => {
                 <label>GitHub</label>
                 <input value={profile.github_url || ""} readOnly />
               </div>
-
               <div className="form-group">
                 <label>LinkedIn</label>
                 <input value={profile.linkedin_url || ""} readOnly />
               </div>
-
               <div className="form-group">
                 <label>CV URL</label>
                 <input value={profile.cv_url || ""} readOnly />
               </div>
-
               <div className="form-group">
                 <label>Twitter / X</label>
                 <input value={profile.twitter_url || ""} readOnly />
               </div>
             </div>
-
-            <button className="save-btn">
-              <Save size={16} />
-              Save Social Links
-            </button>
           </div>
         </div>
       </main>
