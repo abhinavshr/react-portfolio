@@ -80,6 +80,9 @@ const AdminSidebar = ({ active, setActive }) => {
     if (item === "Settings") {
       navigate("/admin/settings");
     }
+    if (item === "Profile") {
+      navigate("/admin/profiles");
+    }
   };
 
   return (
