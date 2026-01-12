@@ -13,10 +13,12 @@ import {
   Mail,
   Settings,
   LogOut,
+  User,
 } from "lucide-react";
 
 const menuItems = [
   "Dashboard",
+  "Profile",
   "Projects",
   "Project Images",
   "Skills",
@@ -30,6 +32,7 @@ const menuItems = [
 
 const icons = {
   Dashboard: <LayoutDashboard />,
+  Profile: <User />,
   Projects: <Folder />,
   "Project Images": <Image />,
   Skills: <Code />,
