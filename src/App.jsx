@@ -16,6 +16,7 @@ import AdminExperience from './pages/admins/experiences/AdminExperience';
 import AdminCertificate from './pages/admins/certificates/AdminCertificates';
 import AdminContact from './pages/admins/contacts/AdminContactMessages';
 import AdminSetting from './pages/admins/settings/AdminSettings';
+import AdminProfileAbout from './pages/admins/profiles/AdminProfileAbout';
 
 function App() {
   return (
@@ -147,6 +148,15 @@ function App() {
           element={
             <ProtectedRoute>
               <AdminSetting />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/profiles"
+          element={
+            <ProtectedRoute>
+              <AdminProfileAbout />
             </ProtectedRoute>
           }
         />
