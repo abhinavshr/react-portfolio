@@ -20,3 +20,15 @@ export const updateAdminBasicInfo = async (payload) => {
     throw error.response?.data || { message: "Failed to update basic info" };
   }
 };
+
+export const updateAdminStatistic = async (payload) => {
+  try {
+    const response = await api.put(
+      "/admin/admin-info/portfolio-stats",
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update basic info" };
+  }
+};
