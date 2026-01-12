@@ -8,3 +8,15 @@ export const getAdminProfileAbout = async () => {
     throw error.response?.data || { message: "Failed to fetch profile about" };
   }
 };
+
+export const updateAdminBasicInfo = async (payload) => {
+  try {
+    const response = await api.put(
+      "/admin/admin-info/basic-info",
+      payload
+    );
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to update basic info" };
+  }
+};
