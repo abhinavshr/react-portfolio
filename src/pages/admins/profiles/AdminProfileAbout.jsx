@@ -297,20 +297,29 @@ const AdminProfileAbout = () => {
                                 <label>GitHub</label>
                                 <input value={profile.github_url || ""} readOnly />
                             </div>
+
                             <div className="form-group">
                                 <label>LinkedIn</label>
                                 <input value={profile.linkedin_url || ""} readOnly />
                             </div>
+
                             <div className="form-group">
                                 <label>CV URL</label>
                                 <input value={profile.cv_url || ""} readOnly />
                             </div>
+
                             <div className="form-group">
                                 <label>Twitter / X</label>
                                 <input value={profile.twitter_url || ""} readOnly />
                             </div>
                         </div>
+
+                        <button className="save-btn" disabled>
+                            <Save size={16} />
+                            Save Social Links
+                        </button>
                     </div>
+
                 </div>
             </main>
         </div>
