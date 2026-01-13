@@ -6,14 +6,15 @@ import "../../../css/admin/profiles/AdminProfileAbout.css";
 import {
     getAdminProfileAbout,
     updateAdminBasicInfo,
-    updateAdminStatistic
+    updateAdminStatistic,
+    updateAdminSocialLinks
 } from "../../../services/adminProfileAbout";
 
 const AdminProfileAbout = () => {
     const [active, setActive] = useState("Profile");
     const [loading, setLoading] = useState(true);
     const [user, setUser] = useState(null);
-    const [profile, setProfile] = useState(null);
+    const [Profile, setProfile] = useState(null);
 
     const [basicInfo, setBasicInfo] = useState({
         phone_number: "",
@@ -33,6 +34,14 @@ const AdminProfileAbout = () => {
 
     const [initialStats, setInitialStats] = useState(null);
 
+    const [socialLinks, setSocialLinks] = useState({
+        github_url: "",
+        linkedin_url: "",
+        cv_url: "",
+        twitter_url: "",
+    });
+
+    const [initialSocialLinks, setInitialSocialLinks] = useState(null);
 
     const fetchProfileAbout = async () => {
         setLoading(true);
@@ -62,6 +71,17 @@ const AdminProfileAbout = () => {
             setStats(statsData);
             setInitialStats(statsData);
 
+            const socialData = {
+                github_url: response.profile.github_url || "",
+                linkedin_url: response.profile.linkedin_url || "",
+                cv_url: response.profile.cv_url || "",
+                twitter_url: response.profile.twitter_url || "",
+            };
+
+            setSocialLinks(socialData);
+            setInitialSocialLinks(socialData);
+
+
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to load profile", "error");
         } finally {
@@ -83,6 +103,10 @@ const AdminProfileAbout = () => {
         setStats((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleSocialChange = (e) => {
+        const { name, value } = e.target;
+        setSocialLinks((prev) => ({ ...prev, [name]: value }));
+    };
 
     const isBasicInfoChanged = useMemo(() => {
         if (!initialBasicInfo) return false;
@@ -98,6 +122,12 @@ const AdminProfileAbout = () => {
         );
     }, [stats, initialStats]);
 
+    const isSocialChanged = useMemo(() => {
+        if (!initialSocialLinks) return false;
+        return Object.keys(socialLinks).some(
+            (key) => socialLinks[key] !== initialSocialLinks[key]
+        );
+    }, [socialLinks, initialSocialLinks]);
 
     const handleSaveBasicInfo = async () => {
         try {
@@ -137,6 +167,17 @@ const AdminProfileAbout = () => {
             );
         }
     };
+
+    const handleSaveSocialLinks = async () => {
+        try {
+            await updateAdminSocialLinks(socialLinks);
+            Swal.fire("Success", "Social links updated successfully", "success");
+            fetchProfileAbout();
+        } catch (error) {
+            Swal.fire("Error", error.message || "Failed to update social links", "error");
+        }
+    };
+
 
 
     return (
@@ -295,31 +336,54 @@ const AdminProfileAbout = () => {
                         <div className="grid-2">
                             <div className="form-group">
                                 <label>GitHub</label>
-                                <input value={profile.github_url || ""} readOnly />
+                                <input
+                                    name="github_url"
+                                    value={socialLinks.github_url}
+                                    onChange={handleSocialChange}
+                                    placeholder="https://github.com/username"
+                                />
                             </div>
 
                             <div className="form-group">
                                 <label>LinkedIn</label>
-                                <input value={profile.linkedin_url || ""} readOnly />
+                                <input
+                                    name="linkedin_url"
+                                    value={socialLinks.linkedin_url}
+                                    onChange={handleSocialChange}
+                                    placeholder="https://linkedin.com/in/username"
+                                />
                             </div>
 
                             <div className="form-group">
                                 <label>CV URL</label>
-                                <input value={profile.cv_url || ""} readOnly />
+                                <input
+                                    name="cv_url"
+                                    value={socialLinks.cv_url}
+                                    onChange={handleSocialChange}
+                                    placeholder="https://example.com/cv.pdf"
+                                />
                             </div>
 
                             <div className="form-group">
                                 <label>Twitter / X</label>
-                                <input value={profile.twitter_url || ""} readOnly />
+                                <input
+                                    name="twitter_url"
+                                    value={socialLinks.twitter_url}
+                                    onChange={handleSocialChange}
+                                    placeholder="https://x.com/username"
+                                />
                             </div>
                         </div>
 
-                        <button className="save-btn" disabled>
+                        <button
+                            className="save-btn"
+                            onClick={handleSaveSocialLinks}
+                            disabled={!isSocialChanged}
+                        >
                             <Save size={16} />
                             Save Social Links
                         </button>
                     </div>
-
                 </div>
             </main>
         </div>
