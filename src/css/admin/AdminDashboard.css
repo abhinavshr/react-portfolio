@@ -7,4 +7,225 @@
 .admin-content {
   flex: 1;
   padding: 2rem;
+  overflow-y: auto;
+  font-family: "Inter", system-ui, sans-serif;
+}
+
+.dashboard-header h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #0f172a;
+}
+
+.dashboard-header p {
+  color: #64748b;
+  margin-bottom: 2rem;
+  font-size: 15px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.stat-card svg {
+  width: 40px;
+  height: 40px;
+  color: #ffffff;
+}
+
+.stat-card svg {
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.stat-card.blue svg {
+  background: #3b82f6;
+}
+
+.stat-card.green svg {
+  background: #22c55e;
+}
+
+.stat-card.purple svg {
+  background: #a855f7;
+}
+
+.stat-card.orange svg {
+  background: #f97316;
+}
+
+.stat-card.pink svg {
+  background: #ec4899;
+}
+
+
+.stat-card h2 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.stat-card p {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.card-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.view-all {
+  border: 1px solid #e5e7eb;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: 999px;
+  color: #2563eb;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.view-all:hover {
+  background: #eff6ff;
+}
+
+
+.projects-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.projects-table thead {
+  background: #f8fafc;
+}
+
+.projects-table th {
+  text-align: left;
+  padding: 14px 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.projects-table td {
+  padding: 18px 0;
+  border-top: 1px solid #e5e7eb;
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.projects-table td:nth-child(2),
+.projects-table td:nth-child(3) {
+  color: #64748b;
+}
+
+.projects-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.status {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.status.active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status.completed {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.message {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.message:first-of-type {
+  border-top: none;
+}
+
+.message strong {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.message p {
+  font-size: 14px;
+  color: #64748b;
+  margin: 4px 0;
+}
+
+.message span {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.message small {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #2563eb;
+  border-radius: 50%;
+  margin-left: 8px;
+}
+
+@media (max-width: 768px) {
+  .admin-content {
+    padding: 1.25rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .projects-table th,
+  .projects-table td {
+    font-size: 14px;
+  }
 }
