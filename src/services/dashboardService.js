@@ -19,3 +19,7 @@ export const getTotalCertificates = async () => {
   const response = await api.get("/admin/total-certificates");
   return response.data;
 };
+export const getTotalContacts = async () => {
+  const response = await api.get("/admin/total-contacts");
+  return response.data;
+};
