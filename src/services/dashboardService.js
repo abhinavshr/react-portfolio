@@ -14,3 +14,8 @@ export const getTotalExperience = async () => {
   const response = await api.get("/admin/total-experiences");
   return response.data;
 };
+
+export const getTotalCertificates = async () => {
+  const response = await api.get("/admin/total-certificates");
+  return response.data;
+};
