@@ -11,25 +11,31 @@ import {
   Trash2,
 } from "lucide-react";
 import "../../css/admin/AdminDashboard.css";
-import { getTotalProjects } from "../../services/dashboardService";
+import {
+  getTotalProjects,
+  getTotalSkills
+} from "../../services/dashboardService";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
   const [totalProjects, setTotalProjects] = useState(0);
+  const [totalSkills, setTotalSkills] = useState(0);
 
   useEffect(() => {
-    const fetchTotalProjects = async () => {
+    const fetchStats = async () => {
       try {
-        const res = await getTotalProjects();
-        setTotalProjects(res.total_projects);
+        const projectsRes = await getTotalProjects();
+        setTotalProjects(projectsRes.total_projects);
+
+        const skillsRes = await getTotalSkills();
+        setTotalSkills(skillsRes.data.grand_total);
       } catch (error) {
-        console.error("Failed to fetch total projects", error);
+        console.error("Failed to fetch dashboard stats", error);
       }
     };
 
-    fetchTotalProjects();
+    fetchStats();
   }, []);
-
 
   return (
     <div className="admin-layout">
@@ -52,7 +58,7 @@ const AdminDashboard = () => {
 
           <div className="stat-card green">
             <Code />
-            <h2>24</h2>
+            <h2>{totalSkills}</h2>
             <p>Total Skills</p>
           </div>
 
@@ -122,7 +128,6 @@ const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
-
 
         {/* Recent Messages */}
         <div className="card">
