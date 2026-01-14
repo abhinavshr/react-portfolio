@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import {
   Folder,
@@ -11,9 +11,25 @@ import {
   Trash2,
 } from "lucide-react";
 import "../../css/admin/AdminDashboard.css";
+import { getTotalProjects } from "../../services/dashboardService";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
+  const [totalProjects, setTotalProjects] = useState(0);
+
+  useEffect(() => {
+    const fetchTotalProjects = async () => {
+      try {
+        const res = await getTotalProjects();
+        setTotalProjects(res.total_projects);
+      } catch (error) {
+        console.error("Failed to fetch total projects", error);
+      }
+    };
+
+    fetchTotalProjects();
+  }, []);
+
 
   return (
     <div className="admin-layout">
@@ -30,7 +46,7 @@ const AdminDashboard = () => {
         <div className="stats-grid">
           <div className="stat-card blue">
             <Folder />
-            <h2>12</h2>
+            <h2>{totalProjects}</h2>
             <p>Total Projects</p>
           </div>
 
