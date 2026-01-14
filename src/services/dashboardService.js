@@ -9,3 +9,8 @@ export const getTotalSkills = async () => {
   const response = await api.get("/admin/total-skills");
   return response.data;
 };
+
+export const getTotalExperience = async () => {
+  const response = await api.get("/admin/total-experiences");
+  return response.data;
+};
