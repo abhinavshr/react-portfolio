@@ -13,13 +13,15 @@ import {
 import "../../css/admin/AdminDashboard.css";
 import {
   getTotalProjects,
-  getTotalSkills
+  getTotalSkills,
+  getTotalExperience
 } from "../../services/dashboardService";
 
 const AdminDashboard = () => {
   const [active, setActive] = useState("Dashboard");
   const [totalProjects, setTotalProjects] = useState(0);
   const [totalSkills, setTotalSkills] = useState(0);
+  const [totalExperience, setTotalExperience] = useState(0);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -29,6 +31,9 @@ const AdminDashboard = () => {
 
         const skillsRes = await getTotalSkills();
         setTotalSkills(skillsRes.data.grand_total);
+
+        const experienceRes = await getTotalExperience();
+        setTotalExperience(experienceRes.years_of_experience);
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);
       }
@@ -64,7 +69,7 @@ const AdminDashboard = () => {
 
           <div className="stat-card purple">
             <Briefcase />
-            <h2>8</h2>
+            <h2>{totalExperience}</h2>
             <p>Experiences</p>
           </div>
 
