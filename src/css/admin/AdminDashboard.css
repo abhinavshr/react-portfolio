@@ -215,6 +215,22 @@
   margin-left: 8px;
 }
 
+.status.active {
+  background: #e6f4ea;
+  color: #1e7f43;
+}
+
+.status.completed {
+  background: #e8f0fe;
+  color: #1a4fd8;
+}
+
+.status.on_hold {
+  background: #fff4e5;
+  color: #b26a00;
+}
+
+
 @media (max-width: 768px) {
   .admin-content {
     padding: 1.25rem;

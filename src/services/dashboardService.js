@@ -23,3 +23,8 @@ export const getTotalContacts = async () => {
   const response = await api.get("/admin/total-contacts");
   return response.data;
 };
+
+export const getRecentProjects = async () => {
+  const response = await api.get("/admin/recent-projects");
+  return response.data;
+};
