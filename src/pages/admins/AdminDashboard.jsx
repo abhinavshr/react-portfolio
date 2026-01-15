@@ -16,7 +16,8 @@ import {
   getTotalSkills,
   getTotalExperience,
   getTotalCertificates,
-  getTotalContacts
+  getTotalContacts,
+  getRecentProjects,
 } from "../../services/dashboardService";
 
 const AdminDashboard = () => {
@@ -26,6 +27,7 @@ const AdminDashboard = () => {
   const [totalExperience, setTotalExperience] = useState(0);
   const [totalCertificates, setTotalCertificates] = useState(0);
   const [totalContacts, setTotalContacts] = useState(0);
+  const [recentProjects, setRecentProjects] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -44,6 +46,9 @@ const AdminDashboard = () => {
 
         const contactsRes = await getTotalContacts();
         setTotalContacts(contactsRes.data.total_contacts);
+
+        const recentProjectsRes = await getRecentProjects();
+        setRecentProjects(recentProjectsRes.projects);
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);
       }
@@ -113,34 +118,35 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>E-commerce Platform</td>
-                <td>Web Development</td>
-                <td>2024-11-15</td>
-                <td><span className="status active">Active</span></td>
-              </tr>
+              {recentProjects.length > 0 ? (
+                recentProjects.map((project) => (
+                  <tr key={project.id}>
+                    <td>{project.title}</td>
 
-              <tr>
-                <td>Mobile Banking App</td>
-                <td>Mobile Development</td>
-                <td>2024-10-20</td>
-                <td><span className="status active">Active</span></td>
-              </tr>
+                    <td>{project.category?.name || "—"}</td>
 
-              <tr>
-                <td>AI Chat Interface</td>
-                <td>AI / ML</td>
-                <td>2024-09-05</td>
-                <td><span className="status completed">Completed</span></td>
-              </tr>
+                    <td>
+                      {project.start_date
+                        ? new Date(project.start_date).toISOString().split("T")[0]
+                        : "—"}
+                    </td>
 
-              <tr>
-                <td>Analytics Dashboard</td>
-                <td>Data Visualization</td>
-                <td>2024-12-01</td>
-                <td><span className="status active">Active</span></td>
-              </tr>
+                    <td>
+                      <span className={`status ${project.status}`}>
+                        {project.status.replace("_", " ")}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" style={{ textAlign: "center" }}>
+                    No recent projects found
+                  </td>
+                </tr>
+              )}
             </tbody>
+
           </table>
         </div>
 
