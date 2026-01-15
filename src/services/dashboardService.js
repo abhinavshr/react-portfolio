@@ -28,3 +28,8 @@ export const getRecentProjects = async () => {
   const response = await api.get("/admin/recent-projects");
   return response.data;
 };
+
+export const getRecentContacts = async () => {
+  const response = await api.get("/admin/recent-contacts");
+  return response.data;
+};
