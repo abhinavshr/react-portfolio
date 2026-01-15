@@ -18,6 +18,7 @@ import {
   getTotalCertificates,
   getTotalContacts,
   getRecentProjects,
+  getRecentContacts,
 } from "../../services/dashboardService";
 
 const AdminDashboard = () => {
@@ -28,6 +29,7 @@ const AdminDashboard = () => {
   const [totalCertificates, setTotalCertificates] = useState(0);
   const [totalContacts, setTotalContacts] = useState(0);
   const [recentProjects, setRecentProjects] = useState([]);
+  const [recentContacts, setRecentContacts] = useState([]);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -48,7 +50,11 @@ const AdminDashboard = () => {
         setTotalContacts(contactsRes.data.total_contacts);
 
         const recentProjectsRes = await getRecentProjects();
-        setRecentProjects(recentProjectsRes.projects);
+        setRecentProjects(Array.isArray(recentProjectsRes.projects) ? recentProjectsRes.projects : []);
+
+        const recentContactsRes = await getRecentContacts();
+        setRecentContacts(Array.isArray(recentContactsRes.data) ? recentContactsRes.data : []);
+
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);
       }
@@ -157,34 +163,28 @@ const AdminDashboard = () => {
             <button className="view-all">View All</button>
           </div>
 
-          <div className="message">
-            <div>
-              <strong>John Smith</strong>
-              <span className="dot"></span>
-              <p>john@example.com</p>
-              <span>Project Inquiry</span>
-            </div>
-            <small>2024-12-22</small>
-          </div>
+          {recentContacts.length > 0 ? (
+            recentContacts.map((contact) => (
+              <div className="message" key={contact.id}>
+                <div>
+                  <strong>{contact.name}</strong>
+                  <span className="dot"></span>
+                  <p>{contact.email}</p>
+                  <span>{contact.subject}</span>
+                </div>
 
-          <div className="message">
-            <div>
-              <strong>Sarah Johnson</strong>
-              <span className="dot"></span>
-              <p>sarah@example.com</p>
-              <span>Collaboration Opportunity</span>
-            </div>
-            <small>2024-12-21</small>
-          </div>
-
-          <div className="message">
-            <div>
-              <strong>Mike Wilson</strong>
-              <p>mike@example.com</p>
-              <span>Question about your work</span>
-            </div>
-            <small>2024-12-20</small>
-          </div>
+                <small>
+                  {contact.created_at
+                    ? new Date(contact.created_at).toISOString().split("T")[0]
+                    : "—"}
+                </small>
+              </div>
+            ))
+          ) : (
+            <p style={{ textAlign: "center", padding: "16px" }}>
+              No recent messages found
+            </p>
+          )}
         </div>
       </main>
     </div>
