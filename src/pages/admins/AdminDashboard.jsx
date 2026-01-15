@@ -34,27 +34,41 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const projectsRes = await getTotalProjects();
+        const [
+          projectsRes,
+          skillsRes,
+          experienceRes,
+          certificatesRes,
+          contactsRes,
+          recentProjectsRes,
+          recentContactsRes,
+        ] = await Promise.all([
+          getTotalProjects(),
+          getTotalSkills(),
+          getTotalExperience(),
+          getTotalCertificates(),
+          getTotalContacts(),
+          getRecentProjects(),
+          getRecentContacts(),
+        ]);
+
         setTotalProjects(projectsRes.total_projects);
-
-        const skillsRes = await getTotalSkills();
         setTotalSkills(skillsRes.data.grand_total);
-
-        const experienceRes = await getTotalExperience();
         setTotalExperience(experienceRes.years_of_experience);
-
-        const certificatesRes = await getTotalCertificates();
         setTotalCertificates(certificatesRes.data.total_certificates);
-
-        const contactsRes = await getTotalContacts();
         setTotalContacts(contactsRes.data.total_contacts);
 
-        const recentProjectsRes = await getRecentProjects();
-        setRecentProjects(Array.isArray(recentProjectsRes.projects) ? recentProjectsRes.projects : []);
+        setRecentProjects(
+          Array.isArray(recentProjectsRes.projects)
+            ? recentProjectsRes.projects
+            : []
+        );
 
-        const recentContactsRes = await getRecentContacts();
-        setRecentContacts(Array.isArray(recentContactsRes.data) ? recentContactsRes.data : []);
-
+        setRecentContacts(
+          Array.isArray(recentContactsRes.data)
+            ? recentContactsRes.data
+            : []
+        );
       } catch (error) {
         console.error("Failed to fetch dashboard stats", error);
       }
