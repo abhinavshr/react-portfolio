@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminSidebar from "../../components/admin/AdminSidebar";
 import {
   Folder,
@@ -6,9 +7,6 @@ import {
   Briefcase,
   Award,
   Mail,
-  Eye,
-  Edit,
-  Trash2,
 } from "lucide-react";
 import "../../css/admin/AdminDashboard.css";
 import {
@@ -30,6 +28,8 @@ const AdminDashboard = () => {
   const [totalContacts, setTotalContacts] = useState(0);
   const [recentProjects, setRecentProjects] = useState([]);
   const [recentContacts, setRecentContacts] = useState([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -90,31 +90,51 @@ const AdminDashboard = () => {
 
         {/* Stats */}
         <div className="stats-grid">
-          <div className="stat-card blue">
+          <div
+            className="stat-card blue"
+            onClick={() => navigate("/admin/projects")}
+            style={{ cursor: "pointer" }}
+          >
             <Folder />
             <h2>{totalProjects}</h2>
             <p>Total Projects</p>
           </div>
 
-          <div className="stat-card green">
+          <div
+            className="stat-card green"
+            onClick={() => navigate("/admin/skills")}
+            style={{ cursor: "pointer" }}
+          >
             <Code />
             <h2>{totalSkills}</h2>
             <p>Total Skills</p>
           </div>
 
-          <div className="stat-card purple">
+          <div
+            className="stat-card purple"
+            onClick={() => navigate("/admin/experience")}
+            style={{ cursor: "pointer" }}
+          >
             <Briefcase />
             <h2>{totalExperience}</h2>
             <p>Experiences</p>
           </div>
 
-          <div className="stat-card orange">
+          <div
+            className="stat-card orange"
+            onClick={() => navigate("/admin/certificates")}
+            style={{ cursor: "pointer" }}
+          >
             <Award />
             <h2>{totalCertificates}</h2>
             <p>Certificates</p>
           </div>
 
-          <div className="stat-card pink">
+          <div
+            className="stat-card pink"
+            onClick={() => navigate("/admin/contacts")}
+            style={{ cursor: "pointer" }}
+          >
             <Mail />
             <h2>{totalContacts}</h2>
             <p>Messages</p>
@@ -125,7 +145,12 @@ const AdminDashboard = () => {
         <div className="card">
           <div className="card-header">
             <h2>Recent Projects</h2>
-            <button className="view-all">View All</button>
+            <button
+              className="view-all"
+              onClick={() => navigate("/admin/projects")}
+            >
+              View All
+            </button>
           </div>
 
           <table className="projects-table">
@@ -142,15 +167,12 @@ const AdminDashboard = () => {
                 recentProjects.map((project) => (
                   <tr key={project.id}>
                     <td>{project.title}</td>
-
                     <td>{project.category?.name || "—"}</td>
-
                     <td>
                       {project.start_date
                         ? new Date(project.start_date).toISOString().split("T")[0]
                         : "—"}
                     </td>
-
                     <td>
                       <span className={`status ${project.status}`}>
                         {project.status.replace("_", " ")}
@@ -166,7 +188,6 @@ const AdminDashboard = () => {
                 </tr>
               )}
             </tbody>
-
           </table>
         </div>
 
@@ -174,7 +195,12 @@ const AdminDashboard = () => {
         <div className="card">
           <div className="card-header">
             <h2>Recent Messages</h2>
-            <button className="view-all">View All</button>
+            <button
+              className="view-all"
+              onClick={() => navigate("/admin/contacts")}
+            >
+              View All
+            </button>
           </div>
 
           {recentContacts.length > 0 ? (
@@ -186,7 +212,6 @@ const AdminDashboard = () => {
                   <p>{contact.email}</p>
                   <span>{contact.subject}</span>
                 </div>
-
                 <small>
                   {contact.created_at
                     ? new Date(contact.created_at).toISOString().split("T")[0]
