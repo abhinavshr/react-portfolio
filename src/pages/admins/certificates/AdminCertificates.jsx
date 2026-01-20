@@ -20,7 +20,7 @@ const AdminCertificates = () => {
     const fetchCertificates = async () => {
         try {
             const res = await viewAllCertificates();
-            setCertificates(res.certificates || []);
+            setCertificates(res.data || []);
         } catch (error) {
             Swal.fire("Error", error.message || "Failed to load certificates", "error");
         } finally {
