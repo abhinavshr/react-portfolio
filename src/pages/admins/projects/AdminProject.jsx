@@ -30,8 +30,8 @@ const AdminProjects = () => {
 
   const fetchProjects = async () => {
     try {
-      const data = await viewAllProjects();
-      setProjects(data.projects || data);
+      const response = await viewAllProjects();
+      setProjects(response.projects?.data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
