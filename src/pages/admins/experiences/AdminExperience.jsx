@@ -22,7 +22,7 @@ const AdminExperience = () => {
     setLoading(true);
     try {
       const response = await viewAllExperiences();
-      setExperiences(response.data);
+      setExperiences(response.data.data || response);
     } catch (error) {
       Swal.fire("Error", error.message || "Failed to fetch experiences", "error");
     } finally {
