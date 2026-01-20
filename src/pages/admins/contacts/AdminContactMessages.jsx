@@ -24,7 +24,7 @@ const AdminContactMessages = () => {
       setLoading(true);
       const res = await viewAllContactMessages();
 
-      const formatted = res.data.map((msg) => ({
+      const formatted = res.data.data.map((msg) => ({
         id: msg.id,
         name: msg.name,
         email: msg.email,
