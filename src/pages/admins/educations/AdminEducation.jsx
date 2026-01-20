@@ -56,7 +56,7 @@ const AdminEducation = () => {
             setLoading(true);
             const response = await viewAllEducations();
 
-            setEducations(response.data || response);
+            setEducations(response.data.data || response);
         } catch (err) {
             setError(err.message || "Failed to fetch educations");
         } finally {
