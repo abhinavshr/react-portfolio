@@ -296,6 +296,18 @@ td {
     max-width: 280px;
 }
 
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 60px 0 12px;
+}
+
+.table-summary {
+  font-size: 14px;
+  color: #555;
+}
 
 /* page fade-in */
 .admin-content {

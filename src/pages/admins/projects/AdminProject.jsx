@@ -6,6 +6,7 @@ import { viewAllProjects, viewProjectById, deleteProject } from "../../../servic
 import { useNavigate } from "react-router-dom";
 import ViewProjectModal from "./ViewProjectModel";
 import Swal from "sweetalert2";
+import Pagination from "../../../components/admin/Pagination";
 
 const AdminProjects = () => {
   const [active, setActive] = useState("Projects");
@@ -14,6 +15,7 @@ const AdminProjects = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0, from: 0, to: 0 });
 
   const navigate = useNavigate();
 
@@ -28,10 +30,17 @@ const AdminProjects = () => {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (page = 1) => {
     try {
-      const response = await viewAllProjects();
+      const response = await viewAllProjects(page);
       setProjects(response.projects?.data || []);
+      setPagination({
+        currentPage: response.projects.current_page,
+        lastPage: response.projects.last_page,
+        total: response.projects.total,
+        from: response.projects.from,
+        to: response.projects.to,
+      });
     } catch (error) {
       console.error("Error fetching projects:", error);
     } finally {
@@ -65,7 +74,7 @@ const AdminProjects = () => {
       try {
         await deleteProject(id);
         Swal.fire("Deleted!", "Project has been deleted successfully.", "success");
-        fetchProjects();
+        fetchProjects(pagination.currentPage);
       } catch (error) {
         Swal.fire("Error!", error.message || "Failed to delete project", "error");
       }
@@ -111,73 +120,82 @@ const AdminProjects = () => {
               <p>Try a different search term or add a new project</p>
             </div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>PROJECT TITLE</th>
-                  <th>TECH STACK</th>
-                  <th>LIVE</th>
-                  <th>GITHUB</th>
-                  <th>STATUS</th>
-                  <th>START DATE</th>
-                  <th>ACTIONS</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredProjects.map((project) => (
-                  <tr key={project.id}>
-                    <td className="project-name">
-                      <span className="text-clamp">{project.title}</span>
-                    </td>
-
-                    <td>
-                      <span className="text-clamp tech-clamp">{project.tech_stack}</span>
-                    </td>
-
-                    <td>
-                      {project.live_link ? (
-                        <a href={project.live_link} target="_blank" rel="noreferrer" className="link-btn">
-                          Live
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-
-                    <td>
-                      {project.github_link ? (
-                        <a href={project.github_link} target="_blank" rel="noreferrer" className="link-btn github">
-                          GitHub
-                        </a>
-                      ) : (
-                        "-"
-                      )}
-                    </td>
-
-                    <td>
-                      <span className={`status-badge ${statusColors[project.status] || ""}`}>
-                        {project.status?.replace("_", " ") || "Not Specified"}
-                      </span>
-                    </td>
-
-                    <td>{project.start_date ? project.start_date.slice(0, 10) : "-"}</td>
-
-                    <td className="actions">
-                      <button className="icon-btn view" title="View" onClick={() => handleViewProject(project.id)}>
-                        <FiEye />
-                      </button>
-                      <button className="icon-btn edit" title="Edit" onClick={() => navigate(`/admin/edit-project/${project.id}`)}>
-                        <FiEdit2 />
-                      </button>
-                      <button className="icon-btn delete" title="Delete" onClick={() => handleDeleteProject(project.id, project.title)}>
-                        <FiTrash2 />
-                      </button>
-                    </td>
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th>PROJECT TITLE</th>
+                    <th>TECH STACK</th>
+                    <th>LIVE</th>
+                    <th>GITHUB</th>
+                    <th>STATUS</th>
+                    <th>START DATE</th>
+                    <th>ACTIONS</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredProjects.map((project) => (
+                    <tr key={project.id}>
+                      <td className="project-name">
+                        <span className="text-clamp">{project.title}</span>
+                      </td>
+                      <td>
+                        <span className="text-clamp tech-clamp">{project.tech_stack}</span>
+                      </td>
+                      <td>
+                        {project.live_link ? (
+                          <a href={project.live_link} target="_blank" rel="noreferrer" className="link-btn">
+                            Live
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td>
+                        {project.github_link ? (
+                          <a href={project.github_link} target="_blank" rel="noreferrer" className="link-btn github">
+                            GitHub
+                          </a>
+                        ) : (
+                          "-"
+                        )}
+                      </td>
+                      <td>
+                        <span className={`status-badge ${statusColors[project.status] || ""}`}>
+                          {project.status?.replace("_", " ") || "Not Specified"}
+                        </span>
+                      </td>
+                      <td>{project.start_date ? project.start_date.slice(0, 10) : "-"}</td>
+                      <td className="actions">
+                        <button className="icon-btn view" title="View" onClick={() => handleViewProject(project.id)}>
+                          <FiEye />
+                        </button>
+                        <button className="icon-btn edit" title="Edit" onClick={() => navigate(`/admin/edit-project/${project.id}`)}>
+                          <FiEdit2 />
+                        </button>
+                        <button className="icon-btn delete" title="Delete" onClick={() => handleDeleteProject(project.id, project.title)}>
+                          <FiTrash2 />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              <div className="table-footer">
+                <div className="table-summary">
+                  Showing {pagination.from} to {pagination.to} of {pagination.total} projects
+                </div>
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.lastPage}
+                  onPageChange={(page) => {
+                    setLoading(true);
+                    fetchProjects(page);
+                  }}
+                />
+              </div>
+            </>
           )}
         </div>
 
