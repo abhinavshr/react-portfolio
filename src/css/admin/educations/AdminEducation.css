@@ -171,3 +171,17 @@
   box-orient: vertical;
   line-clamp: 2;               
 }
+
+.table-footer-education {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.table-summary-education {
+  font-size: 14px;
+  color: #555;
+}

@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const viewAllEducations = async () => {
+export const viewAllEducations = async (page = 1) => {
   try {
-    const response = await api.get("/admin/educations");
+    const response = await api.get(`/admin/educations?page=${page}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to fetch educations" };
