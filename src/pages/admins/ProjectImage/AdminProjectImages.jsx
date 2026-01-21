@@ -5,12 +5,14 @@ import "../../../css/admin/ProjectImage/AdminProjectImages.css";
 import { viewAllProjectImages, deleteProjectImage } from "../../../services/projectImageService";
 import { useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
+import Pagination from "../../../components/admin/Pagination";
 
 const AdminProjectImages = () => {
     const [active, setActive] = useState("Project Images");
     const [images, setImages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0, from: 0, to: 0 });
 
     const navigate = useNavigate();
     const [selectedImage, setSelectedImage] = useState(null);
@@ -19,17 +21,24 @@ const AdminProjectImages = () => {
         fetchProjectImages();
     }, []);
 
-    const fetchProjectImages = async () => {
-        try {
-            setLoading(true);
-            const response = await viewAllProjectImages();
-            setImages(response.data || response);
-        } catch (err) {
-            setError(err.message || "Failed to fetch project images");
-        } finally {
-            setLoading(false);
-        }
-    };
+const fetchProjectImages = async (page = 1) => {
+  try {
+    setLoading(true);
+    const response = await viewAllProjectImages(page);
+    setImages(response.data || []);
+    setPagination({
+      currentPage: response.pagination.current_page,
+      lastPage: response.pagination.last_page,
+      total: response.pagination.total,
+      from: (response.pagination.current_page - 1) * response.pagination.per_page + 1,
+      to: (response.pagination.current_page - 1) * response.pagination.per_page + response.data.length,
+    });
+  } catch (err) {
+    setError(err.message || "Failed to fetch project images");
+  } finally {
+    setLoading(false);
+  }
+};  
 
     const handleClickUpload = () => {
         navigate("/admin/add/project-images");
@@ -57,7 +66,7 @@ const AdminProjectImages = () => {
                     `Project image "${title}" has been deleted.`,
                     'success'
                 );
-                fetchProjectImages();
+                fetchProjectImages(pagination.currentPage);
             } catch (err) {
                 Swal.fire(
                     'Error!',
@@ -67,7 +76,6 @@ const AdminProjectImages = () => {
             }
         }
     };
-
 
     return (
         <div className="admin-layout">
@@ -108,40 +116,56 @@ const AdminProjectImages = () => {
                     )}
 
                     {!loading && images.length > 0 && (
-                        <div className="projects-grid">
-                            {images.map((image) => (
-                                <div key={image.id} className="project-card">
-                                    <img
-                                        src={image.image_path}
-                                        alt={image.image_name}
-                                        className="clickable-image"
-                                        onClick={() => setSelectedImage(image)}
-                                    />
+                        <>
+                            <div className="projects-grid">
+                                {images.map((image) => (
+                                    <div key={image.id} className="project-card">
+                                        <img
+                                            src={image.image_path}
+                                            alt={image.image_name}
+                                            className="clickable-image"
+                                            onClick={() => setSelectedImage(image)}
+                                        />
 
-                                    <div className="project-info">
-                                        <p className="project-name">{image.project?.title}</p>
-                                        <p className="project-caption">{image.image_name}</p>
-                                    </div>
+                                        <div className="project-info">
+                                            <p className="project-name">{image.project?.title}</p>
+                                            <p className="project-caption">{image.image_name}</p>
+                                        </div>
 
-                                    <div className="project-actions">
-                                        <button
-                                            className="edit-btn"
-                                            onClick={() =>
-                                                navigate(`/admin/edit/project-images/${image.id}`)
-                                            }
-                                        >
-                                            <Edit size={16} /> Edit
-                                        </button>
-                                        <button
-                                            className="delete-btn"
-                                            onClick={() => handleDelete(image.id, image)}
-                                        >
-                                            <Trash2 size={16} /> Delete
-                                        </button>
+                                        <div className="project-actions">
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() =>
+                                                    navigate(`/admin/edit/project-images/${image.id}`)
+                                                }
+                                            >
+                                                <Edit size={16} /> Edit
+                                            </button>
+                                            <button
+                                                className="delete-btn"
+                                                onClick={() => handleDelete(image.id, image)}
+                                            >
+                                                <Trash2 size={16} /> Delete
+                                            </button>
+                                        </div>
                                     </div>
+                                ))}
+                            </div>
+
+                            <div className="table-footer-project-image">
+                                <div className="table-summary-project-image">
+                                    Showing {pagination.from} to {pagination.to} of {pagination.total} images
                                 </div>
-                            ))}
-                        </div>
+                                <Pagination
+                                    currentPage={pagination.currentPage}
+                                    totalPages={pagination.lastPage}
+                                    onPageChange={(page) => {
+                                        setLoading(true);
+                                        fetchProjectImages(page);
+                                    }}
+                                />
+                            </div>
+                        </>
                     )}
 
                     {!loading && images.length === 0 && (

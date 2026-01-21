@@ -237,3 +237,17 @@
     color: #fff;
     margin-top: 12px;
 }
+
+.table-footer-project-image {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.table-summary-project-image {
+  font-size: 14px;
+  color: #555;
+}
