@@ -138,6 +138,20 @@
   text-decoration: underline;
 }
 
+.table-footer-certificates {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 12px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.table-summary-certificates {
+  font-size: 14px;
+  color: #555;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .certificates-header {
