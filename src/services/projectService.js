@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const viewAllProjects = async () => {
+export const viewAllProjects = async (page = 1) => {
   try {
-    const response = await api.get("/admin/projects");
+    const response = await api.get(`/admin/projects?page=${page}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to fetch projects" };
