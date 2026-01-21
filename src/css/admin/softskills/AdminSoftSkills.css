@@ -133,3 +133,17 @@
 
   overflow: hidden;
 }
+
+.table-footer-soft-skill {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 12px;
+  margin-top: 1px solid #e5e7eb;
+}
+
+.table-summary-soft-skill {
+  font-size: 14px;
+  color: #555;
+}
