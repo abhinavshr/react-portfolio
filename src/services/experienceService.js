@@ -1,12 +1,12 @@
 import api from "./api";
 
-export const viewAllExperiences = async () => {
-    try {
-        const response = await api.get("/admin/experiences");
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { message: "Failed to fetch experiences" };
-    }
+export const viewAllExperiences = async (page = 1) => {
+  try {
+    const response = await api.get(`/admin/experiences?page=${page}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch experiences" };
+  }
 };
 
 export const viewExperienceById = async (id) => {
