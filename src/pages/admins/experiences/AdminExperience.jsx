@@ -7,32 +7,50 @@ import { viewAllExperiences, deleteExperience } from "../../../services/experien
 import AddExperienceModal from "./AddExperienceModal";
 import ViewExperienceModal from "./ViewExperienceModal";
 import EditExperienceModal from "./EditExperienceModal";
+import Pagination from "../../../components/admin/Pagination";
 
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedExperienceId, setSelectedExperienceId] = useState(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
-  const fetchExperiences = async () => {
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    from: 0,
+    to: 0,
+  });
+
+  useEffect(() => {
+    fetchExperiences();
+  }, []);
+
+  const fetchExperiences = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await viewAllExperiences();
-      setExperiences(response.data.data || response);
+      const response = await viewAllExperiences(page);
+      setExperiences(response.data.data || []);
+      setPagination({
+        currentPage: response.data.current_page,
+        lastPage: response.data.last_page,
+        total: response.data.total,
+        from: response.data.from,
+        to: response.data.to,
+      });
     } catch (error) {
+      setError(error.message || "Failed to fetch experiences");
       Swal.fire("Error", error.message || "Failed to fetch experiences", "error");
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchExperiences();
-  }, []);
 
   const handleDelete = async (exp) => {
     const result = await Swal.fire({
@@ -49,7 +67,7 @@ const AdminExperience = () => {
       try {
         await deleteExperience(exp.id);
         Swal.fire("Deleted!", "Experience has been deleted.", "success");
-        fetchExperiences();
+        fetchExperiences(pagination.currentPage);
       } catch (error) {
         Swal.fire("Error", error.message || "Failed to delete experience", "error");
       }
@@ -74,8 +92,11 @@ const AdminExperience = () => {
               Add Experience
             </button>
           </div>
+
           {loading && <p>Loading experiences...</p>}
+          {error && <p className="error-text">{error}</p>}
           {!loading && experiences.length === 0 && <p>No experiences found.</p>}
+
           {!loading &&
             experiences.map((exp) => (
               <div key={exp.id} className="experience-card">
@@ -121,11 +142,28 @@ const AdminExperience = () => {
                 <p className="experience-description">{exp.description}</p>
               </div>
             ))}
+
+          {!loading && experiences.length > 0 && (
+            <div className="table-footer-experience">
+              <div className="table-summary-experience">
+                Showing {pagination.from} to {pagination.to} of {pagination.total} experiences
+              </div>
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.lastPage}
+                onPageChange={(page) => {
+                  setLoading(true);
+                  fetchExperiences(page);
+                }}
+              />
+            </div>
+          )}
         </div>
+
         <AddExperienceModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          onExperienceAdded={() => fetchExperiences()}
+          onExperienceAdded={() => fetchExperiences(pagination.currentPage)}
         />
 
         <ViewExperienceModal
@@ -141,7 +179,7 @@ const AdminExperience = () => {
             setSelectedExperienceId(null);
           }}
           experienceId={selectedExperienceId}
-          onExperienceUpdated={fetchExperiences}
+          onExperienceUpdated={() => fetchExperiences(pagination.currentPage)}
         />
       </main>
     </div>
