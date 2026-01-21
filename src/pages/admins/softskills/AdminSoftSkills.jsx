@@ -7,13 +7,20 @@ import { viewAllSoftSkills, deleteSoftSkill } from "../../../services/softSkillS
 import AddSoftSkillModal from "./AddSoftSkillModal";
 import ViewSoftSkillModal from "./ViewSoftSkillModal";
 import EditSoftSkillModal from "./EditSoftSkillModal";
+import Pagination from "../../../components/admin/Pagination";
 
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
   const [softSkills, setSoftSkills] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    from: 0,
+    to: 0,
+  });
 
-  // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -23,11 +30,18 @@ const AdminSoftSkills = () => {
     fetchSoftSkills();
   }, []);
 
-  // Fetch all soft skills
-  const fetchSoftSkills = async () => {
+  const fetchSoftSkills = async (page = 1) => {
     try {
-      const response = await viewAllSoftSkills();
+      setLoading(true);
+      const response = await viewAllSoftSkills(page);
       setSoftSkills(response.data || []);
+      setPagination({
+        currentPage: response.pagination.current_page,
+        lastPage: response.pagination.last_page,
+        total: response.pagination.total,
+        from: (response.pagination.current_page - 1) * response.pagination.per_page + 1,
+        to: (response.pagination.current_page - 1) * response.pagination.per_page + response.data.length,
+      });
     } catch (error) {
       console.error("Failed to fetch soft skills:", error);
     } finally {
@@ -35,15 +49,13 @@ const AdminSoftSkills = () => {
     }
   };
 
-  // Add Modal Handlers
   const handleAddSoftSkill = () => setIsAddModalOpen(true);
   const handleCloseAddModal = () => setIsAddModalOpen(false);
   const handleSoftSkillAdded = () => {
-    fetchSoftSkills();
+    fetchSoftSkills(pagination.currentPage);
     setIsAddModalOpen(false);
   };
 
-  // View Modal Handlers
   const handleViewSoftSkill = (id) => {
     setSelectedSkillId(id);
     setIsViewModalOpen(true);
@@ -53,7 +65,6 @@ const AdminSoftSkills = () => {
     setIsViewModalOpen(false);
   };
 
-  // Edit Modal Handlers
   const handleEditSoftSkill = (id) => {
     setSelectedSkillId(id);
     setIsEditModalOpen(true);
@@ -63,11 +74,10 @@ const AdminSoftSkills = () => {
     setIsEditModalOpen(false);
   };
   const handleSoftSkillUpdated = () => {
-    fetchSoftSkills();
+    fetchSoftSkills(pagination.currentPage);
     setIsEditModalOpen(false);
   };
 
-  // Delete Handler with Swal
   const handleDeleteSoftSkill = async (id, title) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -84,7 +94,7 @@ const AdminSoftSkills = () => {
       try {
         await deleteSoftSkill(id);
         Swal.fire("Deleted!", `"${title}" has been deleted.`, "success");
-        fetchSoftSkills();
+        fetchSoftSkills(pagination.currentPage);
       } catch (error) {
         console.error("Failed to delete skill:", error);
         Swal.fire("Error!", error.message || "Failed to delete soft skill.", "error");
@@ -94,12 +104,9 @@ const AdminSoftSkills = () => {
 
   return (
     <div className="admin-layout">
-      {/* Sidebar */}
       <AdminSidebar active={active} setActive={setActive} />
 
-      {/* Main Content */}
       <main className="admin-content admin-soft-skill">
-        {/* Header */}
         <div className="soft-skill-header">
           <div>
             <h1>Soft Skills</h1>
@@ -111,13 +118,9 @@ const AdminSoftSkills = () => {
           </button>
         </div>
 
-        {/* Loading */}
         {loading && <p>Loading soft skills...</p>}
-
-        {/* Empty State */}
         {!loading && softSkills.length === 0 && <p>No soft skills found.</p>}
 
-        {/* Soft Skill Cards */}
         <div className="soft-skill-grid">
           {softSkills.map((skill) => (
             <div className="soft-skill-card" key={skill.id}>
@@ -149,16 +152,30 @@ const AdminSoftSkills = () => {
             </div>
           ))}
         </div>
+
+        {!loading && softSkills.length > 0 && (
+          <div className="table-footer-soft-skill">
+            <div className="table-summary-soft-skill">
+              Showing {pagination.from} to {pagination.to} of {pagination.total} skills
+            </div>
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.lastPage}
+              onPageChange={(page) => {
+                setLoading(true);
+                fetchSoftSkills(page);
+              }}
+            />
+          </div>
+        )}
       </main>
 
-      {/* Add Soft Skill Modal */}
       <AddSoftSkillModal
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onSkillAdded={handleSoftSkillAdded}
       />
 
-      {/* View Soft Skill Modal */}
       {isViewModalOpen && selectedSkillId && (
         <ViewSoftSkillModal
           isOpen={isViewModalOpen}
@@ -167,7 +184,6 @@ const AdminSoftSkills = () => {
         />
       )}
 
-      {/* Edit Soft Skill Modal */}
       {isEditModalOpen && selectedSkillId && (
         <EditSoftSkillModal
           isOpen={isEditModalOpen}

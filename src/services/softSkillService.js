@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const viewAllSoftSkills = async () => {
+export const viewAllSoftSkills = async (page = 1) => {
   try {
-    const response = await api.get("/admin/soft-skills");
+    const response = await api.get(`/admin/soft-skills?page=${page}`);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: "Failed to fetch soft skills" };
