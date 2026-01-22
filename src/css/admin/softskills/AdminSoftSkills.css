@@ -147,3 +147,15 @@
   font-size: 14px;
   color: #555;
 }
+
+.soft-skill-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.soft-skill-card:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+}

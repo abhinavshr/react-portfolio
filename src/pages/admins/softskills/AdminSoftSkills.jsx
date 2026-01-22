@@ -8,6 +8,7 @@ import AddSoftSkillModal from "./AddSoftSkillModal";
 import ViewSoftSkillModal from "./ViewSoftSkillModal";
 import EditSoftSkillModal from "./EditSoftSkillModal";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
@@ -122,8 +123,16 @@ const AdminSoftSkills = () => {
         {!loading && softSkills.length === 0 && <p>No soft skills found.</p>}
 
         <div className="soft-skill-grid">
-          {softSkills.map((skill) => (
-            <div className="soft-skill-card" key={skill.id}>
+          {softSkills.map((skill, index) => (
+            <Motion.div
+              className="soft-skill-card"
+              key={skill.id}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+            >
               <div className="soft-skill-card-header">
                 <h3>{skill.name}</h3>
                 <div className="soft-skill-actions">
@@ -138,9 +147,11 @@ const AdminSoftSkills = () => {
 
               <div className="soft-skill-progress">
                 <div className="progress-bar">
-                  <div
+                  <Motion.div
                     className="progress-fill"
-                    style={{ width: `${skill.level}%` }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${skill.level}%` }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
                   />
                 </div>
                 <span>{skill.level}%</span>
@@ -149,7 +160,7 @@ const AdminSoftSkills = () => {
               <p className="soft-skill-description">
                 {skill.description || "No description provided."}
               </p>
-            </div>
+            </Motion.div>
           ))}
         </div>
 
