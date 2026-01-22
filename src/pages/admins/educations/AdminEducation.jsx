@@ -15,6 +15,7 @@ import AddEducationModal from "./AddEducationModal";
 import ViewEducationModal from "./ViewEducationModal";
 import EditEducationModal from "./EditEducationModal";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminEducation = () => {
   const [active, setActive] = useState("Education");
@@ -133,8 +134,15 @@ const AdminEducation = () => {
           )}
 
           {!loading && educations.length > 0 &&
-            educations.map((edu) => (
-              <div key={edu.id} className="education-card">
+            educations.map((edu, index) => (
+              <Motion.div
+                key={edu.id}
+                className="education-card"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(37,99,235,0.4)" }}
+              >
                 <div className="education-card-header">
                   <h2 className="education-title">
                     <GraduationCap size={20} className="edu-icon" />
@@ -186,7 +194,7 @@ const AdminEducation = () => {
                 <p className="education-description">
                   {edu.description}
                 </p>
-              </div>
+              </Motion.div>
             ))}
 
           {!loading && educations.length === 0 && (

@@ -185,3 +185,16 @@
   font-size: 14px;
   color: #555;
 }
+
+.education-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 22px 24px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease;
+}
+
+.education-card:hover {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+}
