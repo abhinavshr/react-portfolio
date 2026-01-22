@@ -237,6 +237,7 @@
   align-items: center;
   margin-top: 16px;
   padding: 0 12px;
+  border-top: 1px solid #e2e8f0;
 }
 
 .table-summary-contacts {
