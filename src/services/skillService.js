@@ -1,12 +1,12 @@
 import api from "./api";
 
-export const viewAllSkills = async () => {
-    try {
-        const response = await api.get("/admin/skills");
-        return response.data;
-    } catch (error) {
-        throw error.response?.data || { message: "Failed to fetch skills" };
-    }
+export const viewAllSkills = async (page = 1) => {
+  try {
+    const response = await api.get(`/admin/skills?page=${page}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: "Failed to fetch skills" };
+  }
 };
 
 export const addSkill = async (skillData) => {
