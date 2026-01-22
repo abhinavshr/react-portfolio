@@ -5,24 +5,34 @@ import "../../../css/admin/contacts/AdminContactMessages.css";
 import Swal from "sweetalert2";
 import { viewAllContactMessages, deleteContactMessage } from "../../../services/contactMessagesService";
 import ViewContactModal from "./ViewContactModal";
+import Pagination from "../../../components/admin/Pagination";
 
 const AdminContactMessages = () => {
   const [active, setActive] = useState("Contacts");
   const [filter, setFilter] = useState("all");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [, setError] = useState("");
 
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [selectedContactId, setSelectedContactId] = useState(null);
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    from: 0,
+    to: 0,
+  });
 
   useEffect(() => {
     fetchMessages();
   }, []);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (page = 1) => {
     try {
       setLoading(true);
-      const res = await viewAllContactMessages();
+      const res = await viewAllContactMessages(page);
 
       const formatted = res.data.data.map((msg) => ({
         id: msg.id,
@@ -31,12 +41,20 @@ const AdminContactMessages = () => {
         subject: msg.subject,
         message: msg.message,
         date: msg.created_at,
-        unread: !msg.is_read
+        unread: !msg.is_read,
       }));
 
       setMessages(formatted);
+      setPagination({
+        currentPage: res.data.current_page,
+        lastPage: res.data.last_page,
+        total: res.data.total,
+        from: res.data.from,
+        to: res.data.to,
+      });
     } catch (err) {
-      Swal.fire("Error", "Failed to load messages", "error", err);
+      setError(err.message || "Failed to load messages");
+      Swal.fire("Error", err.message || "Failed to load messages", "error");
     } finally {
       setLoading(false);
     }
@@ -65,13 +83,12 @@ const AdminContactMessages = () => {
       try {
         await deleteContactMessage(msg.id);
         Swal.fire("Deleted!", "Message has been deleted.", "success");
-        fetchMessages();
+        fetchMessages(pagination.currentPage);
       } catch (err) {
         Swal.fire("Error", err.message || "Failed to delete message", "error");
       }
     }
   };
-
 
   return (
     <div className="admin-layout">
@@ -79,13 +96,11 @@ const AdminContactMessages = () => {
 
       <main className="admin-content">
         <div className="contact-messages-container">
-          {/* Header */}
           <div className="contact-messages-header">
             <h1>Contact Messages</h1>
             <p>{unreadCount} unread messages</p>
           </div>
 
-          {/* Toolbar */}
           <div className="contact-toolbar-card">
             <div className="contact-toolbar-inner">
               <div className="contact-messages-search">
@@ -100,14 +115,12 @@ const AdminContactMessages = () => {
                 >
                   All
                 </button>
-
                 <button
                   className={`filter-btn ${filter === "unread" ? "active" : ""}`}
                   onClick={() => setFilter("unread")}
                 >
                   Unread ({unreadCount})
                 </button>
-
                 <button
                   className={`filter-btn ${filter === "read" ? "active" : ""}`}
                   onClick={() => setFilter("read")}
@@ -118,7 +131,6 @@ const AdminContactMessages = () => {
             </div>
           </div>
 
-          {/* Messages */}
           {loading ? (
             <p>Loading messages...</p>
           ) : (
@@ -126,20 +138,15 @@ const AdminContactMessages = () => {
               {filteredMessages.map((msg) => (
                 <div
                   key={msg.id}
-                  className={`contact-message-card ${msg.unread ? "unread" : ""
-                    }`}
+                  className={`contact-message-card ${msg.unread ? "unread" : ""}`}
                 >
                   <div className="message-left">
-                    <div className="message-avatar">
-                      {msg.name.charAt(0)}
-                    </div>
-
+                    <div className="message-avatar">{msg.name.charAt(0)}</div>
                     <div className="message-content">
                       <h3 className="message-name">
                         {msg.name}
                         {msg.unread && <span className="unread-dot" />}
                       </h3>
-
                       <p className="message-email">{msg.email}</p>
                       <h4 className="message-subject">{msg.subject}</h4>
                       <p className="message-text">{msg.message}</p>
@@ -150,7 +157,6 @@ const AdminContactMessages = () => {
                     <span className="message-date">
                       {new Date(msg.date).toLocaleDateString()}
                     </span>
-
                     <div className="message-actions">
                       <button
                         className="icon-btn view"
@@ -173,12 +179,29 @@ const AdminContactMessages = () => {
               ))}
             </div>
           )}
+
+          {!loading && messages.length > 0 && (
+            <div className="table-footer-contacts">
+              <div className="table-summary-contacts">
+                Showing {pagination.from} to {pagination.to} of {pagination.total} messages
+              </div>
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.lastPage}
+                onPageChange={(page) => {
+                  setLoading(true);
+                  fetchMessages(page);
+                }}
+              />
+            </div>
+          )}
         </div>
+
         <ViewContactModal
           isOpen={isViewOpen}
           onClose={() => setIsViewOpen(false)}
           contactId={selectedContactId}
-          onRefresh={fetchMessages}
+          onRefresh={() => fetchMessages(pagination.currentPage)}
         />
       </main>
     </div>

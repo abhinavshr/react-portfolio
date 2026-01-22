@@ -230,3 +230,16 @@
 .icon-btn.delete:hover {
   background: #fee2e2;
 }
+
+.table-footer-contacts {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  padding: 0 12px;
+}
+
+.table-summary-contacts {
+  font-size: 14px;
+  color: #555;
+}
