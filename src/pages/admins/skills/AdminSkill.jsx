@@ -7,6 +7,7 @@ import AddSkillModal from "./AddSkillModal";
 import EditSkillModal from "./EditSkillModal";
 import Swal from "sweetalert2";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminSkill = () => {
     const [active, setActive] = useState("Skills");
@@ -83,7 +84,10 @@ const AdminSkill = () => {
                         <h1>Technical Skills</h1>
                         <p>Manage your technical skill set</p>
                     </div>
-                    <button className="add-skill-btn" onClick={() => setIsAddModalOpen(true)}>
+                    <button
+                        className="add-skill-btn"
+                        onClick={() => setIsAddModalOpen(true)}
+                    >
                         <FiPlus /> Add Skill
                     </button>
                 </div>
@@ -97,12 +101,14 @@ const AdminSkill = () => {
                 {loading ? (
                     <div className="empty-state">Loading skills...</div>
                 ) : (
-                    categories.map((category) => {
+                    categories.map((category, index) => {
                         const skills = category.skills || [];
                         const currentSkillPage =
                             skillPagination[category.id]?.currentPage || 1;
 
-                        const totalSkillPages = Math.ceil(skills.length / perSkillPage);
+                        const totalSkillPages = Math.ceil(
+                            skills.length / perSkillPage
+                        );
 
                         const paginatedSkills = skills.slice(
                             (currentSkillPage - 1) * perSkillPage,
@@ -117,8 +123,24 @@ const AdminSkill = () => {
                         );
 
                         return (
-                            <div className="skill-card" key={category.id}>
-                                <h3 className="skill-category">{category.name}</h3>
+                            <Motion.div
+                                key={category.id}
+                                className="skill-card glow-card"
+                                initial={{ opacity: 0, y: 30 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{
+                                    duration: 0.4,
+                                    delay: index * 0.1,
+                                }}
+                                whileHover={{
+                                    scale: 1.02,
+                                    boxShadow:
+                                        "0 0 18px rgba(37, 99, 235, 0.6)",
+                                }}
+                            >
+                                <h3 className="skill-category">
+                                    {category.name}
+                                </h3>
 
                                 <table className="skill-table">
                                     <thead>
@@ -137,18 +159,26 @@ const AdminSkill = () => {
                                                         <div className="skill-bar">
                                                             <div
                                                                 className="skill-bar-fill"
-                                                                style={{ width: `${skill.level}%` }}
+                                                                style={{
+                                                                    width: `${skill.level}%`,
+                                                                }}
                                                             />
                                                         </div>
-                                                        <span>{skill.level}%</span>
+                                                        <span>
+                                                            {skill.level}%
+                                                        </span>
                                                     </div>
                                                 </td>
                                                 <td className="skill-actions">
                                                     <button
                                                         className="icon-btn edit"
                                                         onClick={() => {
-                                                            setSelectedSkillId(skill.id);
-                                                            setIsEditModalOpen(true);
+                                                            setSelectedSkillId(
+                                                                skill.id
+                                                            );
+                                                            setIsEditModalOpen(
+                                                                true
+                                                            );
                                                         }}
                                                     >
                                                         <FiEdit2 />
@@ -156,7 +186,10 @@ const AdminSkill = () => {
                                                     <button
                                                         className="icon-btn delete"
                                                         onClick={() =>
-                                                            handleDelete(skill.id, skill.name)
+                                                            handleDelete(
+                                                                skill.id,
+                                                                skill.name
+                                                            )
                                                         }
                                                     >
                                                         <FiTrash2 />
@@ -167,11 +200,11 @@ const AdminSkill = () => {
                                     </tbody>
                                 </table>
 
-                                {/* 🔹 SAME PAGINATION DESIGN */}
                                 {totalSkillPages > 1 && (
                                     <div className="table-footer-skills">
                                         <div className="table-summary-skills">
-                                            Showing {from} to {to} of {skills.length} skills
+                                            Showing {from} to {to} of{" "}
+                                            {skills.length} skills
                                         </div>
 
                                         <Pagination
@@ -180,13 +213,15 @@ const AdminSkill = () => {
                                             onPageChange={(page) =>
                                                 setSkillPagination((prev) => ({
                                                     ...prev,
-                                                    [category.id]: { currentPage: page },
+                                                    [category.id]: {
+                                                        currentPage: page,
+                                                    },
                                                 }))
                                             }
                                         />
                                     </div>
                                 )}
-                            </div>
+                            </Motion.div>
                         );
                     })
                 )}
@@ -200,7 +235,8 @@ const AdminSkill = () => {
                                 1}{" "}
                             to{" "}
                             {Math.min(
-                                categoryPagination.currentPage * categoryPagination.perPage,
+                                categoryPagination.currentPage *
+                                    categoryPagination.perPage,
                                 categoryPagination.total
                             )}{" "}
                             of {categoryPagination.total} categories
@@ -219,7 +255,9 @@ const AdminSkill = () => {
                         isOpen={isEditModalOpen}
                         skillId={selectedSkillId}
                         onClose={() => setIsEditModalOpen(false)}
-                        onSkillUpdated={() => fetchSkills(categoryPagination.currentPage)}
+                        onSkillUpdated={() =>
+                            fetchSkills(categoryPagination.currentPage)
+                        }
                     />
                 )}
             </main>
