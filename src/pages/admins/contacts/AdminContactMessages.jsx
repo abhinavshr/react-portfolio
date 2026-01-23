@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import { viewAllContactMessages, deleteContactMessage } from "../../../services/contactMessagesService";
 import ViewContactModal from "./ViewContactModal";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminContactMessages = () => {
   const [active, setActive] = useState("Contacts");
@@ -135,10 +136,15 @@ const AdminContactMessages = () => {
             <p>Loading messages...</p>
           ) : (
             <div className="contact-messages-list">
-              {filteredMessages.map((msg) => (
-                <div
+              {filteredMessages.map((msg, index) => (
+                <Motion.div
                   key={msg.id}
                   className={`contact-message-card ${msg.unread ? "unread" : ""}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(37,99,235,0.4)" }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   <div className="message-left">
                     <div className="message-avatar">{msg.name.charAt(0)}</div>
@@ -175,7 +181,7 @@ const AdminContactMessages = () => {
                       </button>
                     </div>
                   </div>
-                </div>
+                </Motion.div>
               ))}
             </div>
           )}
