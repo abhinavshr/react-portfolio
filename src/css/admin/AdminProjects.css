@@ -435,3 +435,11 @@ tbody tr:hover {
         transform: translateX(100%);
     }
 }
+
+.project-row {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.project-row:hover {
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+}

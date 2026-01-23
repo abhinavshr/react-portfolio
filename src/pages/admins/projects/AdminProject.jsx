@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ViewProjectModal from "./ViewProjectModel";
 import Swal from "sweetalert2";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminProjects = () => {
   const [active, setActive] = useState("Projects");
@@ -134,8 +135,15 @@ const AdminProjects = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProjects.map((project) => (
-                    <tr key={project.id}>
+                  {filteredProjects.map((project, index) => (
+                    <Motion.tr
+                      key={project.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
+                      whileHover={{ scale: 1.02, boxShadow: "0 0 12px rgba(37,99,235,0.5)" }}
+                      className="project-row"
+                    >
                       <td className="project-name">
                         <span className="text-clamp">{project.title}</span>
                       </td>
@@ -177,7 +185,7 @@ const AdminProjects = () => {
                           <FiTrash2 />
                         </button>
                       </td>
-                    </tr>
+                    </Motion.tr>
                   ))}
                 </tbody>
               </table>
