@@ -8,6 +8,7 @@ import AddExperienceModal from "./AddExperienceModal";
 import ViewExperienceModal from "./ViewExperienceModal";
 import EditExperienceModal from "./EditExperienceModal";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
@@ -98,8 +99,16 @@ const AdminExperience = () => {
           {!loading && experiences.length === 0 && <p>No experiences found.</p>}
 
           {!loading &&
-            experiences.map((exp) => (
-              <div key={exp.id} className="experience-card">
+            experiences.map((exp, index) => (
+              <Motion.div
+                key={exp.id}
+                className="experience-card"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
+                whileTap={{ scale: 0.98 }}
+              >
                 <div className="experience-card-header">
                   <h2 className="experience-title">
                     <Briefcase className="experience-icon" />
@@ -140,7 +149,7 @@ const AdminExperience = () => {
                   {exp.is_current && <span className="badge">Current</span>}
                 </div>
                 <p className="experience-description">{exp.description}</p>
-              </div>
+              </Motion.div>
             ))}
 
           {!loading && experiences.length > 0 && (
