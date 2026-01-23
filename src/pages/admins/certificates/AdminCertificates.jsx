@@ -7,6 +7,7 @@ import { viewAllCertificates, deleteCertificate } from "../../../services/certif
 import AddCertificateModal from "./AddCertificateModal";
 import EditCertificateModal from "./EditCertificateModal";
 import Pagination from "../../../components/admin/Pagination";
+import { motion as Motion } from "framer-motion";
 
 const AdminCertificates = () => {
   const [active, setActive] = useState("Certificates");
@@ -101,8 +102,16 @@ const AdminCertificates = () => {
               <p>No certificates found.</p>
             )}
 
-            {certificates.map((cert) => (
-              <div key={cert.id} className="certificate-card">
+            {certificates.map((cert, index) => (
+              <Motion.div
+                key={cert.id}
+                className="certificate-card"
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
+                whileTap={{ scale: 0.97 }}
+              >
                 <div className="certificate-top">
                   <div className="certificate-icon">
                     <Award size={26} />
@@ -148,7 +157,7 @@ const AdminCertificates = () => {
                     Verify <ExternalLink size={14} />
                   </a>
                 )}
-              </div>
+              </Motion.div>
             ))}
           </div>
 

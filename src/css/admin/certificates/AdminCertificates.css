@@ -152,6 +152,19 @@
   color: #555;
 }
 
+.certificate-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.certificate-card:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .certificates-header {
