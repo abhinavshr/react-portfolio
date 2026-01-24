@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
 import { useNavigate } from "react-router-dom";
@@ -24,87 +24,63 @@ const AddProject = () => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getCategories = async () => {
-      try {
-        const cats = await fetchCategories();
-        setCategories(cats);
-      } catch (error) {
-        console.error("Failed to fetch categories:", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Failed to load categories",
-        });
-      }
-    };
-    getCategories();
+  const getCategories = useCallback(async () => {
+    try {
+      const cats = await fetchCategories();
+      setCategories(cats);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load categories",
+        error
+      });
+    }
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  useEffect(() => {
+    getCategories();
+  }, [getCategories]);
 
-    if (name === "status" && value !== "completed") {
-      setForm((prev) => ({ ...prev, [name]: value, end_date: "" }));
-    } else {
-      setForm((prev) => ({ ...prev, [name]: value }));
-    }
+  const handleChange = ({ target: { name, value } }) => {
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "status" && value !== "completed" ? { end_date: "" } : {}),
+    }));
   };
 
-  const handleBackClick = () => {
-    navigate(-1);
+  const handleBackClick = () => navigate(-1);
+
+  const validateForm = () => {
+    if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
+      return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
+    }
+    if (form.status === "completed" && !form.end_date) {
+      return { type: "warning", title: "End Date Required", text: "Please provide an end date for completed projects." };
+    }
+    if (form.end_date && new Date(form.end_date) <= new Date(form.start_date)) {
+      return { type: "error", title: "Invalid Date", text: "End date must be after the start date." };
+    }
+    return null;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
-      Swal.fire({
-        icon: "warning",
-        title: "Missing Fields",
-        text: "Please fill in all required fields.",
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (form.status === "completed" && !form.end_date) {
-      Swal.fire({
-        icon: "warning",
-        title: "End Date Required",
-        text: "Please provide an end date for completed projects.",
-      });
-      setLoading(false);
-      return;
-    }
-
-    if (form.end_date && new Date(form.end_date) <= new Date(form.start_date)) {
-      Swal.fire({
-        icon: "error",
-        title: "Invalid Date",
-        text: "End date must be after the start date.",
-      });
+    const validationError = validateForm();
+    if (validationError) {
+      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
       setLoading(false);
       return;
     }
 
     try {
       await addProject(form);
-      Swal.fire({
-        icon: "success",
-        title: "Success",
-        text: "Project added successfully!",
-      }).then(() => {
-        navigate(-1);
-      });
+      Swal.fire({ icon: "success", title: "Success", text: "Project added successfully!" }).then(() => navigate(-1));
     } catch (error) {
-      console.error("Error adding project:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Failed",
-        text: error.message || "Failed to add project",
-      });
+      Swal.fire({ icon: "error", title: "Failed", text: error.message || "Failed to add project" });
     } finally {
       setLoading(false);
     }
@@ -113,12 +89,9 @@ const AddProject = () => {
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
-
       <main className="admin-content">
         <div className="header">
-          <button className="back-btn" onClick={handleBackClick}>
-            &#8592;
-          </button>
+          <button className="back-btn" onClick={handleBackClick}>&#8592;</button>
           <div className="header-text">
             <h1>Add New Project</h1>
             <p>Fill in the information to create a new project</p>
@@ -131,29 +104,14 @@ const AddProject = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Project Name *</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={form.title}
-                  onChange={handleChange}
-                  placeholder="Enter project name"
-                  required
-                />
+                <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Enter project name" required />
               </div>
-
               <div className="form-group">
                 <label>Category *</label>
-                <select
-                  name="category_id"
-                  value={form.category_id}
-                  onChange={handleChange}
-                  required
-                >
+                <select name="category_id" value={form.category_id} onChange={handleChange} required>
                   <option value="">Select category</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
+                  {categories.map(({ id, name }) => (
+                    <option key={id} value={id}>{name}</option>
                   ))}
                 </select>
               </div>
@@ -162,12 +120,7 @@ const AddProject = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>Status *</label>
-                <select
-                  name="status"
-                  value={form.status}
-                  onChange={handleChange}
-                  required
-                >
+                <select name="status" value={form.status} onChange={handleChange} required>
                   <option value="">Select status</option>
                   <option value="active">Active</option>
                   <option value="completed">Completed</option>
@@ -175,76 +128,36 @@ const AddProject = () => {
                   <option value="on_hold">On Hold</option>
                 </select>
               </div>
-
               <div className="form-group">
                 <label>Technologies *</label>
-                <input
-                  type="text"
-                  name="tech_stack"
-                  value={form.tech_stack}
-                  onChange={handleChange}
-                  placeholder="e.g., React, Node.js, MongoDB"
-                  required
-                />
+                <input type="text" name="tech_stack" value={form.tech_stack} onChange={handleChange} placeholder="e.g., React, Node.js, MongoDB" required />
               </div>
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>Start Date</label>
-                <input
-                  type="date"
-                  name="start_date"
-                  value={form.start_date}
-                  onChange={handleChange}
-                />
+                <input type="date" name="start_date" value={form.start_date} onChange={handleChange} />
               </div>
-
               <div className="form-group">
                 <label>End Date</label>
-                <input
-                  type="date"
-                  name="end_date"
-                  value={form.end_date}
-                  onChange={handleChange}
-                  disabled={form.status !== "completed"}
-                  required={form.status === "completed"}
-                />
+                <input type="date" name="end_date" value={form.end_date} onChange={handleChange} disabled={form.status !== "completed"} required={form.status === "completed"} />
               </div>
             </div>
 
             <div className="form-group">
               <label>Description *</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                placeholder="Enter project description"
-                required
-              ></textarea>
+              <textarea name="description" value={form.description} onChange={handleChange} placeholder="Enter project description" required />
             </div>
 
             <div className="form-row">
               <div className="form-group">
                 <label>Live URL</label>
-                <input
-                  type="url"
-                  name="live_link"
-                  value={form.live_link}
-                  onChange={handleChange}
-                  placeholder="https://example.com"
-                />
+                <input type="url" name="live_link" value={form.live_link} onChange={handleChange} placeholder="https://example.com" />
               </div>
-
               <div className="form-group">
                 <label>GitHub URL</label>
-                <input
-                  type="url"
-                  name="github_link"
-                  value={form.github_link}
-                  onChange={handleChange}
-                  placeholder="https://github.com/username/repo"
-                />
+                <input type="url" name="github_link" value={form.github_link} onChange={handleChange} placeholder="https://github.com/username/repo" />
               </div>
             </div>
 
@@ -252,9 +165,7 @@ const AddProject = () => {
               <button className="create-btn" type="submit" disabled={loading}>
                 {loading ? "Creating..." : "Create Project"}
               </button>
-              <button className="cancel-btn" type="button" onClick={handleBackClick}>
-                Cancel
-              </button>
+              <button className="cancel-btn" type="button" onClick={handleBackClick}>Cancel</button>
             </div>
           </form>
         </div>
