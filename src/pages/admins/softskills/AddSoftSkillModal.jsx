@@ -7,40 +7,59 @@ import { addSoftSkill } from "../../../services/softSkillService";
 const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [level, setLevel] = useState(0);
+  const [level, setLevel] = useState(50);
   const [loading, setLoading] = useState(false);
 
   if (!isOpen) return null;
 
+  const resetForm = () => {
+    setName("");
+    setDescription("");
+    setLevel(50);
+  };
+
+  const validateForm = () => {
+    if (!name.trim()) {
+      return { type: "warning", title: "Missing Field", text: "Soft skill name is required." };
+    }
+    if (!description.trim()) {
+      return { type: "warning", title: "Missing Field", text: "Description is required." };
+    }
+    if (level < 0 || level > 100) {
+      return { type: "error", title: "Invalid Level", text: "Level must be between 0 and 100." };
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const skillData = { name, description, level };
+    const validationError = validateForm();
+    if (validationError) {
+      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      return;
+    }
 
     try {
       setLoading(true);
-      const response = await addSoftSkill(skillData);
+      const response = await addSoftSkill({ name, description, level });
 
       Swal.fire({
         icon: "success",
         title: "Added!",
         text: "Soft skill added successfully.",
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
 
-      setName("");
-      setDescription("");
-      setLevel(0);
-
-      if (onSkillAdded) onSkillAdded(response);
-
+      resetForm();
+      onSkillAdded?.(response);
       onClose();
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Failed",
-        text: error.message || "Failed to add soft skill"
+        text: error.message || "Failed to add soft skill",
       });
     } finally {
       setLoading(false);
@@ -52,7 +71,12 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
       <div className="softskill-modal-box">
         <div className="softskill-modal-header">
           <h2>Add Soft Skill</h2>
-          <button className="softskill-close-btn" onClick={onClose}>
+          <button
+            className="softskill-close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+            disabled={loading}
+          >
             <FiX size={20} />
           </button>
         </div>
@@ -68,6 +92,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={loading}
             />
           </label>
 
@@ -78,6 +103,8 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
+              required
+              disabled={loading}
             />
           </label>
 
@@ -91,8 +118,10 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               onChange={(e) => setLevel(Number(e.target.value))}
               onBlur={() => {
                 const clean = Math.max(0, Math.min(100, Number(level)));
-                setLevel(isNaN(clean) ? 0 : clean);
+                setLevel(isNaN(clean) ? 50 : clean);
               }}
+              required
+              disabled={loading}
             />
           </label>
 
@@ -105,6 +134,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               onChange={(e) => setLevel(Number(e.target.value))}
               className="softskill-level-slider"
               style={{ "--percent": `${level}%` }}
+              disabled={loading}
             />
             <span className="softskill-level-percent">{level}%</span>
           </div>
