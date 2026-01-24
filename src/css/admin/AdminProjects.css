@@ -10,6 +10,7 @@
     padding: 32px;
     background: #f8fafc;
     overflow-x: auto;
+    animation: fadeSlide 0.5s ease forwards;
 }
 
 .projects-header {
@@ -44,10 +45,13 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .add-project-btn:hover {
     background: #1d4ed8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
 }
 
 .search-card {
@@ -103,6 +107,15 @@ td {
     vertical-align: middle;
 }
 
+tbody tr {
+    animation: rowFade 0.4s ease forwards;
+}
+
+tbody tr:hover {
+    background: #f8fafc;
+    transition: background 0.2s ease;
+}
+
 .project-name {
     font-weight: 500;
     color: #0f172a;
@@ -152,30 +165,6 @@ td {
     transform: scale(1.1);
 }
 
-@media (max-width: 1024px) {
-    .project-desc {
-        max-width: 200px;
-    }
-}
-
-@media (max-width: 768px) {
-    .admin-content {
-        padding: 20px;
-    }
-
-    th,
-    td {
-        font-size: 13px;
-        padding: 12px;
-    }
-
-    .projects-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-}
-
 .icon-btn {
     width: 34px;
     height: 34px;
@@ -187,6 +176,7 @@ td {
     cursor: pointer;
     background: transparent;
     font-size: 16px;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .icon-btn.edit {
@@ -195,6 +185,7 @@ td {
 
 .icon-btn.edit:hover {
     background: #e0f2fe;
+    transform: scale(1.15);
 }
 
 .icon-btn.delete {
@@ -203,48 +194,7 @@ td {
 
 .icon-btn.delete:hover {
     background: #fee2e2;    
-}
-
-.empty-state {
-    text-align: center;
-    padding: 40px;
-    color: #64748b;
-}
-
-.empty-state h3 {
-    font-size: 18px;
-    margin-bottom: 6px;
-    color: #0f172a;
-}
-
-.status-badge {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.25rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    text-transform: capitalize;
-}
-
-
-.status-active {
-    background-color: #dbeafe;
-    color: #1e40af;
-}
-
-.status-completed {
-    background-color: #d1fae5; 
-    color: #065f46;
-}
-
-.status-in-progress {
-    background-color: #fef3c7; 
-    color: #78350f;
-}
-
-.status-on-hold {
-    background-color: #fee2e2; 
-    color: #991b1b;
+    transform: scale(1.15);
 }
 
 .actions .icon-btn {
@@ -267,30 +217,70 @@ td {
     color: #ef4444;
 }
 
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #64748b;
+    position: relative;
+    overflow: hidden;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 6px;
+    color: #0f172a;
+}
+
+.empty-state::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: shimmer 1.2s infinite;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    animation: badgePop 0.3s ease;
+}
+
+.status-active {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.status-completed {
+    background-color: #d1fae5; 
+    color: #065f46;
+}
+
+.status-in-progress {
+    background-color: #fef3c7; 
+    color: #78350f;
+}
+
+.status-on-hold {
+    background-color: #fee2e2; 
+    color: #991b1b;
+}
+
 .link-btn.github {
     color: #111827;
 }
 
 .text-clamp {
-    display: inline-block;
-    max-width: 280px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.text-clamp {
     display: -webkit-box;
     -webkit-box-orient: vertical;
-
-    line-clamp: 1;
-
     -webkit-line-clamp: 1;
-
+    line-clamp: 1;
     overflow: hidden;
     max-width: 280px;
 }
-
 
 .tech-clamp {
     max-width: 280px;
@@ -310,9 +300,20 @@ td {
   color: #555;
 }
 
-/* page fade-in */
-.admin-content {
-    animation: fadeSlide 0.5s ease forwards;
+.project-row {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.project-row:hover {
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+}
+
+.modal-overlay {
+    animation: modalFade 0.3s ease forwards;
+}
+
+.modal-content {
+    animation: modalScale 0.3s ease forwards;
 }
 
 @keyframes fadeSlide {
@@ -326,11 +327,6 @@ td {
     }
 }
 
-/* table row animation */
-tbody tr {
-    animation: rowFade 0.4s ease forwards;
-}
-
 @keyframes rowFade {
     from {
         opacity: 0;
@@ -342,36 +338,6 @@ tbody tr {
     }
 }
 
-/* row hover */
-tbody tr:hover {
-    background: #f8fafc;
-    transition: background 0.2s ease;
-}
-
-/* button hover animation */
-.add-project-btn {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.add-project-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.25);
-}
-
-/* icon button animation */
-.icon-btn {
-    transition: transform 0.2s ease, background 0.2s ease;
-}
-
-.icon-btn:hover {
-    transform: scale(1.15);
-}
-
-/* status badge pop */
-.status-badge {
-    animation: badgePop 0.3s ease;
-}
-
 @keyframes badgePop {
     0% {
         transform: scale(0.9);
@@ -381,15 +347,6 @@ tbody tr:hover {
         transform: scale(1);
         opacity: 1;
     }
-}
-
-/* modal fade animation */
-.modal-overlay {
-    animation: modalFade 0.3s ease forwards;
-}
-
-.modal-content {
-    animation: modalScale 0.3s ease forwards;
 }
 
 @keyframes modalFade {
@@ -408,25 +365,6 @@ tbody tr:hover {
     }
 }
 
-/* loading shimmer */
-.empty-state {
-    position: relative;
-    overflow: hidden;
-}
-
-.empty-state::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255,255,255,0.6),
-        transparent
-    );
-    animation: shimmer 1.2s infinite;
-}
-
 @keyframes shimmer {
     from {
         transform: translateX(-100%);
@@ -436,10 +374,24 @@ tbody tr:hover {
     }
 }
 
-.project-row {
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+@media (max-width: 1024px) {
+    .project-desc {
+        max-width: 200px;
+    }
 }
 
-.project-row:hover {
-  box-shadow: 0 0 12px rgba(37, 99, 235, 0.5);
+@media (max-width: 768px) {
+    .admin-content {
+        padding: 20px;
+    }
+    th,
+    td {
+        font-size: 13px;
+        padding: 12px;
+    }
+    .projects-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
 }
