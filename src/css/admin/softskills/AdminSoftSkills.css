@@ -32,10 +32,12 @@
   border-radius: 10px;
   cursor: pointer;
   font-weight: 500;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .add-soft-skill-btn:hover {
   background: #1d4ed8;
+  transform: translateY(-2px);
 }
 
 /* Grid */
@@ -51,6 +53,12 @@
   border-radius: 16px;
   padding: 20px;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.soft-skill-card:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+  transform: translateY(-4px);
 }
 
 /* Card Header */
@@ -75,19 +83,17 @@
   font-size: 18px;
   cursor: pointer;
   color: #64748b;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
-/* Hover colors */
 .soft-skill-actions svg:hover {
   color: #2563eb;
+  transform: scale(1.1);
 }
 
-/* Delete emphasis */
 .soft-skill-actions svg:nth-child(2):hover {
   color: #dc2626;
 }
-
 
 /* Progress */
 .soft-skill-progress {
@@ -109,6 +115,7 @@
   height: 100%;
   background: #2563eb;
   border-radius: 6px;
+  transition: width 0.4s ease;
 }
 
 .soft-skill-progress span {
@@ -117,45 +124,29 @@
   min-width: 36px;
 }
 
+/* Description with clamp */
 .soft-skill-description {
   font-size: 14px;
   color: #64748b;
   line-height: 1.6;
-
   display: -webkit-box;
-  display: box;
-
-  line-clamp: 2;
-  -webkit-line-clamp: 2;
-
-  box-orient: vertical;
   -webkit-box-orient: vertical;
-
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
 }
 
+/* Footer */
 .table-footer-soft-skill {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 16px;
   padding: 0 12px;
-  margin-top: 1px solid #e5e7eb;
+  border-top: 1px solid #e5e7eb;
 }
 
 .table-summary-soft-skill {
   font-size: 14px;
   color: #555;
-}
-
-.soft-skill-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.soft-skill-card:hover {
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
 }
