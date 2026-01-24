@@ -26,23 +26,28 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
         const edu = response.data;
 
         setFormData({
-          institution: edu.institution,
-          level: edu.level,
-          program: edu.program,
-          startYear: edu.start_year,
-          endYear: edu.end_year,
+          institution: edu.institution || "",
+          level: edu.level || "",
+          program: edu.program || "",
+          startYear: edu.start_year || "",
+          endYear: edu.end_year || "",
           board: edu.board || "",
           description: edu.description || "",
         });
       } catch (error) {
-        alert(error.message || "Failed to fetch education");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "Failed to fetch education",
+        });
+        onClose();
       } finally {
         setLoading(false);
       }
     };
 
     fetchEducation();
-  }, [isOpen, educationId]);
+  }, [isOpen, educationId, onClose]);
 
   if (!isOpen) return null;
 
@@ -50,44 +55,59 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-
-  const payload = {
-    institution: formData.institution,
-    level: formData.level,
-    program: formData.program,
-    start_year: formData.startYear,
-    end_year: formData.endYear,
-    board: formData.board,
-    description: formData.description,
+  const validateForm = () => {
+    if (!formData.institution.trim() || !formData.level.trim() || !formData.program.trim()) {
+      return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
+    }
+    if (formData.startYear && formData.endYear && Number(formData.endYear) < Number(formData.startYear)) {
+      return { type: "error", title: "Invalid Years", text: "End year must be greater than or equal to start year." };
+    }
+    return null;
   };
 
-  try {
-    setLoading(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    const response = await updateEducation(educationId, payload);
+    const validationError = validateForm();
+    if (validationError) {
+      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      return;
+    }
 
-    Swal.fire({
-      icon: "success",
-      title: "Updated!",
-      text: "Education updated successfully",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    const payload = {
+      institution: formData.institution,
+      level: formData.level,
+      program: formData.program,
+      start_year: formData.startYear,
+      end_year: formData.endYear,
+      board: formData.board,
+      description: formData.description,
+    };
 
-    if (onEducationUpdated) onEducationUpdated(response);
-    onClose();
-  } catch (error) {
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: error?.message || "Failed to update education",
-    });
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const response = await updateEducation(educationId, payload);
+
+      Swal.fire({
+        icon: "success",
+        title: "Updated!",
+        text: "Education updated successfully",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+
+      onEducationUpdated?.(response);
+      onClose();
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error?.message || "Failed to update education",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="edu-modal-overlay">
@@ -97,7 +117,12 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
             <h2>Edit Education</h2>
             <p>Update your education details</p>
           </div>
-          <button className="close-btn" onClick={onClose}>
+          <button
+            className="close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+            disabled={loading}
+          >
             <FiX size={20} />
           </button>
         </div>
@@ -114,6 +139,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 value={formData.institution}
                 onChange={handleChange}
                 required
+                disabled={loading}
               />
             </label>
 
@@ -126,6 +152,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                   value={formData.level}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
 
@@ -137,6 +164,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                   value={formData.program}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
             </div>
@@ -150,6 +178,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                   value={formData.startYear}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
 
@@ -161,6 +190,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                   value={formData.endYear}
                   onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
             </div>
@@ -172,6 +202,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 name="board"
                 value={formData.board}
                 onChange={handleChange}
+                disabled={loading}
               />
             </label>
 
@@ -182,11 +213,12 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
+                disabled={loading}
               />
             </label>
 
             <div className="edu-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>
+              <button type="button" className="cancel-btn" onClick={onClose} disabled={loading}>
                 Cancel
               </button>
               <button type="submit" className="add-btn" disabled={loading}>
