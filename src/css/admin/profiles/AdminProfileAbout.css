@@ -1,6 +1,7 @@
 .profile-container {
     flex: 1;
     overflow-x: hidden;
+    animation: fadeInUp 0.6s ease forwards;
 }
 
 .profile-header {
@@ -11,6 +12,17 @@
     margin: 0;
     font-size: 26px;
     font-weight: 600;
+    position: relative;
+}
+
+.profile-header h1::after {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #38bdf8);
+    border-radius: 999px;
+    margin-top: 8px;
 }
 
 .profile-header p {
@@ -24,6 +36,12 @@
     padding: 22px 24px;
     margin-bottom: 24px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
 }
 
 .profile-card h2 {
@@ -38,6 +56,14 @@
     margin-top: 4px;
     font-size: 13px;
     color: #64748b;
+}
+
+.profile-card:not(:last-child)::after {
+    content: "";
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+    margin-top: 24px;
 }
 
 .identity-box {
@@ -56,6 +82,20 @@
     align-items: center;
     justify-content: center;
     font-size: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+}
+
+.avatar:hover img {
+    transform: scale(1.08);
 }
 
 .identity-box h3 {
@@ -96,6 +136,7 @@
     font-size: 13px;
     color: #475569;
     font-weight: 500;
+    letter-spacing: 0.3px;
 }
 
 .form-group input,
@@ -106,6 +147,19 @@
     padding: 10px 12px;
     font-size: 14px;
     color: #0f172a;
+    transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    background: #fff;
+}
+
+.admin-about {
+    margin-top: 8px;
 }
 
 .save-btn {
@@ -120,45 +174,35 @@
     border-radius: 8px;
     font-size: 14px;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .save-btn:hover {
     background: #1e4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
 }
 
-.avatar {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-}
-
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 50%;
-}
-
-.avatar img {
-    transition: transform 0.3s ease;
-}
-
-.avatar:hover img {
-    transform: scale(1.08);
-}
-
-.admin-about {
-    margin-top: 8px;
+.save-btn:active {
+    transform: scale(0.96);
 }
 
 .save-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 @media (max-width: 1024px) {
@@ -168,7 +212,6 @@
 }
 
 @media (max-width: 768px) {
-
     .grid-2,
     .grid-4 {
         grid-template-columns: 1fr;
