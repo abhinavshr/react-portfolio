@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { FiEdit2, FiTrash2, FiPlus, FiEye } from "react-icons/fi";
 import Swal from "sweetalert2";
@@ -22,62 +22,36 @@ const AdminSoftSkills = () => {
     to: 0,
   });
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [selectedSkillId, setSelectedSkillId] = useState(null);
+  const [modalState, setModalState] = useState({
+    add: false,
+    view: false,
+    edit: false,
+    selectedId: null,
+  });
 
-  useEffect(() => {
-    fetchSoftSkills();
-  }, []);
-
-  const fetchSoftSkills = async (page = 1) => {
+  const fetchSoftSkills = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const response = await viewAllSoftSkills(page);
+      const { current_page, last_page, total, per_page } = response.pagination;
       setSoftSkills(response.data || []);
       setPagination({
-        currentPage: response.pagination.current_page,
-        lastPage: response.pagination.last_page,
-        total: response.pagination.total,
-        from: (response.pagination.current_page - 1) * response.pagination.per_page + 1,
-        to: (response.pagination.current_page - 1) * response.pagination.per_page + response.data.length,
+        currentPage: current_page,
+        lastPage: last_page,
+        total,
+        from: (current_page - 1) * per_page + 1,
+        to: (current_page - 1) * per_page + response.data.length,
       });
     } catch (error) {
-      console.error("Failed to fetch soft skills:", error);
+      Swal.fire("Error!", error.message || "Failed to fetch soft skills.", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleAddSoftSkill = () => setIsAddModalOpen(true);
-  const handleCloseAddModal = () => setIsAddModalOpen(false);
-  const handleSoftSkillAdded = () => {
-    fetchSoftSkills(pagination.currentPage);
-    setIsAddModalOpen(false);
-  };
-
-  const handleViewSoftSkill = (id) => {
-    setSelectedSkillId(id);
-    setIsViewModalOpen(true);
-  };
-  const handleCloseViewModal = () => {
-    setSelectedSkillId(null);
-    setIsViewModalOpen(false);
-  };
-
-  const handleEditSoftSkill = (id) => {
-    setSelectedSkillId(id);
-    setIsEditModalOpen(true);
-  };
-  const handleCloseEditModal = () => {
-    setSelectedSkillId(null);
-    setIsEditModalOpen(false);
-  };
-  const handleSoftSkillUpdated = () => {
-    fetchSoftSkills(pagination.currentPage);
-    setIsEditModalOpen(false);
-  };
+  useEffect(() => {
+    fetchSoftSkills();
+  }, [fetchSoftSkills]);
 
   const handleDeleteSoftSkill = async (id, title) => {
     const result = await Swal.fire({
@@ -97,7 +71,6 @@ const AdminSoftSkills = () => {
         Swal.fire("Deleted!", `"${title}" has been deleted.`, "success");
         fetchSoftSkills(pagination.currentPage);
       } catch (error) {
-        console.error("Failed to delete skill:", error);
         Swal.fire("Error!", error.message || "Failed to delete soft skill.", "error");
       }
     }
@@ -113,8 +86,10 @@ const AdminSoftSkills = () => {
             <h1>Soft Skills</h1>
             <p>Manage your interpersonal and professional skills</p>
           </div>
-
-          <button className="add-soft-skill-btn" onClick={handleAddSoftSkill}>
+          <button
+            className="add-soft-skill-btn"
+            onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
+          >
             <FiPlus /> Add Soft Skill
           </button>
         </div>
@@ -136,12 +111,22 @@ const AdminSoftSkills = () => {
               <div className="soft-skill-card-header">
                 <h3>{skill.name}</h3>
                 <div className="soft-skill-actions">
-                  <FiEdit2 title="Edit" onClick={() => handleEditSoftSkill(skill.id)} />
+                  <FiEdit2
+                    title="Edit"
+                    onClick={() =>
+                      setModalState({ edit: true, selectedId: skill.id, add: false, view: false })
+                    }
+                  />
                   <FiTrash2
                     title="Delete"
                     onClick={() => handleDeleteSoftSkill(skill.id, skill.name)}
                   />
-                  <FiEye title="View" onClick={() => handleViewSoftSkill(skill.id)} />
+                  <FiEye
+                    title="View"
+                    onClick={() =>
+                      setModalState({ view: true, selectedId: skill.id, add: false, edit: false })
+                    }
+                  />
                 </div>
               </div>
 
@@ -172,35 +157,38 @@ const AdminSoftSkills = () => {
             <Pagination
               currentPage={pagination.currentPage}
               totalPages={pagination.lastPage}
-              onPageChange={(page) => {
-                setLoading(true);
-                fetchSoftSkills(page);
-              }}
+              onPageChange={(page) => fetchSoftSkills(page)}
             />
           </div>
         )}
       </main>
 
       <AddSoftSkillModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseAddModal}
-        onSkillAdded={handleSoftSkillAdded}
+        isOpen={modalState.add}
+        onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
+        onSkillAdded={() => {
+          fetchSoftSkills(pagination.currentPage);
+          setModalState((prev) => ({ ...prev, add: false }));
+        }}
       />
 
-      {isViewModalOpen && selectedSkillId && (
+      {modalState.view && modalState.selectedId && (
         <ViewSoftSkillModal
-          isOpen={isViewModalOpen}
-          onClose={handleCloseViewModal}
-          skillId={selectedSkillId}
+          isOpen={modalState.view}
+          onClose={() => setModalState((prev) => ({ ...prev, view: false, selectedId: null }))}
+          skillId={modalState.selectedId}
         />
       )}
 
-      {isEditModalOpen && selectedSkillId && (
+      {modalState.edit && modalState.selectedId && (
         <EditSoftSkillModal
-          isOpen={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          skillId={selectedSkillId}
-          onSkillUpdated={handleSoftSkillUpdated}
+          isOpen={modalState.edit}
+          onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+          skillId={modalState.selectedId}
+          onSkillUpdated={() => {
+            fetchSoftSkills(pagination.currentPage);
+            setModalState((prev) => ({ ...prev, edit: false, selectedId: null }));
+          }}
         />
       )}
     </div>
