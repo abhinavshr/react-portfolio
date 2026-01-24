@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Eye, Briefcase, Calendar, MapPin } from "lucide-react";
 import "../../../css/admin/experiences/AdminExperience.css";
@@ -14,12 +14,13 @@ const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [viewModalOpen, setViewModalOpen] = useState(false);
-  const [selectedExperienceId, setSelectedExperienceId] = useState(null);
-  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [modalState, setModalState] = useState({
+    add: false,
+    view: false,
+    edit: false,
+    selectedId: null,
+  });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -29,29 +30,23 @@ const AdminExperience = () => {
     to: 0,
   });
 
-  useEffect(() => {
-    fetchExperiences();
-  }, []);
-
-  const fetchExperiences = async (page = 1) => {
-    setLoading(true);
+  const fetchExperiences = useCallback(async (page = 1) => {
     try {
+      setLoading(true);
       const response = await viewAllExperiences(page);
-      setExperiences(response.data.data || []);
-      setPagination({
-        currentPage: response.data.current_page,
-        lastPage: response.data.last_page,
-        total: response.data.total,
-        from: response.data.from,
-        to: response.data.to,
-      });
+      const { data, current_page, last_page, total, from, to } = response.data;
+      setExperiences(data || []);
+      setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (error) {
-      setError(error.message || "Failed to fetch experiences");
       Swal.fire("Error", error.message || "Failed to fetch experiences", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchExperiences();
+  }, [fetchExperiences]);
 
   const handleDelete = async (exp) => {
     const result = await Swal.fire({
@@ -61,7 +56,7 @@ const AdminExperience = () => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     });
 
     if (result.isConfirmed) {
@@ -87,15 +82,13 @@ const AdminExperience = () => {
             </div>
             <button
               className="add-experience-btn"
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
             >
-              <Plus size={18} />
-              Add Experience
+              <Plus size={18} /> Add Experience
             </button>
           </div>
 
           {loading && <p>Loading experiences...</p>}
-          {error && <p className="error-text">{error}</p>}
           {!loading && experiences.length === 0 && <p>No experiences found.</p>}
 
           {!loading &&
@@ -117,19 +110,17 @@ const AdminExperience = () => {
                   <div className="experience-actions">
                     <button
                       className="icon-btn view"
-                      onClick={() => {
-                        setSelectedExperienceId(exp.id);
-                        setViewModalOpen(true);
-                      }}
+                      onClick={() =>
+                        setModalState({ view: true, selectedId: exp.id, add: false, edit: false })
+                      }
                     >
                       <Eye size={18} />
                     </button>
                     <button
                       className="icon-btn edit"
-                      onClick={() => {
-                        setSelectedExperienceId(exp.id);
-                        setEditModalOpen(true);
-                      }}
+                      onClick={() =>
+                        setModalState({ edit: true, selectedId: exp.id, add: false, view: false })
+                      }
                     >
                       <Edit size={18} />
                     </button>
@@ -160,36 +151,34 @@ const AdminExperience = () => {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.lastPage}
-                onPageChange={(page) => {
-                  setLoading(true);
-                  fetchExperiences(page);
-                }}
+                onPageChange={(page) => fetchExperiences(page)}
               />
             </div>
           )}
         </div>
 
         <AddExperienceModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={modalState.add}
+          onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onExperienceAdded={() => fetchExperiences(pagination.currentPage)}
         />
 
-        <ViewExperienceModal
-          isOpen={viewModalOpen}
-          onClose={() => setViewModalOpen(false)}
-          experienceId={selectedExperienceId}
-        />
+        {modalState.view && modalState.selectedId && (
+          <ViewExperienceModal
+            isOpen={modalState.view}
+            onClose={() => setModalState((prev) => ({ ...prev, view: false, selectedId: null }))}
+            experienceId={modalState.selectedId}
+          />
+        )}
 
-        <EditExperienceModal
-          isOpen={editModalOpen}
-          onClose={() => {
-            setEditModalOpen(false);
-            setSelectedExperienceId(null);
-          }}
-          experienceId={selectedExperienceId}
-          onExperienceUpdated={() => fetchExperiences(pagination.currentPage)}
-        />
+        {modalState.edit && modalState.selectedId && (
+          <EditExperienceModal
+            isOpen={modalState.edit}
+            onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+            experienceId={modalState.selectedId}
+            onExperienceUpdated={() => fetchExperiences(pagination.currentPage)}
+          />
+        )}
       </main>
     </div>
   );
