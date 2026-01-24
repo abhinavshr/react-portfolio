@@ -34,10 +34,12 @@
   border-radius: 8px;
   font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .add-education-btn:hover {
   background: #1e4ed8;
+  transform: translateY(-2px);
 }
 
 /* Card */
@@ -47,6 +49,12 @@
   padding: 22px 24px;
   margin-bottom: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.education-card:hover {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+  transform: translateY(-4px);
 }
 
 .education-card-header {
@@ -80,18 +88,6 @@
 }
 
 /* Actions */
-.card-actions {
-  display: flex;
-  gap: 12px;
-  font-size: 18px;
-  color: #64748b;
-  cursor: pointer;
-}
-
-.card-actions svg:hover {
-  color: #2563eb;
-}
-
 .education-actions {
   display: flex;
   gap: 12px;
@@ -107,10 +103,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .icon-btn:hover {
   background: #f1f5f9;
+  transform: scale(1.05);
 }
 
 .icon-btn.view:hover {
@@ -155,23 +153,21 @@
   margin: 0 6px;
 }
 
+/* Description with clamp */
 .education-description {
   margin-top: 12px;
   font-size: 14px;
   color: #475569;
   line-height: 1.6;
 
-  
-  display: -webkit-box;        
+  display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
-
-  display: box;                
-  box-orient: vertical;
-  line-clamp: 2;               
 }
 
+/* Footer */
 .table-footer-education {
   display: flex;
   justify-content: space-between;
@@ -186,15 +182,20 @@
   color: #555;
 }
 
-.education-card {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 22px 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.3s ease;
-}
+/* Responsive */
+@media (max-width: 768px) {
+  .education-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
 
-.education-card:hover {
-  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+  .add-education-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .education-card {
+    padding: 18px;
+  }
 }

@@ -1,13 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  Eye,
-  GraduationCap,
-  Calendar
-} from "lucide-react";
+import { Plus, Edit, Trash2, Eye, GraduationCap, Calendar } from "lucide-react";
 import "../../../css/admin/educations/AdminEducation.css";
 import Swal from "sweetalert2";
 import { viewAllEducations, deleteEducation } from "../../../services/educationService";
@@ -21,12 +14,13 @@ const AdminEducation = () => {
   const [active, setActive] = useState("Education");
   const [educations, setEducations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  const [openAddModal, setOpenAddModal] = useState(false);
-  const [selectedEducationId, setSelectedEducationId] = useState(null);
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [modalState, setModalState] = useState({
+    add: false,
+    view: false,
+    edit: false,
+    selectedId: null,
+  });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -36,48 +30,23 @@ const AdminEducation = () => {
     to: 0,
   });
 
-  useEffect(() => {
-    fetchEducations();
-  }, []);
-
-  const fetchEducations = async (page = 1) => {
+  const fetchEducations = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const response = await viewAllEducations(page);
-      setEducations(response.data.data || []);
-      setPagination({
-        currentPage: response.data.current_page,
-        lastPage: response.data.last_page,
-        total: response.data.total,
-        from: response.data.from,
-        to: response.data.to,
-      });
+      const { data, current_page, last_page, total, from, to } = response.data;
+      setEducations(data || []);
+      setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (err) {
-      setError(err.message || "Failed to fetch educations");
+      Swal.fire("Error!", err.message || "Failed to fetch educations", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleViewClick = (id) => {
-    setSelectedEducationId(id);
-    setIsViewOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsViewOpen(false);
-    setSelectedEducationId(null);
-  };
-
-  const handleCloseEdit = () => {
-    setIsEditOpen(false);
-    setSelectedEducationId(null);
-  };
-
-  const handleEditClick = (id) => {
-    setSelectedEducationId(id);
-    setIsEditOpen(true);
-  };
+  useEffect(() => {
+    fetchEducations();
+  }, [fetchEducations]);
 
   const handleDelete = async (edu) => {
     const result = await Swal.fire({
@@ -112,28 +81,17 @@ const AdminEducation = () => {
               <h1>Education</h1>
               <p>Manage your educational background</p>
             </div>
-
             <button
               className="add-education-btn"
-              onClick={() => setOpenAddModal(true)}
+              onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
             >
               <Plus size={18} /> Add Education
             </button>
           </div>
 
-          {loading && (
-            <div className="empty-state">
-              <p>Loading educations...</p>
-            </div>
-          )}
+          {loading && <div className="empty-state"><p>Loading educations...</p></div>}
 
-          {error && (
-            <div className="empty-state error">
-              <p>{error}</p>
-            </div>
-          )}
-
-          {!loading && educations.length > 0 &&
+          {!loading && educations.length > 0 ? (
             educations.map((edu, index) => (
               <Motion.div
                 key={edu.id}
@@ -148,24 +106,21 @@ const AdminEducation = () => {
                     <GraduationCap size={20} className="edu-icon" />
                     {edu.level} {edu.program && `(${edu.program})`}
                   </h2>
-
                   <div className="education-actions">
                     <button
                       className="icon-btn view"
                       title="View"
-                      onClick={() => handleViewClick(edu.id)}
+                      onClick={() => setModalState({ view: true, selectedId: edu.id, add: false, edit: false })}
                     >
                       <Eye size={18} />
                     </button>
-
                     <button
                       className="icon-btn edit"
                       title="Edit"
-                      onClick={() => handleEditClick(edu.id)}
+                      onClick={() => setModalState({ edit: true, selectedId: edu.id, add: false, view: false })}
                     >
                       <Edit size={18} />
                     </button>
-
                     <button
                       className="icon-btn delete"
                       title="Delete"
@@ -191,16 +146,11 @@ const AdminEducation = () => {
                   </span>
                 </div>
 
-                <p className="education-description">
-                  {edu.description}
-                </p>
+                <p className="education-description">{edu.description}</p>
               </Motion.div>
-            ))}
-
-          {!loading && educations.length === 0 && (
-            <div className="empty-state">
-              <p>No education records found</p>
-            </div>
+            ))
+          ) : (
+            !loading && <div className="empty-state"><p>No education records found</p></div>
           )}
 
           {!loading && educations.length > 0 && (
@@ -211,33 +161,34 @@ const AdminEducation = () => {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.lastPage}
-                onPageChange={(page) => {
-                  setLoading(true);
-                  fetchEducations(page);
-                }}
+                onPageChange={(page) => fetchEducations(page)}
               />
             </div>
           )}
         </div>
 
         <AddEducationModal
-          isOpen={openAddModal}
-          onClose={() => setOpenAddModal(false)}
+          isOpen={modalState.add}
+          onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
           onEducationAdded={() => fetchEducations(pagination.currentPage)}
         />
 
-        <ViewEducationModal
-          isOpen={isViewOpen}
-          onClose={handleCloseModal}
-          educationId={selectedEducationId}
-        />
+        {modalState.view && modalState.selectedId && (
+          <ViewEducationModal
+            isOpen={modalState.view}
+            onClose={() => setModalState((prev) => ({ ...prev, view: false, selectedId: null }))}
+            educationId={modalState.selectedId}
+          />
+        )}
 
-        <EditEducationModal
-          isOpen={isEditOpen}
-          onClose={handleCloseEdit}
-          educationId={selectedEducationId}
-          onEducationUpdated={() => fetchEducations(pagination.currentPage)}
-        />
+        {modalState.edit && modalState.selectedId && (
+          <EditEducationModal
+            isOpen={modalState.edit}
+            onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+            educationId={modalState.selectedId}
+            onEducationUpdated={() => fetchEducations(pagination.currentPage)}
+          />
+        )}
       </main>
     </div>
   );
