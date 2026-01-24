@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
@@ -20,18 +20,18 @@ const AdminProjects = () => {
 
   const navigate = useNavigate();
 
-  const statusColors = {
-    active: "status-active",
-    completed: "status-completed",
-    in_progress: "status-in-progress",
-    on_hold: "status-on-hold",
-  };
+  const statusColors = useMemo(
+    () => ({
+      active: "status-active",
+      completed: "status-completed",
+      in_progress: "status-in-progress",
+      on_hold: "status-on-hold",
+    }),
+    []
+  );
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  const fetchProjects = async (page = 1) => {
+  const fetchProjects = useCallback(async (page = 1) => {
+    setLoading(true);
     try {
       const response = await viewAllProjects(page);
       setProjects(response.projects?.data || []);
@@ -47,7 +47,11 @@ const AdminProjects = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
 
   const handleViewProject = async (id) => {
     try {
@@ -82,16 +86,19 @@ const AdminProjects = () => {
     }
   };
 
-  const filteredProjects = projects.filter(
-    (project) =>
-      project.title?.toLowerCase().includes(search.toLowerCase()) ||
-      project.tech_stack?.toLowerCase().includes(search.toLowerCase())
+  const filteredProjects = useMemo(
+    () =>
+      projects.filter(
+        (project) =>
+          project.title?.toLowerCase().includes(search.toLowerCase()) ||
+          project.tech_stack?.toLowerCase().includes(search.toLowerCase())
+      ),
+    [projects, search]
   );
 
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
-
       <main className="admin-content">
         <div className="projects-header">
           <div>
@@ -102,7 +109,6 @@ const AdminProjects = () => {
             + Add Project
           </button>
         </div>
-
         <div className="search-card">
           <input
             type="text"
@@ -111,7 +117,6 @@ const AdminProjects = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-
         <div className="table-card">
           {loading ? (
             <div className="empty-state">Loading projects...</div>
@@ -189,24 +194,15 @@ const AdminProjects = () => {
                   ))}
                 </tbody>
               </table>
-
               <div className="table-footer">
                 <div className="table-summary">
                   Showing {pagination.from} to {pagination.to} of {pagination.total} projects
                 </div>
-                <Pagination
-                  currentPage={pagination.currentPage}
-                  totalPages={pagination.lastPage}
-                  onPageChange={(page) => {
-                    setLoading(true);
-                    fetchProjects(page);
-                  }}
-                />
+                <Pagination currentPage={pagination.currentPage} totalPages={pagination.lastPage} onPageChange={fetchProjects} />
               </div>
             </>
           )}
         </div>
-
         {showModal && selectedProject && (
           <ViewProjectModal project={selectedProject} isOpen={showModal} onClose={() => setShowModal(false)} />
         )}
