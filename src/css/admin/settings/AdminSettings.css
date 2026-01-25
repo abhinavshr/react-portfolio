@@ -33,6 +33,12 @@
   margin-bottom: 28px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   width: 100%;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.settings-card:hover {
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  transform: translateY(-2px);
 }
 
 .settings-card-header {
@@ -98,10 +104,12 @@
   cursor: pointer;
   font-size: 14px;
   width: fit-content;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .upload-btn:hover {
   background: #1e40af;
+  transform: translateY(-2px);
 }
 
 .photo-hint {
@@ -133,6 +141,14 @@
   border: 1px solid #e5e7eb;
   background: #f8fafc;
   font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
 }
 
 .save-profile,
@@ -152,10 +168,17 @@
   border-radius: 12px;
   font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .primary-btn:hover {
   background: #1e40af;
+  transform: translateY(-2px);
+}
+
+.primary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .password-input {
@@ -170,12 +193,18 @@
 .password-input span {
   position: absolute;
   right: 12px;
-  top: 60%;
+  top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #777;
+  transition: color 0.2s ease;
 }
 
+.password-input span:hover {
+  color: #2563eb;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
   .profile-form,
   .password-form {
@@ -185,5 +214,9 @@
   .profile-photo {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .settings-card {
+    padding: 20px;
   }
 }

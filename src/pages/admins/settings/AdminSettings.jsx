@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import {
-  User,
-  Lock,
-  Upload,
-  Save,
-  Eye,
-  EyeOff
-} from "lucide-react";
+import { User, Lock, Upload, Save, Eye, EyeOff } from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
 import Swal from "sweetalert2";
 import {
@@ -21,17 +14,20 @@ const AdminSettings = () => {
   const [active, setActive] = useState("Settings");
   const [admin, setAdmin] = useState(null);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [profileData, setProfileData] = useState({ name: "", email: "" });
+  const [passwordData, setPasswordData] = useState({
+    current: "",
+    new: "",
+    confirm: ""
+  });
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState({
+    current: false,
+    new: false,
+    confirm: false
+  });
 
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -39,8 +35,7 @@ const AdminSettings = () => {
       try {
         const res = await viewAdminSettings();
         setAdmin(res.user);
-        setName(res.user.name);
-        setEmail(res.user.email);
+        setProfileData({ name: res.user.name, email: res.user.email });
       } catch {
         Swal.fire("Error", "Failed to load profile", "error");
       }
@@ -48,75 +43,78 @@ const AdminSettings = () => {
     fetchProfile();
   }, []);
 
-  const handleUploadClick = () => {
-    fileInputRef.current.click();
-  };
+  const handleUploadClick = () => fileInputRef.current.click();
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     try {
+      setLoading(true);
       await updateAdminProfilePhoto(file);
       const res = await viewAdminSettings();
       setAdmin(res.user);
       Swal.fire("Success", "Profile photo updated successfully", "success");
     } catch (err) {
-      Swal.fire(
-        "Error",
-        err?.message || "Failed to update profile photo",
-        "error"
-      );
+      Swal.fire("Error", err?.message || "Failed to update profile photo", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveProfile = async () => {
+    if (!profileData.name.trim() || !profileData.email.trim()) {
+      Swal.fire("Error", "Name and email are required", "error");
+      return;
+    }
     try {
-      await updateAdminProfile({ name, email });
+      setLoading(true);
+      await updateAdminProfile(profileData);
       const res = await viewAdminSettings();
       setAdmin(res.user);
       Swal.fire("Success", "Profile updated successfully", "success");
     } catch (err) {
-      Swal.fire(
-        "Error",
-        err?.message || "Failed to update profile",
-        "error"
-      );
+      Swal.fire("Error", err?.message || "Failed to update profile", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleChangePassword = async () => {
+    if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+      Swal.fire("Error", "All password fields are required", "error");
+      return;
+    }
+    if (passwordData.new !== passwordData.confirm) {
+      Swal.fire("Error", "New password and confirmation do not match", "error");
+      return;
+    }
     try {
+      setLoading(true);
       await changeAdminPassword({
-        current_password: currentPassword,
-        new_password: newPassword,
-        new_password_confirmation: confirmPassword
+        current_password: passwordData.current,
+        new_password: passwordData.new,
+        new_password_confirmation: passwordData.confirm
       });
-
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
-
+      setPasswordData({ current: "", new: "", confirm: "" });
       Swal.fire("Success", "Password updated successfully", "success");
     } catch (err) {
-      Swal.fire(
-        "Error",
-        err?.message || "Failed to update password",
-        "error"
-      );
+      Swal.fire("Error", err?.message || "Failed to update password", "error");
+    } finally {
+      setLoading(false);
     }
   };
 
   const isProfileUnchanged =
     admin &&
-    name === admin.name &&
-    email === admin.email;
+    profileData.name === admin.name &&
+    profileData.email === admin.email;
 
   const isPasswordInvalid =
-    !currentPassword ||
-    !newPassword ||
-    !confirmPassword ||
-    newPassword !== confirmPassword;
+    !passwordData.current ||
+    !passwordData.new ||
+    !passwordData.confirm ||
+    passwordData.new !== passwordData.confirm;
 
   return (
     <div className="admin-layout">
@@ -125,9 +123,7 @@ const AdminSettings = () => {
       <main className="admin-content">
         <div className="settings-container">
           <h1 className="settings-title">Settings</h1>
-          <p className="settings-subtitle">
-            Manage your account settings and preferences
-          </p>
+          <p className="settings-subtitle">Manage your account settings and preferences</p>
 
           {/* Profile Information */}
           <div className="settings-card">
@@ -147,11 +143,9 @@ const AdminSettings = () => {
                 </div>
 
                 <div className="photo-actions">
-                  <button className="upload-btn" onClick={handleUploadClick}>
-                    <Upload size={16} />
-                    Upload Photo
+                  <button className="upload-btn" onClick={handleUploadClick} disabled={loading}>
+                    <Upload size={16} /> Upload Photo
                   </button>
-
                   <input
                     type="file"
                     ref={fileInputRef}
@@ -159,10 +153,7 @@ const AdminSettings = () => {
                     accept="image/png,image/jpeg,image/jpg,image/gif"
                     onChange={handleFileChange}
                   />
-
-                  <span className="photo-hint">
-                    JPG, PNG or GIF. Max size 2MB.
-                  </span>
+                  <span className="photo-hint">JPG, PNG or GIF. Max size 2MB.</span>
                 </div>
               </div>
 
@@ -170,17 +161,18 @@ const AdminSettings = () => {
                 <div className="form-group">
                   <label>Full Name</label>
                   <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    value={profileData.name}
+                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                    disabled={loading}
                   />
                 </div>
-
                 <div className="form-group">
                   <label>Email Address</label>
                   <input
                     type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    disabled={loading}
                   />
                 </div>
               </div>
@@ -188,15 +180,10 @@ const AdminSettings = () => {
               <div className="save-profile">
                 <button
                   className="primary-btn"
-                  disabled={isProfileUnchanged}
+                  disabled={isProfileUnchanged || loading}
                   onClick={handleSaveProfile}
-                  style={{
-                    opacity: isProfileUnchanged ? 0.6 : 1,
-                    cursor: isProfileUnchanged ? "not-allowed" : "pointer"
-                  }}
                 >
-                  <Save size={16} />
-                  Save Profile
+                  <Save size={16} /> Save Profile
                 </button>
               </div>
             </div>
@@ -210,61 +197,42 @@ const AdminSettings = () => {
             </div>
 
             <div className="password-form">
-              <div className="form-group password-group">
-                <label>Current Password</label>
-                <div className="password-input">
-                  <input
-                    type={showCurrent ? "text" : "password"}
-                    value={currentPassword}
-                    onChange={(e) => setCurrentPassword(e.target.value)}
-                  />
-                  <span onClick={() => setShowCurrent(!showCurrent)}>
-                    {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
+              {["current", "new", "confirm"].map((field) => (
+                <div className="form-group password-group" key={field}>
+                  <label>
+                    {field === "current" && "Current Password"}
+                    {field === "new" && "New Password"}
+                    {field === "confirm" && "Confirm New Password"}
+                  </label>
+                  <div className="password-input">
+                    <input
+                      type={showPassword[field] ? "text" : "password"}
+                      value={passwordData[field]}
+                      onChange={(e) =>
+                        setPasswordData({ ...passwordData, [field]: e.target.value })
+                      }
+                      disabled={loading}
+                    />
+                    <span
+                      aria-label={`Toggle ${field} password visibility`}
+                      onClick={() =>
+                        setShowPassword({ ...showPassword, [field]: !showPassword[field] })
+                      }
+                    >
+                      {showPassword[field] ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </span>
+                  </div>
                 </div>
-              </div>
-
-              <div className="form-group password-group">
-                <label>New Password</label>
-                <div className="password-input">
-                  <input
-                    type={showNew ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                  />
-                  <span onClick={() => setShowNew(!showNew)}>
-                    {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
-                </div>
-              </div>
-
-              <div className="form-group password-group">
-                <label>Confirm New Password</label>
-                <div className="password-input">
-                  <input
-                    type={showConfirm ? "text" : "password"}
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                  <span onClick={() => setShowConfirm(!showConfirm)}>
-                    {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </span>
-                </div>
-              </div>
+              ))}
             </div>
 
             <div className="update-password">
               <button
                 className="primary-btn"
-                disabled={isPasswordInvalid}
+                disabled={isPasswordInvalid || loading}
                 onClick={handleChangePassword}
-                style={{
-                  opacity: isPasswordInvalid ? 0.6 : 1,
-                  cursor: isPasswordInvalid ? "not-allowed" : "pointer"
-                }}
               >
-                <Lock size={16} />
-                Update Password
+                <Lock size={16} /> Update Password
               </button>
             </div>
           </div>
