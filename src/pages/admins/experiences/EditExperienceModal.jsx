@@ -1,25 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
-import {
-  updateExperience,
-  viewExperienceById
-} from "../../../services/experienceService";
+import { updateExperience, viewExperienceById } from "../../../services/experienceService";
 import Swal from "sweetalert2";
 
-const EditExperienceModal = ({
-  isOpen,
-  onClose,
-  experienceId,
-  onExperienceUpdated
-}) => {
-  const [companyName, setCompanyName] = useState("");
-  const [companyLocation, setCompanyLocation] = useState("");
-  const [role, setRole] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [current, setCurrent] = useState(false);
-  const [description, setDescription] = useState("");
+const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
+  const [formData, setFormData] = useState({
+    companyName: "",
+    companyLocation: "",
+    role: "",
+    startDate: "",
+    endDate: "",
+    current: false,
+    description: "",
+  });
+
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
@@ -32,19 +27,17 @@ const EditExperienceModal = ({
         const response = await viewExperienceById(experienceId);
         const exp = response.data;
 
-        setCompanyName(exp.company_name || "");
-        setCompanyLocation(exp.company_location || "");
-        setRole(exp.role || "");
-        setStartDate(exp.start_date || "");
-        setEndDate(exp.end_date || "");
-        setCurrent(!!exp.is_current);
-        setDescription(exp.description || "");
+        setFormData({
+          companyName: exp.company_name || "",
+          companyLocation: exp.company_location || "",
+          role: exp.role || "",
+          startDate: exp.start_date || "",
+          endDate: exp.end_date || "",
+          current: !!exp.is_current,
+          description: exp.description || "",
+        });
       } catch (error) {
-        Swal.fire(
-          "Error",
-          error.response?.data?.message || "Failed to fetch experience",
-          "error"
-        );
+        Swal.fire("Error", error.response?.data?.message || "Failed to fetch experience", "error");
         onClose();
       } finally {
         setLoadingData(false);
@@ -54,17 +47,41 @@ const EditExperienceModal = ({
     fetchExperience();
   }, [isOpen, experienceId, onClose]);
 
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const validateForm = () => {
+    if (!formData.companyName.trim() || !formData.role.trim() || !formData.companyLocation.trim()) {
+      return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
+    }
+    if (!formData.current && formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
+      return { type: "error", title: "Invalid Dates", text: "End date must be after start date." };
+    }
+    return null;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationError = validateForm();
+    if (validationError) {
+      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      return;
+    }
+
     const payload = {
-      company_name: companyName,
-      company_location: companyLocation,
-      role,
-      start_date: startDate,
-      end_date: current ? null : endDate,
-      is_current: current,
-      description
+      company_name: formData.companyName,
+      company_location: formData.companyLocation,
+      role: formData.role,
+      start_date: formData.startDate,
+      end_date: formData.current ? null : formData.endDate,
+      is_current: formData.current,
+      description: formData.description,
     };
 
     try {
@@ -75,17 +92,13 @@ const EditExperienceModal = ({
         icon: "success",
         title: "Experience Updated",
         timer: 1500,
-        showConfirmButton: false
+        showConfirmButton: false,
       });
 
       onExperienceUpdated?.();
       onClose();
     } catch (error) {
-      Swal.fire(
-        "Error",
-        error.response?.data?.message || "Failed to update experience",
-        "error"
-      );
+      Swal.fire("Error", error.response?.data?.message || "Failed to update experience", "error");
     } finally {
       setLoading(false);
     }
@@ -98,7 +111,12 @@ const EditExperienceModal = ({
       <div className="experience-modal-box">
         <div className="experience-modal-header">
           <h2>Edit Experience</h2>
-          <button className="experience-close-btn" onClick={onClose}>
+          <button
+            className="experience-close-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+            disabled={loading}
+          >
             <FiX size={20} />
           </button>
         </div>
@@ -112,9 +130,11 @@ const EditExperienceModal = ({
                 Company Name *
                 <input
                   type="text"
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
+                  name="companyName"
+                  value={formData.companyName}
+                  onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
 
@@ -122,9 +142,11 @@ const EditExperienceModal = ({
                 Role *
                 <input
                   type="text"
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
+                  name="role"
+                  value={formData.role}
+                  onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
             </div>
@@ -133,9 +155,11 @@ const EditExperienceModal = ({
               Company Location *
               <input
                 type="text"
-                value={companyLocation}
-                onChange={(e) => setCompanyLocation(e.target.value)}
+                name="companyLocation"
+                value={formData.companyLocation}
+                onChange={handleChange}
                 required
+                disabled={loading}
               />
             </label>
 
@@ -144,9 +168,11 @@ const EditExperienceModal = ({
                 Start Date *
                 <input
                   type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  name="startDate"
+                  value={formData.startDate}
+                  onChange={handleChange}
                   required
+                  disabled={loading}
                 />
               </label>
 
@@ -154,9 +180,10 @@ const EditExperienceModal = ({
                 End Date
                 <input
                   type="date"
-                  value={endDate}
-                  disabled={current}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  name="endDate"
+                  value={formData.endDate}
+                  onChange={handleChange}
+                  disabled={formData.current || loading}
                 />
               </label>
             </div>
@@ -164,8 +191,10 @@ const EditExperienceModal = ({
             <label className="experience-checkbox">
               <input
                 type="checkbox"
-                checked={current}
-                onChange={() => setCurrent(!current)}
+                name="current"
+                checked={formData.current}
+                onChange={handleChange}
+                disabled={loading}
               />
               I currently work here
             </label>
@@ -173,10 +202,12 @@ const EditExperienceModal = ({
             <label>
               Description *
               <textarea
+                name="description"
                 rows={4}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={formData.description}
+                onChange={handleChange}
                 required
+                disabled={loading}
               />
             </label>
 
