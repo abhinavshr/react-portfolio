@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Award, ExternalLink } from "lucide-react";
 import "../../../css/admin/certificates/AdminCertificates.css";
@@ -13,11 +13,12 @@ const AdminCertificates = () => {
   const [active, setActive] = useState("Certificates");
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedCertificateId, setSelectedCertificateId] = useState(null);
+  const [modalState, setModalState] = useState({
+    add: false,
+    edit: false,
+    selectedId: null,
+  });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -27,31 +28,25 @@ const AdminCertificates = () => {
     to: 0,
   });
 
-  const fetchCertificates = async (page = 1) => {
+  const fetchCertificates = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const res = await viewAllCertificates(page);
       setCertificates(res.data || []);
       if (res.pagination) {
-        setPagination({
-          currentPage: res.pagination.current_page,
-          lastPage: res.pagination.last_page,
-          total: res.pagination.total,
-          from: res.pagination.from,
-          to: res.pagination.to,
-        });
+        const { current_page, last_page, total, from, to } = res.pagination;
+        setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
       }
     } catch (error) {
-      setError(error.message || "Failed to load certificates");
       Swal.fire("Error", error.message || "Failed to load certificates", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCertificates();
-  }, []);
+  }, [fetchCertificates]);
 
   const handleDelete = async (cert) => {
     const result = await Swal.fire({
@@ -61,7 +56,7 @@ const AdminCertificates = () => {
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
     });
 
     if (!result.isConfirmed) return;
@@ -88,19 +83,16 @@ const AdminCertificates = () => {
             </div>
             <button
               className="add-certificate-btn"
-              onClick={() => setShowAddModal(true)}
+              onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
             >
               <Plus size={18} /> Add Certificate
             </button>
           </div>
 
           {loading && <p>Loading certificates...</p>}
-          {error && <p className="error-text">{error}</p>}
 
           <div className="certificates-grid">
-            {!loading && certificates.length === 0 && (
-              <p>No certificates found.</p>
-            )}
+            {!loading && certificates.length === 0 && <p>No certificates found.</p>}
 
             {certificates.map((cert, index) => (
               <Motion.div
@@ -119,10 +111,9 @@ const AdminCertificates = () => {
                   <div className="certificate-actions">
                     <button
                       className="icon-btn edit"
-                      onClick={() => {
-                        setSelectedCertificateId(cert.id);
-                        setShowEditModal(true);
-                      }}
+                      onClick={() =>
+                        setModalState({ edit: true, selectedId: cert.id, add: false })
+                      }
                     >
                       <Edit size={18} />
                     </button>
@@ -142,9 +133,7 @@ const AdminCertificates = () => {
                   <span>
                     Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : ""}
                   </span>
-                  {cert.credential_id && (
-                    <span>ID: {cert.credential_id}</span>
-                  )}
+                  {cert.credential_id && <span>ID: {cert.credential_id}</span>}
                 </div>
 
                 {cert.verification_url && (
@@ -169,30 +158,24 @@ const AdminCertificates = () => {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.lastPage}
-                onPageChange={(page) => {
-                  setLoading(true);
-                  fetchCertificates(page);
-                }}
+                onPageChange={(page) => fetchCertificates(page)}
               />
             </div>
           )}
         </div>
 
-        {showAddModal && (
+        {modalState.add && (
           <AddCertificateModal
-            onClose={() => setShowAddModal(false)}
+            onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
             onSuccess={() => fetchCertificates(pagination.currentPage)}
           />
         )}
 
-        {showEditModal && (
+        {modalState.edit && modalState.selectedId && (
           <EditCertificateModal
-            certificateId={selectedCertificateId}
-            onClose={() => setShowEditModal(false)}
-            onSuccess={() => {
-              setShowEditModal(false);
-              fetchCertificates(pagination.currentPage);
-            }}
+            certificateId={modalState.selectedId}
+            onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+            onSuccess={() => fetchCertificates(pagination.currentPage)}
           />
         )}
       </main>
