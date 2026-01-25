@@ -25,6 +25,7 @@
   width: 100%;
 }
 
+/* Header */
 .contact-messages-header h1 {
   font-size: 26px;
   font-weight: 600;
@@ -37,6 +38,7 @@
   font-size: 14px;
 }
 
+/* Toolbar */
 .contact-toolbar-card {
   background: #ffffff;
   border-radius: 16px;
@@ -89,7 +91,7 @@
   font-weight: 500;
   cursor: pointer;
   color: #475569;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .filter-btn:hover {
@@ -102,31 +104,35 @@
   border-color: #2563eb;
 }
 
-
+/* Messages List */
 .contact-messages-list {
   display: flex;
   flex-direction: column;
 }
 
+/* Message Card */
 .contact-message-card {
   display: flex;
   justify-content: space-between;
-  padding: 22px;
-  border-radius: 16px;
+  padding: 20px;
+  border-radius: 14px;
   background: #ffffff;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   border: 1px solid #e2e8f0;
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .contact-message-card:hover {
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+  transform: translateY(-3px);
 }
 
 .contact-message-card.unread {
   background: #f1f7ff;
 }
 
+/* Left Section */
 .message-left {
   display: flex;
   gap: 16px;
@@ -184,6 +190,7 @@
   line-height: 1.5;
 }
 
+/* Right Section */
 .message-right {
   text-align: right;
   display: flex;
@@ -212,7 +219,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .icon-btn.view {
@@ -221,6 +228,7 @@
 
 .icon-btn.view:hover {
   background: #e0e7ff;
+  transform: translateY(-1px);
 }
 
 .icon-btn.delete {
@@ -229,8 +237,10 @@
 
 .icon-btn.delete:hover {
   background: #fee2e2;
+  transform: translateY(-1px);
 }
 
+/* Footer */
 .table-footer-contacts {
   display: flex;
   justify-content: space-between;
@@ -243,17 +253,4 @@
 .table-summary-contacts {
   font-size: 14px;
   color: #555;
-}
-
-.contact-message-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 16px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.contact-message-card:hover {
-  box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
 }
