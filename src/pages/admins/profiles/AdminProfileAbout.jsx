@@ -10,6 +10,10 @@ import {
   updateAdminSocialLinks,
 } from "../../../services/adminProfileAbout";
 
+const Skeleton = ({ className }) => (
+  <div className={`skeleton ${className || ""}`} />
+);
+
 const AdminProfileAbout = () => {
   const [active, setActive] = useState("Profile");
   const [loading, setLoading] = useState(true);
@@ -144,11 +148,7 @@ const AdminProfileAbout = () => {
       Swal.fire("Success", "Statistics updated successfully", "success");
       setInitialStats(stats);
     } catch (error) {
-      Swal.fire(
-        "Error",
-        error.message || "Failed to update statistics",
-        "error"
-      );
+      Swal.fire("Error", error.message || "Failed to update statistics", "error");
     } finally {
       setSavingStats(false);
     }
@@ -161,222 +161,179 @@ const AdminProfileAbout = () => {
       Swal.fire("Success", "Social links updated successfully", "success");
       setInitialSocialLinks(socialLinks);
     } catch (error) {
-      Swal.fire(
-        "Error",
-        error.message || "Failed to update social links",
-        "error"
-      );
+      Swal.fire("Error", error.message || "Failed to update social links", "error");
     } finally {
       setSavingSocial(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="admin-layout">
-        <AdminSidebar active={active} setActive={setActive} />
-        <main className="admin-content">
-          <p>Loading profile...</p>
-        </main>
-      </div>
-    );
-  }
 
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
       <main className="admin-content">
         <div className="profile-container">
-          <div className="profile-header">
-            <h1>Profile & About</h1>
-            <p>Manage your professional profile and portfolio information</p>
-          </div>
-
-          <div className="profile-card">
-            <h2>Identity Confirmation</h2>
-            <span className="subtitle">Your core identity information</span>
-            <div className="identity-box">
-              <div className="avatar">
-                {user?.profile_photo ? (
-                  <img src={user.profile_photo} alt="Profile" />
-                ) : (
-                  "👤"
-                )}
-              </div>
-              <div>
-                <h3>{user?.name}</h3>
-                <p>{user?.email}</p>
-                <small>Update your photo, name, and email in Settings</small>
-              </div>
-            </div>
-          </div>
-
-          <div className="profile-card">
-            <h2>Basic Information</h2>
-            <span className="subtitle">
-              Professional identity and contact details
-            </span>
-
-            <div className="grid-2">
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input
-                  name="phone_number"
-                  value={basicInfo.phone_number}
-                  onChange={handleBasicChange}
-                />
+          {loading ? (
+            <>
+              <div className="profile-card">
+                <Skeleton className="skeleton-title" />
+                <Skeleton className="skeleton-text" />
+                <div className="identity-box">
+                  <Skeleton className="skeleton-avatar" />
+                  <div>
+                    <Skeleton className="skeleton-text short" />
+                    <Skeleton className="skeleton-text" />
+                  </div>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label>Professional Title</label>
-                <input
-                  name="professional_title"
-                  value={basicInfo.professional_title}
-                  onChange={handleBasicChange}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="admin-about">Tagline</label>
-              <input
-                name="tagline"
-                value={basicInfo.tagline}
-                onChange={handleBasicChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="admin-about">About Me</label>
-              <textarea
-                rows="4"
-                name="about_me"
-                value={basicInfo.about_me}
-                onChange={handleBasicChange}
-              />
-            </div>
-
-            <button
-              className="save-btn"
-              onClick={handleSaveBasicInfo}
-              disabled={!isBasicInfoChanged || savingBasic}
-            >
-              <Save size={16} />
-              {savingBasic ? "Saving..." : "Save Basic Info"}
-            </button>
-          </div>
-
-          <div className="profile-card">
-            <h2>Portfolio Statistics</h2>
-            <div className="grid-4">
-              <div className="form-group">
-                <label>Years of Experience</label>
-                <input
-                  type="number"
-                  name="years_of_experience"
-                  value={stats.years_of_experience}
-                  onChange={handleStatsChange}
-                  min="0"
-                />
+              {[1, 2, 3].map((i) => (
+                <div className="profile-card" key={i}>
+                  <Skeleton className="skeleton-title" />
+                  <Skeleton className="skeleton-text" />
+                  <div className="grid-2">
+                    <Skeleton className="skeleton-input" />
+                    <Skeleton className="skeleton-input" />
+                  </div>
+                  <Skeleton className="skeleton-input full" />
+                  <Skeleton className="skeleton-input full" />
+                  <Skeleton className="skeleton-btn" />
+                </div>
+              ))}
+            </>
+          ) : (
+            <>
+              <div className="profile-header">
+                <h1>Profile & About</h1>
+                <p>Manage your professional profile and portfolio information</p>
               </div>
 
-              <div className="form-group">
-                <label>Projects Completed</label>
-                <input
-                  type="number"
-                  name="projects_completed"
-                  value={stats.projects_completed}
-                  onChange={handleStatsChange}
-                  min="0"
-                />
+              <div className="profile-card">
+                <h2>Identity Confirmation</h2>
+                <span className="subtitle">Your core identity information</span>
+                <div className="identity-box">
+                  <div className="avatar">
+                    {user?.profile_photo ? (
+                      <img src={user.profile_photo} alt="Profile" />
+                    ) : (
+                      "👤"
+                    )}
+                  </div>
+                  <div>
+                    <h3>{user?.name}</h3>
+                    <p>{user?.email}</p>
+                    <small>Update your photo, name, and email in Settings</small>
+                  </div>
+                </div>
               </div>
 
-              <div className="form-group">
-                <label>Happy Clients</label>
-                <input
-                  type="number"
-                  name="happy_clients"
-                  value={stats.happy_clients}
-                  onChange={handleStatsChange}
-                  min="0"
-                />
+              <div className="profile-card">
+                <h2>Basic Information</h2>
+                <span className="subtitle">
+                  Professional identity and contact details
+                </span>
+
+                <div className="grid-2">
+                  <div className="form-group">
+                    <label>Phone Number</label>
+                    <input
+                      name="phone_number"
+                      value={basicInfo.phone_number}
+                      onChange={handleBasicChange}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Professional Title</label>
+                    <input
+                      name="professional_title"
+                      value={basicInfo.professional_title}
+                      onChange={handleBasicChange}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="admin-about">Tagline</label>
+                  <input
+                    name="tagline"
+                    value={basicInfo.tagline}
+                    onChange={handleBasicChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="admin-about">About Me</label>
+                  <textarea
+                    rows="4"
+                    name="about_me"
+                    value={basicInfo.about_me}
+                    onChange={handleBasicChange}
+                  />
+                </div>
+
+                <button
+                  className="save-btn"
+                  onClick={handleSaveBasicInfo}
+                  disabled={!isBasicInfoChanged || savingBasic}
+                >
+                  <Save size={16} />
+                  {savingBasic ? "Saving..." : "Save Basic Info"}
+                </button>
               </div>
 
-              <div className="form-group">
-                <label>Technologies Used</label>
-                <input
-                  type="number"
-                  name="technologies_used"
-                  value={stats.technologies_used}
-                  onChange={handleStatsChange}
-                  min="0"
-                />
-              </div>
-            </div>
+              <div className="profile-card">
+                <h2>Portfolio Statistics</h2>
+                <div className="grid-4">
+                  {Object.keys(stats).map((key) => (
+                    <div className="form-group" key={key}>
+                      <label>{key.replaceAll("_", " ")}</label>
+                      <input
+                        type="number"
+                        name={key}
+                        value={stats[key]}
+                        onChange={handleStatsChange}
+                        min="0"
+                      />
+                    </div>
+                  ))}
+                </div>
 
-            <button
-              className="save-btn"
-              onClick={handleSaveStatistics}
-              disabled={!isStatsChanged || savingStats}
-            >
-              <Save size={16} />
-              {savingStats ? "Saving..." : "Save Statistics"}
-            </button>
-          </div>
-
-          <div className="profile-card">
-            <h2>Social Links</h2>
-            <div className="grid-2">
-              <div className="form-group">
-                <label>GitHub</label>
-                <input
-                  name="github_url"
-                  value={socialLinks.github_url}
-                  onChange={handleSocialChange}
-                  placeholder="https://github.com/username"
-                />
+                <button
+                  className="save-btn"
+                  onClick={handleSaveStatistics}
+                  disabled={!isStatsChanged || savingStats}
+                >
+                  <Save size={16} />
+                  {savingStats ? "Saving..." : "Save Statistics"}
+                </button>
               </div>
 
-              <div className="form-group">
-                <label>LinkedIn</label>
-                <input
-                  name="linkedin_url"
-                  value={socialLinks.linkedin_url}
-                  onChange={handleSocialChange}
-                  placeholder="https://linkedin.com/in/username"
-                />
-              </div>
+              <div className="profile-card">
+                <h2>Social Links</h2>
+                <div className="grid-2">
+                  {Object.keys(socialLinks).map((key) => (
+                    <div className="form-group" key={key}>
+                      <label>{key.replaceAll("_", " ")}</label>
+                      <input
+                        name={key}
+                        value={socialLinks[key]}
+                        onChange={handleSocialChange}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-              <div className="form-group">
-                <label>CV URL</label>
-                <input
-                  name="cv_url"
-                  value={socialLinks.cv_url}
-                  onChange={handleSocialChange}
-                  placeholder="https://example.com/cv.pdf"
-                />
+                <button
+                  className="save-btn"
+                  onClick={handleSaveSocialLinks}
+                  disabled={!isSocialChanged || savingSocial}
+                >
+                  <Save size={16} />
+                  {savingSocial ? "Saving..." : "Save Social Links"}
+                </button>
               </div>
-
-              <div className="form-group">
-                <label>Twitter / X</label>
-                <input
-                  name="twitter_url"
-                  value={socialLinks.twitter_url}
-                  onChange={handleSocialChange}
-                  placeholder="https://x.com/username"
-                />
-              </div>
-            </div>
-
-            <button
-              className="save-btn"
-              onClick={handleSaveSocialLinks}
-              disabled={!isSocialChanged || savingSocial}
-            >
-              <Save size={16} />
-              {savingSocial ? "Saving..." : "Save Social Links"}
-            </button>
-          </div>
+            </>
+          )}
         </div>
       </main>
     </div>
