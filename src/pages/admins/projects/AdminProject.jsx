@@ -2,12 +2,26 @@ import React, { useEffect, useState, useCallback, useMemo } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
 import { FiEdit2, FiTrash2, FiEye } from "react-icons/fi";
-import { viewAllProjects, viewProjectById, deleteProject } from "../../../services/projectService";
+import {
+  viewAllProjects,
+  viewProjectById,
+  deleteProject,
+} from "../../../services/projectService";
 import { useNavigate } from "react-router-dom";
 import ViewProjectModal from "./ViewProjectModel";
 import Swal from "sweetalert2";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
+
+const SkeletonRow = () => (
+  <tr>
+    {Array.from({ length: 7 }).map((_, i) => (
+      <td key={i}>
+        <div className="skeleton-input" />
+      </td>
+    ))}
+  </tr>
+);
 
 const AdminProjects = () => {
   const [active, setActive] = useState("Projects");
@@ -16,7 +30,13 @@ const AdminProjects = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProject, setSelectedProject] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [pagination, setPagination] = useState({ currentPage: 1, lastPage: 1, total: 0, from: 0, to: 0 });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    lastPage: 1,
+    total: 0,
+    from: 0,
+    to: 0,
+  });
 
   const navigate = useNavigate();
 
@@ -78,10 +98,18 @@ const AdminProjects = () => {
     if (result.isConfirmed) {
       try {
         await deleteProject(id);
-        Swal.fire("Deleted!", "Project has been deleted successfully.", "success");
+        Swal.fire(
+          "Deleted!",
+          "Project has been deleted successfully.",
+          "success"
+        );
         fetchProjects(pagination.currentPage);
       } catch (error) {
-        Swal.fire("Error!", error.message || "Failed to delete project", "error");
+        Swal.fire(
+          "Error!",
+          error.message || "Failed to delete project",
+          "error"
+        );
       }
     }
   };
@@ -90,8 +118,12 @@ const AdminProjects = () => {
     () =>
       projects.filter(
         (project) =>
-          project.title?.toLowerCase().includes(search.toLowerCase()) ||
-          project.tech_stack?.toLowerCase().includes(search.toLowerCase())
+          project.title
+            ?.toLowerCase()
+            .includes(search.toLowerCase()) ||
+          project.tech_stack
+            ?.toLowerCase()
+            .includes(search.toLowerCase())
       ),
     [projects, search]
   );
@@ -105,10 +137,14 @@ const AdminProjects = () => {
             <h1>Projects</h1>
             <p>Manage all your portfolio projects</p>
           </div>
-          <button className="add-project-btn" onClick={() => navigate("/admin/add-project")}>
+          <button
+            className="add-project-btn"
+            onClick={() => navigate("/admin/add-project")}
+          >
             + Add Project
           </button>
         </div>
+
         <div className="search-card">
           <input
             type="text"
@@ -117,9 +153,27 @@ const AdminProjects = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+
         <div className="table-card">
           {loading ? (
-            <div className="empty-state">Loading projects...</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>PROJECT TITLE</th>
+                  <th>TECH STACK</th>
+                  <th>LIVE</th>
+                  <th>GITHUB</th>
+                  <th>STATUS</th>
+                  <th>START DATE</th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <SkeletonRow key={i} />
+                ))}
+              </tbody>
+            </table>
           ) : filteredProjects.length === 0 ? (
             <div className="empty-state">
               <h3>No projects found</h3>
@@ -145,19 +199,35 @@ const AdminProjects = () => {
                       key={project.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      whileHover={{ scale: 1.02, boxShadow: "0 0 12px rgba(37,99,235,0.5)" }}
+                      transition={{
+                        duration: 0.3,
+                        delay: index * 0.05,
+                      }}
+                      whileHover={{
+                        scale: 1.02,
+                        boxShadow:
+                          "0 0 12px rgba(37,99,235,0.5)",
+                      }}
                       className="project-row"
                     >
                       <td className="project-name">
-                        <span className="text-clamp">{project.title}</span>
+                        <span className="text-clamp">
+                          {project.title}
+                        </span>
                       </td>
                       <td>
-                        <span className="text-clamp tech-clamp">{project.tech_stack}</span>
+                        <span className="text-clamp tech-clamp">
+                          {project.tech_stack}
+                        </span>
                       </td>
                       <td>
                         {project.live_link ? (
-                          <a href={project.live_link} target="_blank" rel="noreferrer" className="link-btn">
+                          <a
+                            href={project.live_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="link-btn"
+                          >
                             Live
                           </a>
                         ) : (
@@ -166,7 +236,12 @@ const AdminProjects = () => {
                       </td>
                       <td>
                         {project.github_link ? (
-                          <a href={project.github_link} target="_blank" rel="noreferrer" className="link-btn github">
+                          <a
+                            href={project.github_link}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="link-btn github"
+                          >
                             GitHub
                           </a>
                         ) : (
@@ -174,19 +249,57 @@ const AdminProjects = () => {
                         )}
                       </td>
                       <td>
-                        <span className={`status-badge ${statusColors[project.status] || ""}`}>
-                          {project.status?.replace("_", " ") || "Not Specified"}
+                        <span
+                          className={`status-badge ${
+                            statusColors[
+                              project.status
+                            ] || ""
+                          }`}
+                        >
+                          {project.status?.replace(
+                            "_",
+                            " "
+                          ) || "Not Specified"}
                         </span>
                       </td>
-                      <td>{project.start_date ? project.start_date.slice(0, 10) : "-"}</td>
+                      <td>
+                        {project.start_date
+                          ? project.start_date.slice(
+                              0,
+                              10
+                            )
+                          : "-"}
+                      </td>
                       <td className="actions">
-                        <button className="icon-btn view" title="View" onClick={() => handleViewProject(project.id)}>
+                        <button
+                          className="icon-btn view"
+                          onClick={() =>
+                            handleViewProject(
+                              project.id
+                            )
+                          }
+                        >
                           <FiEye />
                         </button>
-                        <button className="icon-btn edit" title="Edit" onClick={() => navigate(`/admin/edit-project/${project.id}`)}>
+                        <button
+                          className="icon-btn edit"
+                          onClick={() =>
+                            navigate(
+                              `/admin/edit-project/${project.id}`
+                            )
+                          }
+                        >
                           <FiEdit2 />
                         </button>
-                        <button className="icon-btn delete" title="Delete" onClick={() => handleDeleteProject(project.id, project.title)}>
+                        <button
+                          className="icon-btn delete"
+                          onClick={() =>
+                            handleDeleteProject(
+                              project.id,
+                              project.title
+                            )
+                          }
+                        >
                           <FiTrash2 />
                         </button>
                       </td>
@@ -194,17 +307,29 @@ const AdminProjects = () => {
                   ))}
                 </tbody>
               </table>
+
               <div className="table-footer">
                 <div className="table-summary">
-                  Showing {pagination.from} to {pagination.to} of {pagination.total} projects
+                  Showing {pagination.from} to{" "}
+                  {pagination.to} of{" "}
+                  {pagination.total} projects
                 </div>
-                <Pagination currentPage={pagination.currentPage} totalPages={pagination.lastPage} onPageChange={fetchProjects} />
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.lastPage}
+                  onPageChange={fetchProjects}
+                />
               </div>
             </>
           )}
         </div>
+
         {showModal && selectedProject && (
-          <ViewProjectModal project={selectedProject} isOpen={showModal} onClose={() => setShowModal(false)} />
+          <ViewProjectModal
+            project={selectedProject}
+            isOpen={showModal}
+            onClose={() => setShowModal(false)}
+          />
         )}
       </main>
     </div>
