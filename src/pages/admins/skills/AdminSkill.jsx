@@ -11,6 +11,30 @@ import { motion as Motion } from "framer-motion";
 
 const PER_SKILL_PAGE = 6;
 
+const SkeletonSkillCard = () => (
+  <div className="skill-card skeleton-skill">
+    <div className="skeleton-input title" />
+    <table className="skill-table">
+      <thead>
+        <tr>
+          <th className="skeleton-input th" />
+          <th className="skeleton-input th" />
+          <th className="skeleton-input th" />
+        </tr>
+      </thead>
+      <tbody>
+        {Array.from({ length: PER_SKILL_PAGE }).map((_, i) => (
+          <tr key={i}>
+            <td className="skeleton-input td" />
+            <td className="skeleton-input td" />
+            <td className="skeleton-input td" />
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
 const AdminSkill = () => {
   const [active, setActive] = useState("Skills");
   const [categories, setCategories] = useState([]);
@@ -122,7 +146,9 @@ const AdminSkill = () => {
         />
 
         {loading ? (
-          <div className="empty-state">Loading skills...</div>
+          Array.from({ length: categoryPagination.perPage }).map((_, i) => (
+            <SkeletonSkillCard key={i} />
+          ))
         ) : (
           categories.map((category, index) => {
             const {
