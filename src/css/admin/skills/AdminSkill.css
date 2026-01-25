@@ -227,3 +227,45 @@
     width: 50%;
   }
 }
+
+.skeleton-skill {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f3f4f6;
+}
+
+.skeleton-input {
+  height: 16px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+.skeleton-input.title {
+  width: 50%;
+  height: 20px;
+  margin-bottom: 12px;
+}
+
+.skeleton-input.th {
+  width: 100%;
+  height: 18px;
+}
+
+.skeleton-input.td {
+  width: 100%;
+  height: 16px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
