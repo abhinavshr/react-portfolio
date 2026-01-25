@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Eye, Trash2, Search } from "lucide-react";
 import "../../../css/admin/contacts/AdminContactMessages.css";
@@ -11,12 +11,14 @@ import { motion as Motion } from "framer-motion";
 const AdminContactMessages = () => {
   const [active, setActive] = useState("Contacts");
   const [filter, setFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [, setError] = useState("");
 
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedContactId, setSelectedContactId] = useState(null);
+  const [modalState, setModalState] = useState({
+    view: false,
+    selectedId: null,
+  });
 
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -26,11 +28,7 @@ const AdminContactMessages = () => {
     to: 0,
   });
 
-  useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  const fetchMessages = async (page = 1) => {
+  const fetchMessages = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const res = await viewAllContactMessages(page);
@@ -46,24 +44,29 @@ const AdminContactMessages = () => {
       }));
 
       setMessages(formatted);
-      setPagination({
-        currentPage: res.data.current_page,
-        lastPage: res.data.last_page,
-        total: res.data.total,
-        from: res.data.from,
-        to: res.data.to,
-      });
+      const { current_page, last_page, total, from, to } = res.data;
+      setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (err) {
-      setError(err.message || "Failed to load messages");
       Swal.fire("Error", err.message || "Failed to load messages", "error");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchMessages();
+  }, [fetchMessages]);
 
   const unreadCount = messages.filter((m) => m.unread).length;
 
   const filteredMessages = messages.filter((msg) => {
+    const matchesSearch =
+      msg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      msg.message.toLowerCase().includes(searchTerm.toLowerCase());
+
+    if (!matchesSearch) return false;
     if (filter === "unread") return msg.unread;
     if (filter === "read") return !msg.unread;
     return true;
@@ -106,7 +109,12 @@ const AdminContactMessages = () => {
             <div className="contact-toolbar-inner">
               <div className="contact-messages-search">
                 <Search size={18} />
-                <input type="text" placeholder="Search messages..." />
+                <input
+                  type="text"
+                  placeholder="Search messages..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
 
               <div className="contact-messages-filters">
@@ -166,10 +174,7 @@ const AdminContactMessages = () => {
                     <div className="message-actions">
                       <button
                         className="icon-btn view"
-                        onClick={() => {
-                          setSelectedContactId(msg.id);
-                          setIsViewOpen(true);
-                        }}
+                        onClick={() => setModalState({ view: true, selectedId: msg.id })}
                       >
                         <Eye size={18} />
                       </button>
@@ -194,21 +199,20 @@ const AdminContactMessages = () => {
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.lastPage}
-                onPageChange={(page) => {
-                  setLoading(true);
-                  fetchMessages(page);
-                }}
+                onPageChange={(page) => fetchMessages(page)}
               />
             </div>
           )}
         </div>
 
-        <ViewContactModal
-          isOpen={isViewOpen}
-          onClose={() => setIsViewOpen(false)}
-          contactId={selectedContactId}
-          onRefresh={() => fetchMessages(pagination.currentPage)}
-        />
+        {modalState.view && modalState.selectedId && (
+          <ViewContactModal
+            isOpen={modalState.view}
+            onClose={() => setModalState({ view: false, selectedId: null })}
+            contactId={modalState.selectedId}
+            onRefresh={() => fetchMessages(pagination.currentPage)}
+          />
+        )}
       </main>
     </div>
   );
