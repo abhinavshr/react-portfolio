@@ -8,6 +8,7 @@
   flex: 1;
 }
 
+/* Header */
 .certificates-header {
   display: flex;
   justify-content: space-between;
@@ -37,10 +38,12 @@
   border-radius: 10px;
   font-size: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .add-certificate-btn:hover {
   background: #1e4ed8;
+  transform: translateY(-2px);
 }
 
 /* Grid */
@@ -53,11 +56,18 @@
 /* Card */
 .certificate-card {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
   padding: 22px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   display: flex;
   flex-direction: column;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.certificate-card:hover {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
+  transform: translateY(-4px);
 }
 
 /* Top */
@@ -73,7 +83,7 @@
   color: #fff;
   width: 52px;
   height: 52px;
-  border-radius: 14px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -91,14 +101,25 @@
   cursor: pointer;
   padding: 6px;
   border-radius: 8px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 .icon-btn.edit {
   color: #2563eb;
 }
 
+.icon-btn.edit:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
+}
+
 .icon-btn.delete {
   color: #dc2626;
+}
+
+.icon-btn.delete:hover {
+  background: #fee2e2;
+  transform: translateY(-1px);
 }
 
 /* Content */
@@ -132,12 +153,15 @@
   gap: 6px;
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .verify-link:hover {
   text-decoration: underline;
+  color: #1e4ed8;
 }
 
+/* Footer */
 .table-footer-certificates {
   display: flex;
   justify-content: space-between;
@@ -150,19 +174,6 @@
 .table-summary-certificates {
   font-size: 14px;
   color: #555;
-}
-
-.certificate-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-}
-
-.certificate-card:hover {
-  box-shadow: 0 0 20px rgba(37, 99, 235, 0.5);
 }
 
 /* Responsive */
