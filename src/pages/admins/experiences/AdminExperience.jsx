@@ -10,6 +10,32 @@ import EditExperienceModal from "./EditExperienceModal";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
 
+/* ------------------ SKELETON CARD ------------------ */
+const SkeletonExperienceCard = () => {
+  return (
+    <div className="experience-card skeleton-experience">
+      <div className="experience-card-header">
+        <div className="skeleton-line title" />
+        <div className="skeleton-actions">
+          <div className="skeleton-icon" />
+          <div className="skeleton-icon" />
+          <div className="skeleton-icon" />
+        </div>
+      </div>
+
+      <div className="skeleton-line company" />
+
+      <div className="experience-meta">
+        <div className="skeleton-line meta" />
+        <div className="skeleton-line meta" />
+      </div>
+
+      <div className="skeleton-line desc" />
+      <div className="skeleton-line desc short" />
+    </div>
+  );
+};
+
 const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
   const [experiences, setExperiences] = useState([]);
@@ -73,6 +99,7 @@ const AdminExperience = () => {
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
+
       <main className="admin-content">
         <div className="experience-container">
           <div className="experience-header">
@@ -88,9 +115,16 @@ const AdminExperience = () => {
             </button>
           </div>
 
-          {loading && <p>Loading experiences...</p>}
+          {/* ---------- SKELETON LOADING ---------- */}
+          {loading &&
+            Array.from({ length: 5 }).map((_, i) => (
+              <SkeletonExperienceCard key={i} />
+            ))}
+
+          {/* ---------- EMPTY ---------- */}
           {!loading && experiences.length === 0 && <p>No experiences found.</p>}
 
+          {/* ---------- REAL DATA ---------- */}
           {!loading &&
             experiences.map((exp, index) => (
               <Motion.div
@@ -129,16 +163,20 @@ const AdminExperience = () => {
                     </button>
                   </div>
                 </div>
+
                 <h4 className="company">{exp.company_name}</h4>
+
                 <div className="experience-meta">
                   <span>
-                    <Calendar size={14} /> {exp.start_date} - {exp.is_current ? "Present" : exp.end_date}
+                    <Calendar size={14} /> {exp.start_date} -{" "}
+                    {exp.is_current ? "Present" : exp.end_date}
                   </span>
                   <span>
                     <MapPin size={14} /> {exp.company_location || "N/A"}
                   </span>
                   {exp.is_current && <span className="badge">Current</span>}
                 </div>
+
                 <p className="experience-description">{exp.description}</p>
               </Motion.div>
             ))}
