@@ -10,6 +10,15 @@ import EditSoftSkillModal from "./EditSoftSkillModal";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
 
+const SkeletonSoftSkill = () => (
+  <div className="soft-skill-card skeleton-soft-skill">
+    <div className="skeleton-input title" />
+    <div className="skeleton-input bar" />
+    <div className="skeleton-input desc" />
+    <div className="skeleton-input desc short" />
+  </div>
+);
+
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
   const [softSkills, setSoftSkills] = useState([]);
@@ -34,6 +43,7 @@ const AdminSoftSkills = () => {
       setLoading(true);
       const response = await viewAllSoftSkills(page);
       const { current_page, last_page, total, per_page } = response.pagination;
+
       setSoftSkills(response.data || []);
       setPagination({
         currentPage: current_page,
@@ -94,59 +104,57 @@ const AdminSoftSkills = () => {
           </button>
         </div>
 
-        {loading && <p>Loading soft skills...</p>}
-        {!loading && softSkills.length === 0 && <p>No soft skills found.</p>}
-
         <div className="soft-skill-grid">
-          {softSkills.map((skill, index) => (
-            <Motion.div
-              className="soft-skill-card"
-              key={skill.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              <div className="soft-skill-card-header">
-                <h3>{skill.name}</h3>
-                <div className="soft-skill-actions">
-                  <FiEdit2
-                    title="Edit"
-                    onClick={() =>
-                      setModalState({ edit: true, selectedId: skill.id, add: false, view: false })
-                    }
-                  />
-                  <FiTrash2
-                    title="Delete"
-                    onClick={() => handleDeleteSoftSkill(skill.id, skill.name)}
-                  />
-                  <FiEye
-                    title="View"
-                    onClick={() =>
-                      setModalState({ view: true, selectedId: skill.id, add: false, edit: false })
-                    }
-                  />
-                </div>
-              </div>
+          {loading
+            ? Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonSoftSkill key={i} />
+              ))
+            : softSkills.map((skill, index) => (
+                <Motion.div
+                  className="soft-skill-card"
+                  key={skill.id}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <div className="soft-skill-card-header">
+                    <h3>{skill.name}</h3>
+                    <div className="soft-skill-actions">
+                      <FiEdit2
+                        onClick={() =>
+                          setModalState({ edit: true, selectedId: skill.id, add: false, view: false })
+                        }
+                      />
+                      <FiTrash2
+                        onClick={() => handleDeleteSoftSkill(skill.id, skill.name)}
+                      />
+                      <FiEye
+                        onClick={() =>
+                          setModalState({ view: true, selectedId: skill.id, add: false, edit: false })
+                        }
+                      />
+                    </div>
+                  </div>
 
-              <div className="soft-skill-progress">
-                <div className="progress-bar">
-                  <Motion.div
-                    className="progress-fill"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${skill.level}%` }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                  />
-                </div>
-                <span>{skill.level}%</span>
-              </div>
+                  <div className="soft-skill-progress">
+                    <div className="progress-bar">
+                      <Motion.div
+                        className="progress-fill"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${skill.level}%` }}
+                        transition={{ duration: 0.6 }}
+                      />
+                    </div>
+                    <span>{skill.level}%</span>
+                  </div>
 
-              <p className="soft-skill-description">
-                {skill.description || "No description provided."}
-              </p>
-            </Motion.div>
-          ))}
+                  <p className="soft-skill-description">
+                    {skill.description || "No description provided."}
+                  </p>
+                </Motion.div>
+              ))}
         </div>
 
         {!loading && softSkills.length > 0 && (
@@ -163,32 +171,27 @@ const AdminSoftSkills = () => {
         )}
       </main>
 
+      {/* Modals */}
       <AddSoftSkillModal
         isOpen={modalState.add}
         onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
-        onSkillAdded={() => {
-          fetchSoftSkills(pagination.currentPage);
-          setModalState((prev) => ({ ...prev, add: false }));
-        }}
+        onSkillAdded={() => fetchSoftSkills(pagination.currentPage)}
       />
 
-      {modalState.view && modalState.selectedId && (
+      {modalState.view && (
         <ViewSoftSkillModal
           isOpen={modalState.view}
-          onClose={() => setModalState((prev) => ({ ...prev, view: false, selectedId: null }))}
+          onClose={() => setModalState({ ...modalState, view: false, selectedId: null })}
           skillId={modalState.selectedId}
         />
       )}
 
-      {modalState.edit && modalState.selectedId && (
+      {modalState.edit && (
         <EditSoftSkillModal
           isOpen={modalState.edit}
-          onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+          onClose={() => setModalState({ ...modalState, edit: false, selectedId: null })}
           skillId={modalState.selectedId}
-          onSkillUpdated={() => {
-            fetchSoftSkills(pagination.currentPage);
-            setModalState((prev) => ({ ...prev, edit: false, selectedId: null }));
-          }}
+          onSkillUpdated={() => fetchSoftSkills(pagination.currentPage)}
         />
       )}
     </div>
