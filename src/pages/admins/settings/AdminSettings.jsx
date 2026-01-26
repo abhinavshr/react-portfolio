@@ -10,9 +10,56 @@ import {
   changeAdminPassword
 } from "../../../services/adminSettingService";
 
+/* ---------------- Skeleton Layout ---------------- */
+const SkeletonSettings = () => (
+  <div className="settings-container skeleton-setting">
+    <div className="skeleton-title" />
+    <div className="skeleton-subtitle" />
+
+    <div className="settings-card">
+      <div className="settings-card-header">
+        <div className="skeleton-icon" />
+        <div className="skeleton-line w-180" />
+      </div>
+
+      <div className="profile-section">
+        <div className="profile-photo">
+          <div className="skeleton-avatar" />
+          <div className="skeleton-line w-120" />
+          <div className="skeleton-line w-160" />
+        </div>
+
+        <div className="profile-form">
+          <div className="skeleton-input" />
+          <div className="skeleton-input" />
+        </div>
+
+        <div className="skeleton-btn" />
+      </div>
+    </div>
+
+    <div className="settings-card">
+      <div className="settings-card-header">
+        <div className="skeleton-icon" />
+        <div className="skeleton-line w-160" />
+      </div>
+
+      <div className="password-form">
+        <div className="skeleton-input" />
+        <div className="skeleton-input" />
+        <div className="skeleton-input" />
+      </div>
+
+      <div className="skeleton-btn" />
+    </div>
+  </div>
+);
+
+/* ---------------- Main Component ---------------- */
 const AdminSettings = () => {
   const [active, setActive] = useState("Settings");
   const [admin, setAdmin] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   const [profileData, setProfileData] = useState({ name: "", email: "" });
   const [passwordData, setPasswordData] = useState({
@@ -33,15 +80,29 @@ const AdminSettings = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        setLoadingProfile(true);
         const res = await viewAdminSettings();
         setAdmin(res.user);
         setProfileData({ name: res.user.name, email: res.user.email });
       } catch {
         Swal.fire("Error", "Failed to load profile", "error");
+      } finally {
+        setLoadingProfile(false);
       }
     };
     fetchProfile();
   }, []);
+
+  if (loadingProfile) {
+    return (
+      <div className="admin-layout">
+        <AdminSidebar active={active} setActive={setActive} />
+        <main className="admin-content">
+          <SkeletonSettings />
+        </main>
+      </div>
+    );
+  }
 
   const handleUploadClick = () => fileInputRef.current.click();
 
@@ -123,9 +184,11 @@ const AdminSettings = () => {
       <main className="admin-content">
         <div className="settings-container">
           <h1 className="settings-title">Settings</h1>
-          <p className="settings-subtitle">Manage your account settings and preferences</p>
+          <p className="settings-subtitle">
+            Manage your account settings and preferences
+          </p>
 
-          {/* Profile Information */}
+          {/* Profile */}
           <div className="settings-card">
             <div className="settings-card-header">
               <User size={22} />
@@ -143,7 +206,11 @@ const AdminSettings = () => {
                 </div>
 
                 <div className="photo-actions">
-                  <button className="upload-btn" onClick={handleUploadClick} disabled={loading}>
+                  <button
+                    className="upload-btn"
+                    onClick={handleUploadClick}
+                    disabled={loading}
+                  >
                     <Upload size={16} /> Upload Photo
                   </button>
                   <input
@@ -153,7 +220,9 @@ const AdminSettings = () => {
                     accept="image/png,image/jpeg,image/jpg,image/gif"
                     onChange={handleFileChange}
                   />
-                  <span className="photo-hint">JPG, PNG or GIF. Max size 2MB.</span>
+                  <span className="photo-hint">
+                    JPG, PNG or GIF. Max size 2MB.
+                  </span>
                 </div>
               </div>
 
@@ -162,16 +231,27 @@ const AdminSettings = () => {
                   <label>Full Name</label>
                   <input
                     value={profileData.name}
-                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        name: e.target.value
+                      })
+                    }
                     disabled={loading}
                   />
                 </div>
+
                 <div className="form-group">
                   <label>Email Address</label>
                   <input
                     type="email"
                     value={profileData.email}
-                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        email: e.target.value
+                      })
+                    }
                     disabled={loading}
                   />
                 </div>
@@ -189,7 +269,7 @@ const AdminSettings = () => {
             </div>
           </div>
 
-          {/* Change Password */}
+          {/* Password */}
           <div className="settings-card">
             <div className="settings-card-header">
               <Lock size={22} />
@@ -209,17 +289,26 @@ const AdminSettings = () => {
                       type={showPassword[field] ? "text" : "password"}
                       value={passwordData[field]}
                       onChange={(e) =>
-                        setPasswordData({ ...passwordData, [field]: e.target.value })
+                        setPasswordData({
+                          ...passwordData,
+                          [field]: e.target.value
+                        })
                       }
                       disabled={loading}
                     />
                     <span
-                      aria-label={`Toggle ${field} password visibility`}
                       onClick={() =>
-                        setShowPassword({ ...showPassword, [field]: !showPassword[field] })
+                        setShowPassword({
+                          ...showPassword,
+                          [field]: !showPassword[field]
+                        })
                       }
                     >
-                      {showPassword[field] ? <EyeOff size={18} /> : <Eye size={18} />}
+                      {showPassword[field] ? (
+                        <EyeOff size={18} />
+                      ) : (
+                        <Eye size={18} />
+                      )}
                     </span>
                   </div>
                 </div>
