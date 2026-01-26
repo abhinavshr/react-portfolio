@@ -9,6 +9,29 @@ import EditCertificateModal from "./EditCertificateModal";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
 
+/* ------------ SKELETON CARD ------------ */
+const SkeletonCertificateCard = () => (
+  <div className="certificate-card skeleton-certificate">
+    <div className="certificate-top">
+      <div className="skeleton-icon-lg" />
+      <div className="skeleton-actions">
+        <div className="skeleton-icon" />
+        <div className="skeleton-icon" />
+      </div>
+    </div>
+
+    <div className="skeleton-line title" />
+    <div className="skeleton-line org" />
+
+    <div className="certificate-meta">
+      <div className="skeleton-line meta" />
+      <div className="skeleton-line meta short" />
+    </div>
+
+    <div className="skeleton-line link" />
+  </div>
+);
+
 const AdminCertificates = () => {
   const [active, setActive] = useState("Certificates");
   const [certificates, setCertificates] = useState([]);
@@ -89,66 +112,76 @@ const AdminCertificates = () => {
             </button>
           </div>
 
-          {loading && <p>Loading certificates...</p>}
+          {/* ---------- SKELETON ---------- */}
+          {loading && (
+            <div className="certificates-grid">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonCertificateCard key={i} />
+              ))}
+            </div>
+          )}
 
-          <div className="certificates-grid">
-            {!loading && certificates.length === 0 && <p>No certificates found.</p>}
+          {/* ---------- REAL GRID ---------- */}
+          {!loading && (
+            <div className="certificates-grid">
+              {certificates.length === 0 && <p>No certificates found.</p>}
 
-            {certificates.map((cert, index) => (
-              <Motion.div
-                key={cert.id}
-                className="certificate-card"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <div className="certificate-top">
-                  <div className="certificate-icon">
-                    <Award size={26} />
+              {certificates.map((cert, index) => (
+                <Motion.div
+                  key={cert.id}
+                  className="certificate-card"
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  <div className="certificate-top">
+                    <div className="certificate-icon">
+                      <Award size={26} />
+                    </div>
+                    <div className="certificate-actions">
+                      <button
+                        className="icon-btn edit"
+                        onClick={() =>
+                          setModalState({ edit: true, selectedId: cert.id, add: false })
+                        }
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        className="icon-btn delete"
+                        onClick={() => handleDelete(cert)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="certificate-actions">
-                    <button
-                      className="icon-btn edit"
-                      onClick={() =>
-                        setModalState({ edit: true, selectedId: cert.id, add: false })
-                      }
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      className="icon-btn delete"
-                      onClick={() => handleDelete(cert)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+
+                  <h3 className="certificate-title">{cert.title}</h3>
+                  <p className="certificate-org">{cert.issuer}</p>
+
+                  <div className="certificate-meta">
+                    <span>
+                      Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : ""}
+                    </span>
+                    {cert.credential_id && <span>ID: {cert.credential_id}</span>}
                   </div>
-                </div>
 
-                <h3 className="certificate-title">{cert.title}</h3>
-                <p className="certificate-org">{cert.issuer}</p>
-
-                <div className="certificate-meta">
-                  <span>
-                    Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : ""}
-                  </span>
-                  {cert.credential_id && <span>ID: {cert.credential_id}</span>}
-                </div>
-
-                {cert.verification_url && (
-                  <a
-                    href={cert.verification_url}
-                    className="verify-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Verify <ExternalLink size={14} />
-                  </a>
-                )}
-              </Motion.div>
-            ))}
-          </div>
+                  {cert.verification_url && (
+                    <a
+                      href={cert.verification_url}
+                      className="verify-link"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Verify <ExternalLink size={14} />
+                    </a>
+                  )}
+                </Motion.div>
+              ))}
+            </div>
+          )}
 
           {!loading && certificates.length > 0 && (
             <div className="table-footer-certificates">
@@ -174,7 +207,9 @@ const AdminCertificates = () => {
         {modalState.edit && modalState.selectedId && (
           <EditCertificateModal
             certificateId={modalState.selectedId}
-            onClose={() => setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))}
+            onClose={() =>
+              setModalState((prev) => ({ ...prev, edit: false, selectedId: null }))
+            }
             onSuccess={() => fetchCertificates(pagination.currentPage)}
           />
         )}

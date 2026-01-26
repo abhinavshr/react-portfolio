@@ -189,3 +189,59 @@
     justify-content: center;
   }
 }
+
+/* ---------- Skeleton Loader ---------- */
+.skeleton-certificate {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-certificate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.45) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-line {
+  height: 14px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin: 8px 0;
+}
+
+.skeleton-line.title { width: 70%; height: 18px; }
+.skeleton-line.org { width: 50%; }
+.skeleton-line.meta { width: 40%; }
+.skeleton-line.meta.short { width: 30%; }
+.skeleton-line.link { width: 45%; height: 12px; margin-top: 12px; }
+
+.skeleton-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.skeleton-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e7eb;
+}
+
+.skeleton-icon-lg {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #e5e7eb;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
