@@ -10,6 +10,17 @@ import EditEducationModal from "./EditEducationModal";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
 
+/* ---------- Skeleton Card ---------- */
+const SkeletonEducation = () => (
+  <div className="education-card skeleton-education">
+    <div className="skeleton-input title" />
+    <div className="skeleton-input subtitle" />
+    <div className="skeleton-input meta" />
+    <div className="skeleton-input desc" />
+    <div className="skeleton-input desc short" />
+  </div>
+);
+
 const AdminEducation = () => {
   const [active, setActive] = useState("Education");
   const [educations, setEducations] = useState([]);
@@ -89,7 +100,14 @@ const AdminEducation = () => {
             </button>
           </div>
 
-          {loading && <div className="empty-state"><p>Loading educations...</p></div>}
+          {/* ---------- Skeletons ---------- */}
+          {loading && (
+            <div className="education-skeleton-wrapper">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <SkeletonEducation key={i} />
+              ))}
+            </div>
+          )}
 
           {!loading && educations.length > 0 ? (
             educations.map((edu, index) => (
@@ -109,21 +127,22 @@ const AdminEducation = () => {
                   <div className="education-actions">
                     <button
                       className="icon-btn view"
-                      title="View"
-                      onClick={() => setModalState({ view: true, selectedId: edu.id, add: false, edit: false })}
+                      onClick={() =>
+                        setModalState({ view: true, selectedId: edu.id, add: false, edit: false })
+                      }
                     >
                       <Eye size={18} />
                     </button>
                     <button
                       className="icon-btn edit"
-                      title="Edit"
-                      onClick={() => setModalState({ edit: true, selectedId: edu.id, add: false, view: false })}
+                      onClick={() =>
+                        setModalState({ edit: true, selectedId: edu.id, add: false, view: false })
+                      }
                     >
                       <Edit size={18} />
                     </button>
                     <button
                       className="icon-btn delete"
-                      title="Delete"
                       onClick={() => handleDelete(edu)}
                     >
                       <Trash2 size={18} />
@@ -167,6 +186,7 @@ const AdminEducation = () => {
           )}
         </div>
 
+        {/* ---------- Modals ---------- */}
         <AddEducationModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
