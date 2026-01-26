@@ -199,3 +199,51 @@
     padding: 18px;
   }
 }
+
+.skeleton-education {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #f3f4f6;
+}
+
+.skeleton-input {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #e5e7eb 25%,
+    #f3f4f6 37%,
+    #e5e7eb 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+.skeleton-input.title {
+  width: 70%;
+  height: 20px;
+}
+
+.skeleton-input.subtitle {
+  width: 55%;
+}
+
+.skeleton-input.meta {
+  width: 80%;
+}
+
+.skeleton-input.desc {
+  width: 100%;
+}
+
+.skeleton-input.desc.short {
+  width: 65%;
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
