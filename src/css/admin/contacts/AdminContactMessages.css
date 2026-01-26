@@ -254,3 +254,64 @@
   font-size: 14px;
   color: #555;
 }
+
+/* ---------- Skeleton Loader ---------- */
+.skeleton-contact {
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-contact::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,0.45) 50%,
+    rgba(255,255,255,0) 100%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e5e7eb;
+}
+
+.skeleton-line {
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  margin: 6px 0;
+}
+
+.skeleton-line.name { width: 120px; height: 16px; }
+.skeleton-line.email { width: 160px; }
+.skeleton-line.subject { width: 200px; height: 14px; }
+.skeleton-line.text { width: 240px; }
+
+.skeleton-line.date {
+  width: 80px;
+  height: 12px;
+  margin-bottom: 10px;
+}
+
+.skeleton-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.skeleton-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e5e7eb;
+}

@@ -3,11 +3,38 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Eye, Trash2, Search } from "lucide-react";
 import "../../../css/admin/contacts/AdminContactMessages.css";
 import Swal from "sweetalert2";
-import { viewAllContactMessages, deleteContactMessage } from "../../../services/contactMessagesService";
+import {
+  viewAllContactMessages,
+  deleteContactMessage,
+} from "../../../services/contactMessagesService";
 import ViewContactModal from "./ViewContactModal";
 import Pagination from "../../../components/admin/Pagination";
 import { motion as Motion } from "framer-motion";
 
+/* ---------------- Skeleton Card ---------------- */
+const SkeletonContactCard = () => (
+  <div className="contact-message-card skeleton-contact">
+    <div className="message-left">
+      <div className="skeleton-avatar" />
+      <div className="message-content">
+        <div className="skeleton-line name" />
+        <div className="skeleton-line email" />
+        <div className="skeleton-line subject" />
+        <div className="skeleton-line text" />
+      </div>
+    </div>
+
+    <div className="message-right">
+      <div className="skeleton-line date" />
+      <div className="skeleton-actions">
+        <div className="skeleton-icon" />
+        <div className="skeleton-icon" />
+      </div>
+    </div>
+  </div>
+);
+
+/* ---------------- Main Component ---------------- */
 const AdminContactMessages = () => {
   const [active, setActive] = useState("Contacts");
   const [filter, setFilter] = useState("all");
@@ -141,7 +168,11 @@ const AdminContactMessages = () => {
           </div>
 
           {loading ? (
-            <p>Loading messages...</p>
+            <div className="contact-messages-list">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <SkeletonContactCard key={i} />
+              ))}
+            </div>
           ) : (
             <div className="contact-messages-list">
               {filteredMessages.map((msg, index) => (
