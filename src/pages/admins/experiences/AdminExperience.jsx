@@ -178,6 +178,18 @@ const AdminExperience = () => {
                 </div>
 
                 <p className="experience-description">{exp.description}</p>
+
+                {exp.responsibilities && exp.responsibilities.length > 0 && (
+                  <div className="experience-responsibilities">
+                    <h4>Responsibilities</h4>
+                    <ul>
+                      {exp.responsibilities.map((item) => (
+                        <li key={item.id}>{item.responsibility}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
               </Motion.div>
             ))}
 

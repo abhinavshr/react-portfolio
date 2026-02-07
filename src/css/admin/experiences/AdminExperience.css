@@ -276,3 +276,26 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+.experience-responsibilities {
+  margin-top: 12px;
+}
+
+.experience-responsibilities h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  margin-bottom: 6px;
+}
+
+.experience-responsibilities ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.experience-responsibilities li {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.6;
+  list-style: disc;
+}
