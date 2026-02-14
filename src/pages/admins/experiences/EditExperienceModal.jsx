@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
 import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
+  const modalContainerRef = useRef(null);
+
   const [formData, setFormData] = useState({
     companyName: "",
     companyLocation: "",
@@ -17,6 +21,33 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.from(".experience-modal-overlay", { opacity: 0, duration: 0.3 });
+      gsap.from(".experience-modal-box", {
+        y: 50,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.4,
+        ease: "power3.out"
+      });
+    }
+  }, { scope: modalContainerRef, dependencies: [isOpen] });
+
+  const handleClose = () => {
+    gsap.to(".experience-modal-box", {
+      y: 20,
+      opacity: 0,
+      duration: 0.2,
+      ease: "power3.in"
+    });
+    gsap.to(".experience-modal-overlay", {
+      opacity: 0,
+      duration: 0.2,
+      onComplete: onClose
+    });
+  };
 
   useEffect(() => {
     if (!isOpen || !experienceId) return;
@@ -31,10 +62,22 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           companyName: exp.company_name || "",
           companyLocation: exp.company_location || "",
           role: exp.role || "",
+          start_date: exp.start_date || "",
+          end_date: exp.end_date || "",
+          is_current: !!exp.is_current,
+          description: exp.description || "",
+          // Note: State keys should match form inputs. 
+          // Previous code had mixed keys (startDate vs start_date in payload).
+          // Let's fix mapping below or in render.
+          // Wait, the previous code had:
+          // start_date: exp.start_date
+          // But input name="startDate".
+          // And handleChange updates "startDate".
+          // So I should map API snake_case to camelCase state here.
+          // Correcting keys:
           startDate: exp.start_date || "",
           endDate: exp.end_date || "",
           current: !!exp.is_current,
-          description: exp.description || "",
         });
       } catch (error) {
         Swal.fire("Error", error.response?.data?.message || "Failed to fetch experience", "error");
@@ -96,7 +139,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       });
 
       onExperienceUpdated?.();
-      onClose();
+      handleClose(); // Use animated close
     } catch (error) {
       Swal.fire("Error", error.response?.data?.message || "Failed to update experience", "error");
     } finally {
@@ -107,13 +150,13 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
   if (!isOpen) return null;
 
   return (
-    <div className="experience-modal-overlay">
+    <div className="experience-modal-overlay" ref={modalContainerRef}>
       <div className="experience-modal-box">
         <div className="experience-modal-header">
           <h2>Edit Experience</h2>
           <button
             className="experience-close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
@@ -215,7 +258,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
               <button
                 type="button"
                 className="experience-btn-cancel"
-                onClick={onClose}
+                onClick={handleClose}
                 disabled={loading}
               >
                 Cancel

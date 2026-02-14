@@ -111,7 +111,7 @@ function App() {
           path="/admin/education"
           element={
             <ProtectedRoute>
-              <AdminEducation />
+              <AdminExperience />
             </ProtectedRoute>
           }
         />

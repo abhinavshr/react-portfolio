@@ -1,11 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { viewExperienceById } from "../../../services/experienceService";
+import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
+  const modalContainerRef = useRef(null);
   const [experience, setExperience] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.from(".experience-modal-overlay", { opacity: 0, duration: 0.3 });
+      gsap.from(".experience-modal-box", {
+        y: 50,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.4,
+        ease: "power3.out"
+      });
+    }
+  }, { scope: modalContainerRef, dependencies: [isOpen] });
+
+  const handleClose = () => {
+    gsap.to(".experience-modal-box", {
+      y: 20,
+      opacity: 0,
+      duration: 0.2,
+      ease: "power3.in"
+    });
+    gsap.to(".experience-modal-overlay", {
+      opacity: 0,
+      duration: 0.2,
+      onComplete: onClose
+    });
+  };
 
   useEffect(() => {
     if (!isOpen || !experienceId) return;
@@ -16,7 +47,7 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
         const response = await viewExperienceById(experienceId);
         setExperience(response.data); // API returns { message, data }
       } catch (error) {
-        alert(error.message || "Failed to fetch experience");
+        Swal.fire("Error", error.message || "Failed to fetch experience", "error");
       } finally {
         setLoading(false);
       }
@@ -28,14 +59,14 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="experience-modal-overlay">
+    <div className="experience-modal-overlay" ref={modalContainerRef}>
       <div className="experience-modal-box">
         <div className="experience-modal-header">
           <div>
             <h2>Experience Details</h2>
             <p>View the details of this work experience</p>
           </div>
-          <button className="experience-close-btn" onClick={onClose}>
+          <button className="experience-close-btn" onClick={handleClose}>
             <FiX size={20} />
           </button>
         </div>
@@ -97,7 +128,7 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
               <button
                 type="button"
                 className="experience-btn-cancel"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 Close
               </button>
