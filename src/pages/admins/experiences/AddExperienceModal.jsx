@@ -1,10 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { FiX } from "react-icons/fi";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { addExperience } from "../../../services/experienceService";
 import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
+  const modalContainerRef = useRef(null);
+
   const [formData, setFormData] = useState({
     companyName: "",
     companyLocation: "",
@@ -16,6 +20,34 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
   });
 
   const [loading, setLoading] = useState(false);
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.from(".experience-modal-overlay", { opacity: 0, duration: 0.3 });
+      gsap.from(".experience-modal-box", {
+        y: 50,
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.4,
+        ease: "power3.out"
+      });
+    }
+  }, { scope: modalContainerRef, dependencies: [isOpen] });
+
+  // Handle closing with animation
+  const handleClose = () => {
+    gsap.to(".experience-modal-box", {
+      y: 20,
+      opacity: 0,
+      duration: 0.2,
+      ease: "power3.in"
+    });
+    gsap.to(".experience-modal-overlay", {
+      opacity: 0,
+      duration: 0.2,
+      onComplete: onClose
+    });
+  };
 
   if (!isOpen) return null;
 
@@ -95,14 +127,14 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
   };
 
   return (
-    <div className="experience-modal-overlay">
+    <div className="experience-modal-overlay" ref={modalContainerRef}>
       <div className="experience-modal-box">
         {/* Header */}
         <div className="experience-modal-header">
           <h2>Add New Experience</h2>
           <button
             className="experience-close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
@@ -208,7 +240,7 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
             <button
               type="button"
               className="experience-btn-cancel"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
             >
               Cancel

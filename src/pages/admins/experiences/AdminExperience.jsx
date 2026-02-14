@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Plus, Edit, Trash2, Eye, Briefcase, Calendar, MapPin } from "lucide-react";
 import "../../../css/admin/experiences/AdminExperience.css";
@@ -8,7 +8,8 @@ import AddExperienceModal from "./AddExperienceModal";
 import ViewExperienceModal from "./ViewExperienceModal";
 import EditExperienceModal from "./EditExperienceModal";
 import Pagination from "../../../components/admin/Pagination";
-import { motion as Motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 /* ------------------ SKELETON CARD ------------------ */
 const SkeletonExperienceCard = () => {
@@ -40,6 +41,8 @@ const AdminExperience = () => {
   const [active, setActive] = useState("Experience");
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const containerRef = useRef(null);
 
   const [modalState, setModalState] = useState({
     add: false,
@@ -74,10 +77,44 @@ const AdminExperience = () => {
     fetchExperiences();
   }, [fetchExperiences]);
 
+  useGSAP(() => {
+    if (!loading && experiences.length > 0) {
+      gsap.fromTo(
+        ".experience-card",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          stagger: 0.1,
+          ease: "power3.out",
+          clearProps: "all",
+        }
+      );
+    }
+  }, { scope: containerRef, dependencies: [loading, experiences] });
+
+  useEffect(() => {
+    const content = document.querySelector(".admin-content");
+
+    if (!content) return;
+
+    if (modalState.add || modalState.edit || modalState.view) {
+      content.scrollTo({ top: 0, behavior: "smooth" });
+      content.style.overflow = "hidden";
+    } else {
+      content.style.overflow = "auto";
+    }
+
+    return () => {
+      content.style.overflow = "auto";
+    };
+  }, [modalState]);
+
   const handleDelete = async (exp) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: `You are about to delete "${exp.company_name}"`,
+      text: `Delete "${exp.company_name}"?`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
@@ -87,10 +124,28 @@ const AdminExperience = () => {
 
     if (result.isConfirmed) {
       try {
+        // Optimistic UI update: Remove from list immediately
+        setExperiences((prev) => prev.filter((item) => item.id !== exp.id));
+
         await deleteExperience(exp.id);
-        Swal.fire("Deleted!", "Experience has been deleted.", "success");
-        fetchExperiences(pagination.currentPage);
+        Swal.fire({
+          title: "Deleted!",
+          text: "Experience has been deleted.",
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        // Re-fetch to sync pagination if needed, but not strictly necessary for visual if we are okay with count being off until next page load
+        // But let's fetch silently without setting loading to true to avoid layout shift
+        const response = await viewAllExperiences(pagination.currentPage);
+        const { data, current_page, last_page, total, from, to } = response.data;
+        setExperiences(data || []);
+        setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
+
       } catch (error) {
+        // Revert on error
+        fetchExperiences(pagination.currentPage);
         Swal.fire("Error", error.message || "Failed to delete experience", "error");
       }
     }
@@ -101,7 +156,7 @@ const AdminExperience = () => {
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
-        <div className="experience-container">
+        <div className="experience-container" ref={containerRef}>
           <div className="experience-header">
             <div>
               <h1>Experience</h1>
@@ -126,16 +181,8 @@ const AdminExperience = () => {
 
           {/* ---------- REAL DATA ---------- */}
           {!loading &&
-            experiences.map((exp, index) => (
-              <Motion.div
-                key={exp.id}
-                className="experience-card"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
-                whileTap={{ scale: 0.98 }}
-              >
+            experiences.map((exp) => (
+              <div key={exp.id} className="experience-card">
                 <div className="experience-card-header">
                   <h2 className="experience-title">
                     <Briefcase className="experience-icon" />
@@ -189,8 +236,7 @@ const AdminExperience = () => {
                     </ul>
                   </div>
                 )}
-
-              </Motion.div>
+              </div>
             ))}
 
           {!loading && experiences.length > 0 && (
