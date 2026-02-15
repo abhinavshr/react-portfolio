@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { FiUploadCloud } from "react-icons/fi";
 import "../../../css/admin/ProjectImage/AddProjectImage.css";
+import { UploadCloud, ChevronLeft, Briefcase, Tag, Image as ImageIcon } from "lucide-react";
 import { fetchProjectsDropdown, getProjectImageById, editProjectImage } from "../../../services/projectImageService";
 import Swal from "sweetalert2";
+import gsap from "gsap";
 
 const EditProjectImage = () => {
     const { id } = useParams();
@@ -16,6 +17,9 @@ const EditProjectImage = () => {
     const [loading, setLoading] = useState(false);
     const [projects, setProjects] = useState([]);
     const [projectsLoading, setProjectsLoading] = useState(true);
+
+    const containerRef = useRef(null);
+    const cardRef = useRef(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -44,6 +48,18 @@ const EditProjectImage = () => {
         };
 
         loadData();
+
+        // Animations
+        gsap.fromTo(
+            containerRef.current,
+            { opacity: 0, x: -20 },
+            { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }
+        );
+        gsap.fromTo(
+            cardRef.current,
+            { opacity: 0, y: 30 },
+            { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power3.out" }
+        );
     }, [id]);
 
 
@@ -74,6 +90,8 @@ const EditProjectImage = () => {
                 icon: "warning",
                 title: "Missing Information",
                 text: "Please fill project and image name",
+                background: "#ffffff",
+                confirmButtonColor: "#6366f1",
             });
             return;
         }
@@ -91,7 +109,8 @@ const EditProjectImage = () => {
                 icon: "success",
                 title: "Updated",
                 text: "Project image updated successfully!",
-                confirmButtonText: "OK",
+                confirmButtonText: "Back to Gallery",
+                confirmButtonColor: "#6366f1",
             }).then(() => navigate(-1));
 
         } catch (err) {
@@ -111,20 +130,23 @@ const EditProjectImage = () => {
             <AdminSidebar active={active} setActive={setActive} />
 
             <main className="add-project-image-content">
-                <div className="add-project-image-header">
+                <div className="add-project-image-header" ref={containerRef}>
                     <button className="add-project-image-back-btn" onClick={() => navigate(-1)}>
-                        ←
+                        <ChevronLeft size={24} />
                     </button>
                     <div>
-                        <h1>Edit Project Image</h1>
-                        <p>Update image for selected project</p>
+                        <h1>Refine Artifact</h1>
+                        <p>Update the visual details for your project showcase</p>
                     </div>
                 </div>
 
-                <div className="add-project-image-card">
+                <div className="add-project-image-card" ref={cardRef}>
                     <form onSubmit={handleSubmit}>
                         <div className="add-project-image-group">
-                            <label>Project *</label>
+                            <label>
+                                <Briefcase size={16} color="#6366f1" />
+                                Project Reference *
+                            </label>
                             <select
                                 name="project_id"
                                 value={form.project_id || ""}
@@ -141,18 +163,24 @@ const EditProjectImage = () => {
                         </div>
 
                         <div className="add-project-image-group">
-                            <label>Image Name *</label>
+                            <label>
+                                <Tag size={16} color="#6366f1" />
+                                Image Label *
+                            </label>
                             <input
                                 type="text"
                                 name="image_name"
                                 value={form.image_name || ""}
                                 onChange={handleChange}
-                                placeholder="Enter image name"
+                                placeholder="e.g., Main Showcase, Feature Detail"
                             />
                         </div>
 
                         <div className="add-project-image-group">
-                            <label>Image</label>
+                            <label>
+                                <ImageIcon size={16} color="#6366f1" />
+                                Updated Asset
+                            </label>
                             <div
                                 className="add-project-image-upload-box"
                                 onClick={() => document.getElementById("editProjectImageInput").click()}
@@ -161,10 +189,10 @@ const EditProjectImage = () => {
                             >
                                 <div className="add-project-image-upload-content">
                                     <div className="add-project-image-upload-icon">
-                                        <FiUploadCloud size={36} />
+                                        <UploadCloud size={48} />
                                     </div>
-                                    <p className="add-project-image-upload-title">Click to upload image</p>
-                                    <p className="add-project-image-upload-sub">PNG, JPG up to 10MB</p>
+                                    <p className="add-project-image-upload-title">Click or drag to replace image</p>
+                                    <p className="add-project-image-upload-sub">Leave empty to keep existing asset</p>
                                 </div>
                                 <input
                                     id="editProjectImageInput"
@@ -179,16 +207,16 @@ const EditProjectImage = () => {
 
                         {preview && (
                             <div className="add-project-image-preview">
-                                <img src={preview} alt="Preview" />
+                                <img src={preview} alt="Asset Preview" />
                             </div>
                         )}
 
                         <div className="add-project-image-actions">
                             <button type="submit" disabled={loading}>
-                                {loading ? "Updating..." : "Update Image"}
+                                {loading ? "Saving Changes..." : "Apply Updates"}
                             </button>
                             <button type="button" className="add-project-image-cancel" onClick={() => navigate(-1)}>
-                                Cancel
+                                Discard Edits
                             </button>
                         </div>
                     </form>

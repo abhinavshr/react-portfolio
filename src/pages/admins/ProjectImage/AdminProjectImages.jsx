@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { Upload, Edit, Trash2, X } from "lucide-react";
+import { Upload, Edit, Trash2, X, Image as ImageIcon, Plus } from "lucide-react";
 import "../../../css/admin/ProjectImage/AdminProjectImages.css";
 import {
   viewAllProjectImages,
@@ -9,18 +9,18 @@ import {
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Pagination from "../../../components/admin/Pagination";
-import { motion as Motion } from "framer-motion";
+import gsap from "gsap";
 
 const SkeletonProjectImage = () => (
   <div className="project-card skeleton-project-image">
     <div className="skeleton-image skeleton-input" />
-    <div className="project-info">
-      <div className="skeleton-input title" />
-      <div className="skeleton-input caption" />
-    </div>
-    <div className="project-actions">
-      <div className="skeleton-input btn" />
-      <div className="skeleton-input btn" />
+    <div className="skeleton-info">
+      <div className="skeleton-input" style={{ width: "40%", height: "12px", marginBottom: "12px" }} />
+      <div className="skeleton-input" style={{ width: "80%", height: "20px", marginBottom: "20px" }} />
+      <div style={{ display: "flex", gap: "12px" }}>
+        <div className="skeleton-input" style={{ flex: 1, height: "40px", borderRadius: "12px" }} />
+        <div className="skeleton-input" style={{ flex: 1, height: "40px", borderRadius: "12px" }} />
+      </div>
     </div>
   </div>
 );
@@ -40,9 +40,35 @@ const AdminProjectImages = () => {
 
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
+  const gridRef = useRef(null);
+  const headerRef = useRef(null);
 
   useEffect(() => {
     fetchProjectImages();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && images.length > 0) {
+      gsap.fromTo(
+        ".project-card",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, [loading, images]);
+
+  useEffect(() => {
+    gsap.fromTo(
+      headerRef.current,
+      { opacity: 0, x: -30 },
+      { opacity: 1, x: 0, duration: 0.8, ease: "power3.out" }
+    );
   }, []);
 
   const fetchProjectImages = async (page = 1) => {
@@ -56,11 +82,11 @@ const AdminProjectImages = () => {
         total: response.pagination.total,
         from:
           (response.pagination.current_page - 1) *
-            response.pagination.per_page +
+          response.pagination.per_page +
           1,
         to:
           (response.pagination.current_page - 1) *
-            response.pagination.per_page +
+          response.pagination.per_page +
           response.data.length,
       });
     } catch (err) {
@@ -81,20 +107,26 @@ const AdminProjectImages = () => {
       text: `You are about to delete "${title}". This action cannot be undone!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#64748b",
       confirmButtonText: "Yes, delete it!",
       cancelButtonText: "Cancel",
+      background: "#ffffff",
+      customClass: {
+        popup: "premium-swal-popup",
+      },
     });
 
     if (result.isConfirmed) {
       try {
         await deleteProjectImage(id);
-        Swal.fire(
-          "Deleted!",
-          `Project image "${title}" has been deleted.`,
-          "success"
-        );
+        Swal.fire({
+          title: "Deleted!",
+          text: `Project image "${title}" has been deleted.`,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        });
         fetchProjectImages(pagination.currentPage);
       } catch (err) {
         Swal.fire(
@@ -112,61 +144,46 @@ const AdminProjectImages = () => {
 
       <main className="admin-content">
         <div className="admin-project-images-page">
-          <div className="projectimage-header">
+          <header className="projectimage-header" ref={headerRef}>
             <div>
-              <h1>Project Images</h1>
-              <p>Manage images for your projects</p>
+              <h1>Project Gallery</h1>
+              <p>Curate and manage your high-quality showcase images</p>
             </div>
             <button className="upload-btn" onClick={handleClickUpload}>
-              <Upload size={20} style={{ marginRight: "8px" }} />
-              Upload to Project
+              <Plus size={20} />
+              <span>Add New Image</span>
             </button>
-          </div>
+          </header>
 
           <div className="filter">
+            <ImageIcon size={18} color="#6366f1" />
             <span>Filter by project:</span>
             <select className="filter-select" disabled>
               <option>All Projects</option>
             </select>
           </div>
 
-          {loading && (
+          {loading ? (
             <div className="projects-grid">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonProjectImage key={i} />
               ))}
             </div>
-          )}
-
-          {error && !loading && (
+          ) : error ? (
             <div className="empty-state error">
               <p>{error}</p>
             </div>
-          )}
-
-          {!loading && images.length > 0 && (
+          ) : images.length > 0 ? (
             <>
-              <div className="projects-grid">
-                {images.map((image, index) => (
-                  <Motion.div
-                    key={image.id}
-                    className="project-card"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{
-                      duration: 0.4,
-                      delay: index * 0.1,
-                    }}
-                    whileHover={{
-                      scale: 1.03,
-                      boxShadow: "0 0 15px rgba(37,99,235,0.5)",
-                    }}
-                  >
+              <div className="projects-grid" ref={gridRef}>
+                {images.map((image) => (
+                  <div key={image.id} className="project-card">
                     <img
                       src={image.image_path}
                       alt={image.image_name}
                       className="clickable-image"
                       onClick={() => setSelectedImage(image)}
+                      loading="lazy"
                     />
 
                     <div className="project-info">
@@ -190,13 +207,13 @@ const AdminProjectImages = () => {
                         <Trash2 size={16} /> Delete
                       </button>
                     </div>
-                  </Motion.div>
+                  </div>
                 ))}
               </div>
 
               <div className="table-footer-project-image">
                 <div className="table-summary-project-image">
-                  Showing {pagination.from} to {pagination.to} of {pagination.total} images
+                  Showing <b>{pagination.from}–{pagination.to}</b> of <b>{pagination.total}</b> artifacts
                 </div>
                 <Pagination
                   currentPage={pagination.currentPage}
@@ -205,11 +222,10 @@ const AdminProjectImages = () => {
                 />
               </div>
             </>
-          )}
-
-          {!loading && images.length === 0 && (
+          ) : (
             <div className="empty-state">
-              <p>No images available</p>
+              <ImageIcon size={48} style={{ marginBottom: "16px", opacity: 0.5 }} />
+              <p>No project images found. Start by uploading one!</p>
             </div>
           )}
 
@@ -217,7 +233,7 @@ const AdminProjectImages = () => {
             <div className="image-modal" onClick={() => setSelectedImage(null)}>
               <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="close-btn" onClick={() => setSelectedImage(null)}>
-                  <X size={28} />
+                  <X size={24} />
                 </button>
                 <img src={selectedImage.image_path} alt={selectedImage.image_name} />
                 <div className="modal-info">
