@@ -3,7 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
 import { viewProjectById, updateProject, fetchCategories } from "../../../services/projectService";
+import { ChevronLeft, Save, Briefcase, RefreshCw } from "lucide-react";
 import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 const EditProject = () => {
   const { id } = useParams();
@@ -50,7 +55,7 @@ const EditProject = () => {
         github_link: project.github_link || "",
       });
     } catch (error) {
-      Swal.fire({ icon: "error", title: "Error", text: "Failed to load project data", error}).then(() =>
+      Swal.fire({ icon: "error", title: "Error", text: "Failed to load project data", error }).then(() =>
         navigate("/admin/projects")
       );
     } finally {
@@ -108,6 +113,24 @@ const EditProject = () => {
     }
   };
 
+  useGSAP(() => {
+    if (!loading) {
+      gsap.from(".header", {
+        x: -30,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out"
+      });
+      gsap.from(".project-form", {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out"
+      });
+    }
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="admin-layout">
@@ -124,15 +147,17 @@ const EditProject = () => {
       <AdminSidebar active={active} setActive={setActive} />
       <main className="admin-content">
         <div className="header">
-          <button className="back-btn" onClick={handleBackClick}>&#8592;</button>
+          <button className="back-btn" onClick={handleBackClick} title="Go Back">
+            <ChevronLeft size={24} />
+          </button>
           <div className="header-text">
             <h1>Edit Project</h1>
-            <p>Update the information for this project</p>
+            <p>Update information and maintain your portfolio project state</p>
           </div>
         </div>
 
         <div className="section">
-          <h2>Basic Information</h2>
+          <h2><Briefcase size={18} /> Update Details</h2>
           <form className="project-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
@@ -196,7 +221,11 @@ const EditProject = () => {
 
             <div className="action-buttons">
               <button className="create-btn" type="submit" disabled={updating}>
-                {updating ? "Updating..." : "Update Project"}
+                {updating ? (
+                  <div className="spinner-mini"></div>
+                ) : (
+                  <><Save size={18} /> Update Project</>
+                )}
               </button>
               <button className="cancel-btn" type="button" onClick={handleBackClick}>Cancel</button>
             </div>

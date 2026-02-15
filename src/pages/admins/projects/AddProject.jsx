@@ -3,7 +3,12 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
 import { useNavigate } from "react-router-dom";
 import { addProject, fetchCategories } from "../../../services/projectService";
+import { ChevronLeft, Save, Briefcase, PlusCircle } from "lucide-react";
 import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(useGSAP);
 
 const AddProject = () => {
   const [active, setActive] = useState("Projects");
@@ -86,20 +91,38 @@ const AddProject = () => {
     }
   };
 
+  useGSAP(() => {
+    gsap.from(".header", {
+      x: -30,
+      opacity: 0,
+      duration: 0.8,
+      ease: "power3.out"
+    });
+    gsap.from(".project-form", {
+      y: 30,
+      opacity: 0,
+      duration: 0.8,
+      delay: 0.2,
+      ease: "power3.out"
+    });
+  }, []);
+
   return (
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
       <main className="admin-content">
         <div className="header">
-          <button className="back-btn" onClick={handleBackClick}>&#8592;</button>
+          <button className="back-btn" onClick={handleBackClick} title="Go Back">
+            <ChevronLeft size={24} />
+          </button>
           <div className="header-text">
             <h1>Add New Project</h1>
-            <p>Fill in the information to create a new project</p>
+            <p>Fill in the details to showcase your latest work in the portfolio</p>
           </div>
         </div>
 
         <div className="section">
-          <h2>Basic Information</h2>
+          <h2><Briefcase size={18} /> Project Details</h2>
           <form className="project-form" onSubmit={handleSubmit}>
             <div className="form-row">
               <div className="form-group">
@@ -163,7 +186,11 @@ const AddProject = () => {
 
             <div className="action-buttons">
               <button className="create-btn" type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Project"}
+                {loading ? (
+                  <div className="spinner-mini"></div>
+                ) : (
+                  <><PlusCircle size={18} /> Create Project</>
+                )}
               </button>
               <button className="cancel-btn" type="button" onClick={handleBackClick}>Cancel</button>
             </div>
