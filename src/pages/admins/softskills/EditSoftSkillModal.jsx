@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from "react";
+import { X, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../../css/admin/softskills/AddSoftSkillModal.css";
 import { getSoftSkillById, updateSoftSkill } from "../../../services/softSkillService";
+import { gsap } from "gsap";
 
 const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const [name, setName] = useState("");
@@ -10,6 +11,8 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const [level, setLevel] = useState(50);
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     if (skillId && isOpen) {
@@ -21,6 +24,13 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
           setName(skill.name || "");
           setDescription(skill.description || "");
           setLevel(skill.level ?? 50);
+
+          gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+          gsap.fromTo(
+            modalRef.current,
+            { opacity: 0, scale: 0.9, y: 20 },
+            { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+          );
         } catch (error) {
           Swal.fire({
             icon: "error",
@@ -33,30 +43,33 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
         }
       };
       fetchSkill();
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [skillId, isOpen, onClose]);
 
   if (!isOpen) return null;
 
-  const validateForm = () => {
-    if (!name.trim()) {
-      return { type: "warning", title: "Missing Field", text: "Soft skill name is required." };
-    }
-    if (!description.trim()) {
-      return { type: "warning", title: "Missing Field", text: "Description is required." };
-    }
-    if (level < 0 || level > 100) {
-      return { type: "error", title: "Invalid Level", text: "Level must be between 0 and 100." };
-    }
-    return null;
+  const handleClose = () => {
+    gsap.to(modalRef.current, {
+      opacity: 0,
+      scale: 0.9,
+      y: 20,
+      duration: 0.3,
+      onComplete: onClose,
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationError = validateForm();
-    if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+    if (!name.trim() || !description.trim()) {
+      Swal.fire("Warning", "Name and description are required.", "warning");
       return;
     }
 
@@ -73,7 +86,7 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
       });
 
       onSkillUpdated?.(response);
-      onClose();
+      handleClose();
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -86,25 +99,27 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   };
 
   return (
-    <div className="softskill-modal-overlay">
-      <div className="softskill-modal-box">
+    <div className="softskill-modal-overlay" ref={overlayRef} onClick={(e) => e.target === overlayRef.current && handleClose()}>
+      <div className="softskill-modal-box" ref={modalRef}>
         <div className="softskill-modal-header">
           <h2>Edit Soft Skill</h2>
           <button
             className="softskill-close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
         {fetching ? (
-          <p className="softskill-modal-subtitle">Loading...</p>
+          <div className="flex items-center justify-center p-12 text-blue-500">
+            <Loader2 className="animate-spin" size={32} />
+          </div>
         ) : (
           <>
-            <p className="softskill-modal-subtitle">Update the soft skill details</p>
+            <p className="softskill-modal-subtitle">Update the soft skill details to reflect your growth</p>
 
             <form className="softskill-modal-form" onSubmit={handleSubmit}>
               <label>
@@ -122,17 +137,17 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
               <label>
                 Description *
                 <textarea
-                  placeholder="Enter description"
+                  placeholder="Enter details..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
+                  rows={4}
                   required
                   disabled={loading}
                 />
               </label>
 
               <label>
-                Level (0–100%) *
+                Proficiency Level (0–100%) *
                 <input
                   type="number"
                   min="0"
@@ -166,7 +181,7 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
                 <button
                   type="button"
                   className="softskill-btn-cancel"
-                  onClick={onClose}
+                  onClick={handleClose}
                   disabled={loading}
                 >
                   Cancel
@@ -176,7 +191,7 @@ const EditSoftSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
                   className="softskill-btn-add"
                   disabled={loading}
                 >
-                  {loading ? "Updating..." : "Update"}
+                  {loading ? "Updating..." : "Update Soft Skill"}
                 </button>
               </div>
             </form>

@@ -1,16 +1,47 @@
-import React, { useState } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useState, useEffect, useRef } from "react";
+import { X } from "lucide-react";
 import Swal from "sweetalert2";
 import "../../../css/admin/softskills/AddSoftSkillModal.css";
 import { addSoftSkill } from "../../../services/softSkillService";
+import { gsap } from "gsap";
 
 const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [level, setLevel] = useState(50);
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+      );
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    gsap.to(modalRef.current, {
+      opacity: 0,
+      scale: 0.9,
+      y: 20,
+      duration: 0.3,
+      onComplete: onClose,
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
+  };
 
   const resetForm = () => {
     setName("");
@@ -18,25 +49,11 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
     setLevel(50);
   };
 
-  const validateForm = () => {
-    if (!name.trim()) {
-      return { type: "warning", title: "Missing Field", text: "Soft skill name is required." };
-    }
-    if (!description.trim()) {
-      return { type: "warning", title: "Missing Field", text: "Description is required." };
-    }
-    if (level < 0 || level > 100) {
-      return { type: "error", title: "Invalid Level", text: "Level must be between 0 and 100." };
-    }
-    return null;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const validationError = validateForm();
-    if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+    if (!name.trim() || !description.trim()) {
+      Swal.fire("Warning", "Name and description are required.", "warning");
       return;
     }
 
@@ -54,7 +71,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
       resetForm();
       onSkillAdded?.(response);
-      onClose();
+      handleClose();
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -67,21 +84,21 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   };
 
   return (
-    <div className="softskill-modal-overlay">
-      <div className="softskill-modal-box">
+    <div className="softskill-modal-overlay" ref={overlayRef} onClick={(e) => e.target === overlayRef.current && handleClose()}>
+      <div className="softskill-modal-box" ref={modalRef}>
         <div className="softskill-modal-header">
           <h2>Add Soft Skill</h2>
           <button
             className="softskill-close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
-        <p className="softskill-modal-subtitle">Add a new soft skill</p>
+        <p className="softskill-modal-subtitle">Add a new professional soft skill to your profile</p>
 
         <form className="softskill-modal-form" onSubmit={handleSubmit}>
           <label>
@@ -99,17 +116,17 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
           <label>
             Description *
             <textarea
-              placeholder="Enter description"
+              placeholder="Enter details about this skill..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={3}
+              rows={4}
               required
               disabled={loading}
             />
           </label>
 
           <label>
-            Level (0–100%) *
+            Proficiency Level (0–100%) *
             <input
               type="number"
               min="0"
@@ -143,7 +160,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
             <button
               type="button"
               className="softskill-btn-cancel"
-              onClick={onClose}
+              onClick={handleClose}
               disabled={loading}
             >
               Cancel
@@ -153,7 +170,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
               className="softskill-btn-add"
               disabled={loading}
             >
-              {loading ? "Adding..." : "Add"}
+              {loading ? "Adding..." : "Add Soft Skill"}
             </button>
           </div>
         </form>

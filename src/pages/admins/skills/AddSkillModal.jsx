@@ -1,14 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { X } from "lucide-react";
 import Select from "react-select";
 import { fetchCategories } from "../../../services/projectService";
 import { addSkill } from "../../../services/skillService";
 import "../../../css/admin/skills/AddSkillModal.css";
+import { gsap } from "gsap";
 
 const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [form, setForm] = useState({ name: "", level: 50, category: null });
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
   const loadCategories = useCallback(async () => {
     try {
@@ -24,13 +27,38 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   }, []);
 
   useEffect(() => {
-    if (isOpen) loadCategories();
+    if (isOpen) {
+      loadCategories();
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+      );
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen, loadCategories]);
 
   if (!isOpen) return null;
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleClose = () => {
+    gsap.to(modalRef.current, {
+      opacity: 0,
+      scale: 0.9,
+      y: 20,
+      duration: 0.3,
+      onComplete: onClose,
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   };
 
   const handleSubmit = async (e) => {
@@ -48,6 +76,7 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
       onSkillAdded?.();
       setForm({ name: "", level: 50, category: null });
+      handleClose();
     } catch (err) {
       console.error(err);
       alert(err.message || "Failed to add skill");
@@ -55,16 +84,16 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
+    <div className="modal-overlay" ref={overlayRef} onClick={(e) => e.target === overlayRef.current && handleClose()}>
+      <div className="modal-box" ref={modalRef}>
         <div className="modal-header">
           <h2>Add New Skill</h2>
-          <button className="close-btn" onClick={onClose}>
-            <FiX size={20} />
+          <button className="close-btn" onClick={handleClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <p className="modal-subtitle">Add a new skill to your profile</p>
+        <p className="modal-subtitle">Add a new skill to your technical profile</p>
 
         <form className="modal-form" onSubmit={handleSubmit}>
           <label>
@@ -79,7 +108,7 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
           </label>
 
           <label>
-            Level (0–100%) *
+            Proficiency Level (0–100%) *
             <input
               type="number"
               min="0"
@@ -107,21 +136,22 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
           <label>
             Category *
             <Select
+              classNamePrefix="select"
               value={form.category}
               onChange={(val) => handleChange("category", val)}
               options={categories}
               isLoading={loadingCategories}
-              placeholder={loadingCategories ? "Loading categories..." : "Select category"}
+              placeholder={loadingCategories ? "Loading..." : "Select category"}
               isClearable
             />
           </label>
 
           <div className="modal-actions">
-            <button type="button" className="btn-cancel" onClick={onClose}>
+            <button type="button" className="btn-cancel" onClick={handleClose}>
               Cancel
             </button>
             <button type="submit" className="btn-add">
-              Add
+              Add Skill
             </button>
           </div>
         </form>
