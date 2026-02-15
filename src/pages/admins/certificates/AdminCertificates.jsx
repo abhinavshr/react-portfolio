@@ -1,13 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { Plus, Edit, Trash2, Award, ExternalLink } from "lucide-react";
+import { Plus, Edit, Trash2, Award, ExternalLink, Calendar, IdCard } from "lucide-react";
 import "../../../css/admin/certificates/AdminCertificates.css";
 import Swal from "sweetalert2";
 import { viewAllCertificates, deleteCertificate } from "../../../services/certificatesService";
 import AddCertificateModal from "./AddCertificateModal";
 import EditCertificateModal from "./EditCertificateModal";
 import Pagination from "../../../components/admin/Pagination";
-import { motion as Motion } from "framer-motion";
+import gsap from "gsap";
 
 /* ------------ SKELETON CARD ------------ */
 const SkeletonCertificateCard = () => (
@@ -36,6 +36,8 @@ const AdminCertificates = () => {
   const [active, setActive] = useState("Certificates");
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+  const headerRef = useRef(null);
 
   const [modalState, setModalState] = useState({
     add: false,
@@ -61,7 +63,14 @@ const AdminCertificates = () => {
         setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
       }
     } catch (error) {
-      Swal.fire("Error", error.message || "Failed to load certificates", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: error.message || "Failed to load certificates",
+        customClass: {
+          popup: "premium-swal-popup",
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -71,22 +80,65 @@ const AdminCertificates = () => {
     fetchCertificates();
   }, [fetchCertificates]);
 
+  // GSAP Entrance Animation
+  useEffect(() => {
+    if (!loading && certificates.length > 0) {
+      const cards = containerRef.current.querySelectorAll(".certificate-card");
+
+      gsap.fromTo(cards,
+        {
+          opacity: 0,
+          y: 40,
+          scale: 0.95
+        },
+        {
+          opacity: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out"
+        }
+      );
+    }
+  }, [loading, certificates]);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      gsap.fromTo(headerRef.current,
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: "power3.out" }
+      );
+    }
+  }, []);
+
   const handleDelete = async (cert) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: `Delete "${cert.title}" certificate?`,
+      text: `You are about to delete "${cert.title}". This action cannot be undone!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: "#fff",
+      customClass: {
+        popup: "premium-swal-popup",
+      }
     });
 
     if (!result.isConfirmed) return;
 
     try {
       await deleteCertificate(cert.id);
-      Swal.fire("Deleted!", "Certificate has been deleted.", "success");
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Certificate has been removed successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       fetchCertificates(pagination.currentPage);
     } catch (error) {
       Swal.fire("Error", error.message || "Failed to delete certificate", "error");
@@ -99,16 +151,16 @@ const AdminCertificates = () => {
 
       <main className="admin-content">
         <div className="certificates-container">
-          <div className="certificates-header">
+          <div className="certificates-header" ref={headerRef}>
             <div>
               <h1>Certificates</h1>
-              <p>Manage your professional certifications</p>
+              <p>Manage and showcase your professional achievements</p>
             </div>
             <button
               className="add-certificate-btn"
               onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
             >
-              <Plus size={18} /> Add Certificate
+              <Plus size={20} /> Add Certificate
             </button>
           </div>
 
@@ -123,22 +175,19 @@ const AdminCertificates = () => {
 
           {/* ---------- REAL GRID ---------- */}
           {!loading && (
-            <div className="certificates-grid">
-              {certificates.length === 0 && <p>No certificates found.</p>}
+            <div className="certificates-grid" ref={containerRef}>
+              {certificates.length === 0 && (
+                <div className="no-data">
+                  <Award size={48} />
+                  <p>No certificates found. Start by adding one!</p>
+                </div>
+              )}
 
-              {certificates.map((cert, index) => (
-                <Motion.div
-                  key={cert.id}
-                  className="certificate-card"
-                  initial={{ opacity: 0, y: 30 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  whileHover={{ scale: 1.03, boxShadow: "0 0 20px rgba(37,99,235,0.5)" }}
-                  whileTap={{ scale: 0.97 }}
-                >
+              {certificates.map((cert) => (
+                <div key={cert.id} className="certificate-card">
                   <div className="certificate-top">
                     <div className="certificate-icon">
-                      <Award size={26} />
+                      <Award size={28} />
                     </div>
                     <div className="certificate-actions">
                       <button
@@ -146,12 +195,14 @@ const AdminCertificates = () => {
                         onClick={() =>
                           setModalState({ edit: true, selectedId: cert.id, add: false })
                         }
+                        title="Edit Certificate"
                       >
                         <Edit size={18} />
                       </button>
                       <button
                         className="icon-btn delete"
                         onClick={() => handleDelete(cert)}
+                        title="Delete Certificate"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -159,13 +210,19 @@ const AdminCertificates = () => {
                   </div>
 
                   <h3 className="certificate-title">{cert.title}</h3>
-                  <p className="certificate-org">{cert.issuer}</p>
+                  <div className="certificate-org">{cert.issuer}</div>
 
                   <div className="certificate-meta">
                     <span>
-                      Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : ""}
+                      <Calendar size={14} />
+                      Issued: {cert.issue_date ? cert.issue_date.split("T")[0] : "N/A"}
                     </span>
-                    {cert.credential_id && <span>ID: {cert.credential_id}</span>}
+                    {cert.credential_id && (
+                      <span>
+                        <IdCard size={14} />
+                        ID: {cert.credential_id}
+                      </span>
+                    )}
                   </div>
 
                   {cert.verification_url && (
@@ -175,10 +232,10 @@ const AdminCertificates = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Verify <ExternalLink size={14} />
+                      Verify Authenticity <ExternalLink size={14} />
                     </a>
                   )}
-                </Motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -186,7 +243,7 @@ const AdminCertificates = () => {
           {!loading && certificates.length > 0 && (
             <div className="table-footer-certificates">
               <div className="table-summary-certificates">
-                Showing {pagination.from} to {pagination.to} of {pagination.total} certificates
+                Showing <b>{pagination.from}</b> to <b>{pagination.to}</b> of <b>{pagination.total}</b> certificates
               </div>
               <Pagination
                 currentPage={pagination.currentPage}
