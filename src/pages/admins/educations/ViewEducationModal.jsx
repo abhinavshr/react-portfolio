@@ -1,11 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { X, GraduationCap, Calendar, BookOpen, School } from "lucide-react";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { viewEducationById } from "../../../services/educationService";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
   const [education, setEducation] = useState(null);
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  const handleClose = useCallback(() => {
+    gsap.to(modalRef.current, {
+      y: 50,
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.3,
+      onComplete: onClose
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen || !educationId) return;
@@ -14,9 +29,9 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
       try {
         setLoading(true);
         const response = await viewEducationById(educationId);
-        setEducation(response.data); 
+        setEducation(response.data);
       } catch (error) {
-        alert(error.message || "Failed to fetch education");
+        console.error(error.message || "Failed to fetch education");
       } finally {
         setLoading(false);
       }
@@ -25,72 +40,90 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
     fetchEducation();
   }, [isOpen, educationId]);
 
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+      );
+    }
+  }, { dependencies: [isOpen] });
+
   if (!isOpen) return null;
 
   return (
-    <div className="edu-modal-overlay">
-      <div className="edu-modal">
+    <div className="edu-modal-overlay" ref={overlayRef} onClick={handleClose}>
+      <div
+        className="edu-modal"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="edu-modal-header">
           <div>
             <h2>Education Details</h2>
-            <p>View the details of this education entry</p>
+            <p>Comprehensive overview of your academic record</p>
           </div>
-          <button className="close-btn" onClick={onClose}>
-            <FiX size={20} />
+          <button className="close-btn" onClick={handleClose}>
+            <X size={20} />
           </button>
         </div>
 
         {loading ? (
-          <p>Loading...</p>
+          <div className="modal-loading">
+            <div className="spinner"></div>
+            <p>Retrieving education details...</p>
+          </div>
         ) : education ? (
-          <div className="edu-form">
+          <div className="edu-form view-only">
             <label>
-              Institution/University
-              <input type="text" value={education.institution} readOnly />
+              <div className="label-with-icon"><School size={16} /> Institution</div>
+              <input type="text" value={education.institution} readOnly className="read-only-input" />
             </label>
 
             <div className="two-col">
               <label>
-                Level
-                <input type="text" value={education.level} readOnly />
+                <div className="label-with-icon"><BookOpen size={16} /> Level</div>
+                <input type="text" value={education.level} readOnly className="read-only-input" />
               </label>
 
               <label>
-                Program of Study
-                <input type="text" value={education.program} readOnly />
+                <div className="label-with-icon"><GraduationCap size={16} /> Program</div>
+                <input type="text" value={education.program} readOnly className="read-only-input" />
               </label>
             </div>
 
             <div className="two-col">
               <label>
-                Start Year
-                <input type="text" value={education.start_year} readOnly />
+                <div className="label-with-icon"><Calendar size={16} /> Start Year</div>
+                <input type="text" value={education.start_year} readOnly className="read-only-input" />
               </label>
 
               <label>
-                End Year
-                <input type="text" value={education.end_year} readOnly />
+                <div className="label-with-icon"><Calendar size={16} /> End Year</div>
+                <input type="text" value={education.end_year} readOnly className="read-only-input" />
               </label>
             </div>
 
             <label>
-              Board
-              <input type="text" value={education.board || "-"} readOnly />
+              Board / Affiliation
+              <input type="text" value={education.board || "Not specified"} readOnly className="read-only-input" />
             </label>
 
             <label>
-              Description
-              <textarea rows="4" value={education.description || "-"} readOnly />
+              Description / Notes
+              <textarea rows="4" value={education.description || "No additional description provided."} readOnly className="read-only-input" />
             </label>
 
             <div className="edu-actions">
-              <button type="button" className="cancel-btn" onClick={onClose}>
+              <button type="button" className="cancel-btn" style={{ background: '#f8fafc', width: '100px' }} onClick={handleClose}>
                 Close
               </button>
             </div>
           </div>
         ) : (
-          <p>No education found.</p>
+          <p className="empty-message">No education details found.</p>
         )}
       </div>
     </div>
@@ -98,3 +131,4 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
 };
 
 export default ViewEducationModal;
+
