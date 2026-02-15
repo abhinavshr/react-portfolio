@@ -1,30 +1,20 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { X, Loader2 } from "lucide-react";
 import Select from "react-select";
 import { fetchCategories } from "../../../services/projectService";
 import { viewSkillById, updateSkill } from "../../../services/skillService";
 import Swal from "sweetalert2";
 import "../../../css/admin/skills/AddSkillModal.css";
+import { gsap } from "gsap";
 
 const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const [form, setForm] = useState({ name: "", level: 50, category: null });
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(false);
   const [loadingSkill, setLoadingSkill] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  // --- Lock scroll when modal is open ---
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
-
-  // --- Load categories ---
   const loadCategories = useCallback(async () => {
     try {
       setLoadingCategories(true);
@@ -36,19 +26,17 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
           label: cat.name ?? cat,
         }))
       );
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Failed to fetch categories",
-        error,
       });
     } finally {
       setLoadingCategories(false);
     }
   }, []);
 
-  // --- Load skill data ---
   const loadSkill = useCallback(async () => {
     if (!skillId) return;
     try {
@@ -61,12 +49,11 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
           ? { value: skill.category.id, label: skill.category.name }
           : null,
       });
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Failed to fetch skill data",
-        error,
       });
     } finally {
       setLoadingSkill(false);
@@ -77,34 +64,42 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
     if (isOpen) {
       loadCategories();
       loadSkill();
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" }
+      );
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
     }
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen, loadCategories, loadSkill]);
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    gsap.to(modalRef.current, {
+      opacity: 0,
+      scale: 0.9,
+      y: 20,
+      duration: 0.3,
+      onComplete: onClose,
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
+  };
 
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const validateForm = () => {
-    if (!form.name.trim()) {
-      return { type: "warning", title: "Missing Field", text: "Skill name is required." };
-    }
-    if (!form.category) {
-      return { type: "warning", title: "Missing Field", text: "Category is required." };
-    }
-    if (form.level < 0 || form.level > 100) {
-      return { type: "error", title: "Invalid Level", text: "Level must be between 0 and 100." };
-    }
-    return null;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const validationError = validateForm();
-    if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+    if (!form.name.trim() || !form.category) {
+      Swal.fire("Warning", "Skill name and category are required.", "warning");
       return;
     }
 
@@ -117,34 +112,40 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
         category_id: form.category.value,
       });
 
-      Swal.fire({ icon: "success", title: "Updated", text: "Skill updated successfully!" });
+      Swal.fire({
+        icon: "success",
+        title: "Updated",
+        text: "Skill updated successfully!",
+        timer: 1500,
+        showConfirmButton: false,
+      });
       onSkillUpdated?.();
-      onClose();
-      setForm({ name: "", level: 50, category: null });
+      handleClose();
     } catch (err) {
-      Swal.fire({ icon: "error", title: "Failed", text: err.message || "Failed to update skill" });
+      Swal.fire({
+        icon: "error",
+        title: "Failed",
+        text: err.message || "Failed to update skill",
+      });
     }
   };
 
-  // --- Close modal on click outside ---
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-box">
+    <div className="modal-overlay" ref={overlayRef} onClick={(e) => e.target === overlayRef.current && handleClose()}>
+      <div className="modal-box" ref={modalRef}>
         <div className="modal-header">
           <h2>Edit Skill</h2>
-          <button className="close-btn" onClick={onClose}>
-            <FiX size={20} />
+          <button className="close-btn" onClick={handleClose}>
+            <X size={20} />
           </button>
         </div>
 
-        <p className="modal-subtitle">Edit the details of your skill</p>
+        <p className="modal-subtitle">Refine the details of your technical expertise</p>
 
         {loadingSkill ? (
-          <div>Loading skill...</div>
+          <div className="flex items-center justify-center p-12 text-blue-500">
+            <Loader2 className="animate-spin" size={32} />
+          </div>
         ) : (
           <form className="modal-form" onSubmit={handleSubmit}>
             <label>
@@ -159,7 +160,7 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
             </label>
 
             <label>
-              Level (0–100%) *
+              Proficiency Level (0–100%) *
               <input
                 type="number"
                 min="0"
@@ -187,21 +188,22 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
             <label>
               Category *
               <Select
+                classNamePrefix="select"
                 value={form.category}
                 onChange={(val) => handleChange("category", val)}
                 options={categories}
                 isLoading={loadingCategories}
-                placeholder={loadingCategories ? "Loading categories..." : "Select category"}
+                placeholder={loadingCategories ? "Loading..." : "Select category"}
                 isClearable
               />
             </label>
 
             <div className="modal-actions">
-              <button type="button" className="btn-cancel" onClick={onClose}>
+              <button type="button" className="btn-cancel" onClick={handleClose}>
                 Cancel
               </button>
               <button type="submit" className="btn-add">
-                Update
+                Update Skill
               </button>
             </div>
           </form>
