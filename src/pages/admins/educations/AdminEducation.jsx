@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { Plus, Edit, Trash2, Eye, GraduationCap, Calendar } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, GraduationCap, Calendar, Info } from "lucide-react";
 import "../../../css/admin/educations/AdminEducation.css";
 import Swal from "sweetalert2";
 import { viewAllEducations, deleteEducation } from "../../../services/educationService";
@@ -8,7 +8,8 @@ import AddEducationModal from "./AddEducationModal";
 import ViewEducationModal from "./ViewEducationModal";
 import EditEducationModal from "./EditEducationModal";
 import Pagination from "../../../components/admin/Pagination";
-import { motion as Motion } from "framer-motion";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 /* ---------- Skeleton Card ---------- */
 const SkeletonEducation = () => (
@@ -17,7 +18,6 @@ const SkeletonEducation = () => (
     <div className="skeleton-input subtitle" />
     <div className="skeleton-input meta" />
     <div className="skeleton-input desc" />
-    <div className="skeleton-input desc short" />
   </div>
 );
 
@@ -25,6 +25,7 @@ const AdminEducation = () => {
   const [active, setActive] = useState("Education");
   const [educations, setEducations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
 
   const [modalState, setModalState] = useState({
     add: false,
@@ -49,7 +50,12 @@ const AdminEducation = () => {
       setEducations(data || []);
       setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (err) {
-      Swal.fire("Error!", err.message || "Failed to fetch educations", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Connection Error",
+        text: err.message || "Failed to fetch educations. Please check your connection.",
+        confirmButtonColor: "#2563eb",
+      });
     } finally {
       setLoading(false);
     }
@@ -59,24 +65,52 @@ const AdminEducation = () => {
     fetchEducations();
   }, [fetchEducations]);
 
+  useGSAP(() => {
+    if (!loading && educations.length > 0) {
+      gsap.from(".education-card", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.1,
+        ease: "power2.out",
+      });
+    }
+  }, { dependencies: [loading, educations], scope: containerRef });
+
   const handleDelete = async (edu) => {
     const result = await Swal.fire({
-      title: "Are you sure?",
-      text: `You are about to delete "${edu.level} (${edu.program})"`,
+      title: "Delete Education?",
+      text: `Are you sure you want to remove "${edu.level} from ${edu.institution}"?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
+      confirmButtonColor: "#dc2626",
+      cancelButtonColor: "#64748b",
       confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: "#ffffff",
+      customClass: {
+        title: "swal2-title-custom",
+        popup: "swal2-popup-custom",
+      }
     });
 
     if (result.isConfirmed) {
       try {
         await deleteEducation(edu.id);
-        Swal.fire("Deleted!", "Education has been deleted.", "success");
+        Swal.fire({
+          icon: "success",
+          title: "Deleted",
+          text: "Education record has been removed.",
+          timer: 1500,
+          showConfirmButton: false,
+        });
         fetchEducations(pagination.currentPage);
       } catch (error) {
-        Swal.fire("Error!", error.message || "Failed to delete education", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "Failed to delete education",
+        });
       }
     }
   };
@@ -85,104 +119,116 @@ const AdminEducation = () => {
     <div className="admin-layout">
       <AdminSidebar active={active} setActive={setActive} />
 
-      <main className="admin-content">
+      <main className="admin-content" ref={containerRef}>
         <div className="admin-education-page">
-          <div className="education-header">
+          <header className="education-header">
             <div>
               <h1>Education</h1>
-              <p>Manage your educational background</p>
+              <p>Manage your academic journey and qualifications</p>
             </div>
             <button
               className="add-education-btn"
               onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
             >
-              <Plus size={18} /> Add Education
+              <Plus size={20} strokeWidth={2.5} /> Add New Record
             </button>
-          </div>
+          </header>
 
           {/* ---------- Skeletons ---------- */}
-          {loading && (
+          {loading ? (
             <div className="education-skeleton-wrapper">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: 3 }).map((_, i) => (
                 <SkeletonEducation key={i} />
               ))}
             </div>
-          )}
-
-          {!loading && educations.length > 0 ? (
-            educations.map((edu, index) => (
-              <Motion.div
-                key={edu.id}
-                className="education-card"
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-                whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(37,99,235,0.4)" }}
-              >
-                <div className="education-card-header">
-                  <h2 className="education-title">
-                    <GraduationCap size={20} className="edu-icon" />
-                    {edu.level} {edu.program && `(${edu.program})`}
-                  </h2>
-                  <div className="education-actions">
-                    <button
-                      className="icon-btn view"
-                      onClick={() =>
-                        setModalState({ view: true, selectedId: edu.id, add: false, edit: false })
-                      }
-                    >
-                      <Eye size={18} />
-                    </button>
-                    <button
-                      className="icon-btn edit"
-                      onClick={() =>
-                        setModalState({ edit: true, selectedId: edu.id, add: false, view: false })
-                      }
-                    >
-                      <Edit size={18} />
-                    </button>
-                    <button
-                      className="icon-btn delete"
-                      onClick={() => handleDelete(edu)}
-                    >
-                      <Trash2 size={18} />
-                    </button>
+          ) : educations.length > 0 ? (
+            <div className="education-list">
+              {educations.map((edu) => (
+                <div key={edu.id} className="education-card">
+                  <div className="education-card-header">
+                    <h2 className="education-title">
+                      <GraduationCap size={24} className="edu-icon" strokeWidth={2.5} />
+                      <span>{edu.level} {edu.program && <span className="program-text">({edu.program})</span>}</span>
+                    </h2>
+                    <div className="education-actions">
+                      <button
+                        className="icon-btn view"
+                        title="View Details"
+                        onClick={() =>
+                          setModalState({ view: true, selectedId: edu.id, add: false, edit: false })
+                        }
+                      >
+                        <Eye size={18} />
+                      </button>
+                      <button
+                        className="icon-btn edit"
+                        title="Edit Record"
+                        onClick={() =>
+                          setModalState({ edit: true, selectedId: edu.id, add: false, view: false })
+                        }
+                      >
+                        <Edit size={18} />
+                      </button>
+                      <button
+                        className="icon-btn delete"
+                        title="Delete Record"
+                        onClick={() => handleDelete(edu)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                   </div>
+
+                  <h4>{edu.institution}</h4>
+
+                  <div className="education-duration">
+                    <Calendar size={16} className="calendar-icon" />
+                    <span>
+                      {edu.start_year} — {edu.end_year}
+                      {edu.board && (
+                        <>
+                          <span className="dot mx-2">•</span>
+                          <span className="board-text">Board: {edu.board}</span>
+                        </>
+                      )}
+                    </span>
+                  </div>
+
+                  {edu.description && (
+                    <p className="education-description">
+                      {edu.description}
+                    </p>
+                  )}
                 </div>
-
-                <h4>{edu.institution}</h4>
-
-                <div className="education-duration">
-                  <Calendar size={16} className="calendar-icon" />
-                  <span>
-                    {edu.start_year} - {edu.end_year}
-                    {edu.board && (
-                      <>
-                        <span className="dot">•</span>
-                        Board: {edu.board}
-                      </>
-                    )}
-                  </span>
-                </div>
-
-                <p className="education-description">{edu.description}</p>
-              </Motion.div>
-            ))
+              ))}
+            </div>
           ) : (
-            !loading && <div className="empty-state"><p>No education records found</p></div>
+            <div className="empty-state">
+              <div className="empty-icon">
+                <Info size={40} />
+              </div>
+              <p>No education records found. Start by adding your first qualification.</p>
+              <button
+                className="add-education-btn mt-4"
+                onClick={() => setModalState((prev) => ({ ...prev, add: true }))}
+                style={{ margin: '1rem auto' }}
+              >
+                Add Education
+              </button>
+            </div>
           )}
 
           {!loading && educations.length > 0 && (
-            <div className="table-footer-education">
+            <footer className="table-footer-education">
               <div className="table-summary">
-                Showing {pagination.from} to {pagination.to} of {pagination.total} educations
+                Showing <strong>{pagination.from || 0}</strong> to <strong>{pagination.to || 0}</strong> of <strong>{pagination.total}</strong> records
               </div>
               <Pagination
                 currentPage={pagination.currentPage}
                 totalPages={pagination.lastPage}
                 onPageChange={(page) => fetchEducations(page)}
               />
-            </div>
+            </footer>
           )}
         </div>
 
@@ -215,3 +261,4 @@ const AdminEducation = () => {
 };
 
 export default AdminEducation;
+

@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { X, Save, AlertCircle } from "lucide-react";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { viewEducationById, updateEducation } from "../../../services/educationService";
-import Swal from "sweetalert2"; 
+import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }) => {
   const [formData, setFormData] = useState({
@@ -15,6 +17,8 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     description: "",
   });
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen || !educationId) return;
@@ -37,17 +41,40 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
       } catch (error) {
         Swal.fire({
           icon: "error",
-          title: "Error",
-          text: error.message || "Failed to fetch education",
+          title: "Fetch Failed",
+          text: error.message || "Could not retrieve education details",
+          confirmButtonColor: "#2563eb",
         });
-        onClose();
+        handleClose();
       } finally {
         setLoading(false);
       }
     };
 
     fetchEducation();
-  }, [isOpen, educationId, onClose]);
+  }, [isOpen, educationId, handleClose]);
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+      );
+    }
+  }, { dependencies: [isOpen] });
+
+  const handleClose = useCallback(() => {
+    gsap.to(modalRef.current, {
+      y: 50,
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.3,
+      onComplete: onClose
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
+  }, [onClose]);
 
   if (!isOpen) return null;
 
@@ -70,7 +97,12 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 
     const validationError = validateForm();
     if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      Swal.fire({
+        icon: validationError.type,
+        title: validationError.title,
+        text: validationError.text,
+        confirmButtonColor: "#2563eb",
+      });
       return;
     }
 
@@ -90,19 +122,20 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 
       Swal.fire({
         icon: "success",
-        title: "Updated!",
-        text: "Education updated successfully",
+        title: "Record Updated",
+        text: "Your education details have been saved.",
         timer: 1500,
         showConfirmButton: false,
       });
 
       onEducationUpdated?.(response);
-      onClose();
+      handleClose();
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: error?.message || "Failed to update education",
+        title: "Update Failed",
+        text: error?.message || "Could not save your changes",
+        confirmButtonColor: "#2563eb",
       });
     } finally {
       setLoading(false);
@@ -110,32 +143,40 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
   };
 
   return (
-    <div className="edu-modal-overlay">
-      <div className="edu-modal">
+    <div className="edu-modal-overlay" ref={overlayRef} onClick={handleClose}>
+      <div
+        className="edu-modal"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="edu-modal-header">
           <div>
             <h2>Edit Education</h2>
-            <p>Update your education details</p>
+            <p>Modify your academic experience details</p>
           </div>
           <button
             className="close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
-        {loading ? (
-          <p>Loading...</p>
+        {loading && !formData.institution ? (
+          <div className="modal-loading">
+            <div className="spinner"></div>
+            <p>Loading details...</p>
+          </div>
         ) : (
           <form className="edu-form" onSubmit={handleSubmit}>
             <label>
-              Institution/University *
+              Institution / University *
               <input
                 type="text"
                 name="institution"
+                placeholder="e.g. Stanford University"
                 value={formData.institution}
                 onChange={handleChange}
                 required
@@ -145,10 +186,11 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 
             <div className="two-col">
               <label>
-                Level *
+                Level of Education *
                 <input
                   type="text"
                   name="level"
+                  placeholder="e.g. Master's"
                   value={formData.level}
                   onChange={handleChange}
                   required
@@ -157,10 +199,11 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
               </label>
 
               <label>
-                Program of Study *
+                Program / Major *
                 <input
                   type="text"
                   name="program"
+                  placeholder="e.g. Software Engineering"
                   value={formData.program}
                   onChange={handleChange}
                   required
@@ -175,6 +218,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="number"
                   name="startYear"
+                  placeholder="YYYY"
                   value={formData.startYear}
                   onChange={handleChange}
                   required
@@ -187,6 +231,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="number"
                   name="endYear"
+                  placeholder="YYYY (or expected)"
                   value={formData.endYear}
                   onChange={handleChange}
                   required
@@ -196,10 +241,11 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
             </div>
 
             <label>
-              Board
+              Board / Affiliation
               <input
                 type="text"
                 name="board"
+                placeholder="e.g. National Board"
                 value={formData.board}
                 onChange={handleChange}
                 disabled={loading}
@@ -207,10 +253,11 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
             </label>
 
             <label>
-              Description
+              Additional Description
               <textarea
                 rows="4"
                 name="description"
+                placeholder="Details about your studies..."
                 value={formData.description}
                 onChange={handleChange}
                 disabled={loading}
@@ -218,11 +265,23 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
             </label>
 
             <div className="edu-actions">
-              <button type="button" className="cancel-btn" onClick={onClose} disabled={loading}>
+              <button
+                type="button"
+                className="cancel-btn"
+                onClick={handleClose}
+                disabled={loading}
+              >
                 Cancel
               </button>
               <button type="submit" className="add-btn" disabled={loading}>
-                {loading ? "Updating..." : "Update"}
+                {loading ? (
+                  "Saving..."
+                ) : (
+                  <>
+                    <Save size={18} />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </form>
@@ -233,3 +292,4 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 };
 
 export default EditEducationModal;
+

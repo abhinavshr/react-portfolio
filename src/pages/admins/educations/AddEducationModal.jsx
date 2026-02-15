@@ -1,8 +1,10 @@
-import React, { useState } from "react";
-import { FiX } from "react-icons/fi";
+import React, { useState, useRef, useCallback } from "react";
+import { X, Plus, GraduationCap } from "lucide-react";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { addEducation } from "../../../services/educationService";
 import Swal from "sweetalert2";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
   const [formData, setFormData] = useState({
@@ -16,8 +18,30 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
   });
 
   const [loading, setLoading] = useState(false);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
-  if (!isOpen) return null;
+  const handleClose = useCallback(() => {
+    gsap.to(modalRef.current, {
+      y: 50,
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.3,
+      onComplete: onClose
+    });
+    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
+  }, [onClose]);
+
+  useGSAP(() => {
+    if (isOpen) {
+      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+      gsap.fromTo(
+        modalRef.current,
+        { y: 50, opacity: 0, scale: 0.95 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+      );
+    }
+  }, { dependencies: [isOpen] });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,12 +69,19 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
     return null;
   };
 
+  if (!isOpen) return null;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const validationError = validateForm();
     if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      Swal.fire({
+        icon: validationError.type,
+        title: validationError.title,
+        text: validationError.text,
+        confirmButtonColor: "#2563eb",
+      });
       return;
     }
 
@@ -78,12 +109,13 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
 
       resetForm();
       onEducationAdded?.(response);
-      onClose();
+      handleClose();
     } catch (error) {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: error?.message || "Failed to add education",
+        confirmButtonColor: "#2563eb",
       });
     } finally {
       setLoading(false);
@@ -91,29 +123,34 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
   };
 
   return (
-    <div className="edu-modal-overlay">
-      <div className="edu-modal">
+    <div className="edu-modal-overlay" ref={overlayRef} onClick={handleClose}>
+      <div
+        className="edu-modal"
+        ref={modalRef}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="edu-modal-header">
           <div>
             <h2>Add New Education</h2>
-            <p>Add a new education entry to your profile</p>
+            <p>Showcase your academic background and achievements</p>
           </div>
           <button
             className="close-btn"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close modal"
             disabled={loading}
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="edu-form">
           <label>
-            Institution/University *
+            Institution / University *
             <input
               type="text"
               name="institution"
+              placeholder="e.g. Stanford University"
               required
               value={formData.institution}
               onChange={handleChange}
@@ -123,10 +160,11 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
 
           <div className="two-col">
             <label>
-              Level *
+              Level of Education *
               <input
                 type="text"
                 name="level"
+                placeholder="e.g. Bachelor's"
                 required
                 value={formData.level}
                 onChange={handleChange}
@@ -135,10 +173,11 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
             </label>
 
             <label>
-              Program of Study *
+              Program / Major *
               <input
                 type="text"
                 name="program"
+                placeholder="e.g. Computer Science"
                 required
                 value={formData.program}
                 onChange={handleChange}
@@ -153,6 +192,7 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
               <input
                 type="number"
                 name="startYear"
+                placeholder="YYYY"
                 required
                 value={formData.startYear}
                 onChange={handleChange}
@@ -165,6 +205,7 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
               <input
                 type="number"
                 name="endYear"
+                placeholder="YYYY (or expected)"
                 required
                 value={formData.endYear}
                 onChange={handleChange}
@@ -174,10 +215,11 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
           </div>
 
           <label>
-            Board
+            Board / Affiliation
             <input
               type="text"
               name="board"
+              placeholder="e.g. Oxford Board"
               value={formData.board}
               onChange={handleChange}
               disabled={loading}
@@ -185,10 +227,11 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
           </label>
 
           <label>
-            Description
+            Additional Description
             <textarea
               name="description"
               rows="4"
+              placeholder="Mention honors, GPA, or key projects..."
               value={formData.description}
               onChange={handleChange}
               disabled={loading}
@@ -196,11 +239,23 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
           </label>
 
           <div className="edu-actions">
-            <button type="button" className="cancel-btn" onClick={onClose} disabled={loading}>
+            <button
+              type="button"
+              className="cancel-btn"
+              onClick={handleClose}
+              disabled={loading}
+            >
               Cancel
             </button>
             <button type="submit" className="add-btn" disabled={loading}>
-              {loading ? "Adding..." : "Add"}
+              {loading ? (
+                "Adding..."
+              ) : (
+                <>
+                  <Plus size={18} />
+                  Add Education
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -210,3 +265,4 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
 };
 
 export default AddEducationModal;
+
