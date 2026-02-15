@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { useNavigate } from "react-router-dom";
 import "../../../css/admin/ProjectImage/AddProjectImage.css";
-import { FiUploadCloud } from "react-icons/fi";
+import { UploadCloud, ChevronLeft, Briefcase, Tag, Image as ImageIcon } from "lucide-react";
 import { fetchProjectsDropdown, uploadProjectImage } from "../../../services/projectImageService";
 import Swal from "sweetalert2";
+import gsap from "gsap";
 
 const AddProjectImage = () => {
   const [active, setActive] = useState("Project Images");
@@ -14,6 +15,9 @@ const AddProjectImage = () => {
   const [projects, setProjects] = useState([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
   const navigate = useNavigate();
+
+  const containerRef = useRef(null);
+  const cardRef = useRef(null);
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -31,6 +35,18 @@ const AddProjectImage = () => {
       }
     };
     loadProjects();
+
+    // Animations
+    gsap.fromTo(
+      containerRef.current,
+      { opacity: 0, x: -20 },
+      { opacity: 1, x: 0, duration: 0.6, ease: "power2.out" }
+    );
+    gsap.fromTo(
+      cardRef.current,
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power3.out" }
+    );
   }, []);
 
 
@@ -61,6 +77,8 @@ const AddProjectImage = () => {
         icon: "warning",
         title: "Missing Information",
         text: "Please select project, enter image name, and choose an image",
+        background: "#ffffff",
+        confirmButtonColor: "#6366f1",
       });
       return;
     }
@@ -77,7 +95,8 @@ const AddProjectImage = () => {
         icon: "success",
         title: "Success",
         text: "Project image uploaded successfully!",
-        confirmButtonText: "OK",
+        confirmButtonText: "Return to Gallery",
+        confirmButtonColor: "#6366f1",
       }).then(() => navigate(-1));
     } catch (err) {
       Swal.fire({
@@ -95,22 +114,26 @@ const AddProjectImage = () => {
     <div className="add-project-image-layout">
       <AdminSidebar active={active} setActive={setActive} />
       <main className="add-project-image-content">
-        <div className="add-project-image-header">
+        <div className="add-project-image-header" ref={containerRef}>
           <button
             className="add-project-image-back-btn"
             onClick={() => navigate(-1)}
           >
-            ←
+            <ChevronLeft size={24} />
           </button>
           <div>
-            <h1>Add Project Image</h1>
-            <p>Upload image for selected project</p>
+            <h1>Upload Artifact</h1>
+            <p>Add high-quality imagery to showcase your project work</p>
           </div>
         </div>
-        <div className="add-project-image-card">
+
+        <div className="add-project-image-card" ref={cardRef}>
           <form onSubmit={handleSubmit}>
             <div className="add-project-image-group">
-              <label>Project *</label>
+              <label>
+                <Briefcase size={16} color="#6366f1" />
+                Select Project *
+              </label>
               <select
                 name="project_id"
                 value={form.project_id}
@@ -127,18 +150,26 @@ const AddProjectImage = () => {
                 ))}
               </select>
             </div>
+
             <div className="add-project-image-group">
-              <label>Image Name *</label>
+              <label>
+                <Tag size={16} color="#6366f1" />
+                Image Label *
+              </label>
               <input
                 type="text"
                 name="image_name"
                 value={form.image_name}
                 onChange={handleChange}
-                placeholder="Enter image name"
+                placeholder="e.g., Dashboard Screenshot, Mobile View"
               />
             </div>
+
             <div className="add-project-image-group">
-              <label>Image *</label>
+              <label>
+                <ImageIcon size={16} color="#6366f1" />
+                Visual Asset *
+              </label>
               <div
                 className="add-project-image-upload-box"
                 onClick={() =>
@@ -149,13 +180,13 @@ const AddProjectImage = () => {
               >
                 <div className="add-project-image-upload-content">
                   <div className="add-project-image-upload-icon">
-                    <FiUploadCloud size={36} />
+                    <UploadCloud size={48} />
                   </div>
                   <p className="add-project-image-upload-title">
-                    Click to upload image
+                    Drop your image here or click to browse
                   </p>
                   <p className="add-project-image-upload-sub">
-                    PNG, JPG up to 10MB
+                    Supports high-res PNG, JPG, WEBP (Max 10MB)
                   </p>
                 </div>
                 <input
@@ -168,21 +199,23 @@ const AddProjectImage = () => {
                 />
               </div>
             </div>
+
             {preview && (
               <div className="add-project-image-preview">
-                <img src={preview} alt="Preview" />
+                <img src={preview} alt="Asset Preview" />
               </div>
             )}
+
             <div className="add-project-image-actions">
               <button type="submit" disabled={loading}>
-                {loading ? "Uploading..." : "Upload Image"}
+                {loading ? "Processing..." : "Publish to Gallery"}
               </button>
               <button
                 type="button"
                 className="add-project-image-cancel"
                 onClick={() => navigate(-1)}
               >
-                Cancel
+                Discard Changes
               </button>
             </div>
           </form>
