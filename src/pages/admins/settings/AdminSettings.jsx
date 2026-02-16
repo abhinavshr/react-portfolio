@@ -3,6 +3,7 @@ import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { User, Lock, Upload, Save, Eye, EyeOff } from "lucide-react";
 import "../../../css/admin/settings/AdminSettings.css";
 import Swal from "sweetalert2";
+import gsap from "gsap";
 import {
   viewAdminSettings,
   updateAdminProfilePhoto,
@@ -13,20 +14,24 @@ import {
 /* ---------------- Skeleton Layout ---------------- */
 const SkeletonSettings = () => (
   <div className="settings-container skeleton-setting">
-    <div className="skeleton-title" />
-    <div className="skeleton-subtitle" />
+    <div className="settings-header">
+      <div className="skeleton-title" />
+      <div className="skeleton-subtitle" />
+    </div>
 
     <div className="settings-card">
       <div className="settings-card-header">
         <div className="skeleton-icon" />
-        <div className="skeleton-line w-180" />
+        <div className="skeleton-line w-180" style={{ height: "1.5rem" }} />
       </div>
 
       <div className="profile-section">
         <div className="profile-photo">
           <div className="skeleton-avatar" />
-          <div className="skeleton-line w-120" />
-          <div className="skeleton-line w-160" />
+          <div className="photo-actions">
+            <div className="skeleton-line w-120" style={{ height: "2.5rem" }} />
+            <div className="skeleton-line w-160" />
+          </div>
         </div>
 
         <div className="profile-form">
@@ -41,7 +46,7 @@ const SkeletonSettings = () => (
     <div className="settings-card">
       <div className="settings-card-header">
         <div className="skeleton-icon" />
-        <div className="skeleton-line w-160" />
+        <div className="skeleton-line w-160" style={{ height: "1.5rem" }} />
       </div>
 
       <div className="password-form">
@@ -77,6 +82,11 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
+  // Animation Refs
+  const headerRef = useRef(null);
+  const profileCardRef = useRef(null);
+  const passwordCardRef = useRef(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -85,13 +95,35 @@ const AdminSettings = () => {
         setAdmin(res.user);
         setProfileData({ name: res.user.name, email: res.user.email });
       } catch {
-        Swal.fire("Error", "Failed to load profile", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to load profile",
+          customClass: { popup: "premium-swal-popup" }
+        });
       } finally {
         setLoadingProfile(false);
       }
     };
     fetchProfile();
   }, []);
+
+  // GSAP Animations
+  useEffect(() => {
+    if (!loadingProfile) {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+      tl.fromTo(headerRef.current,
+        { opacity: 0, y: -30 },
+        { opacity: 1, y: 0, duration: 0.8 }
+      )
+        .fromTo([profileCardRef.current, passwordCardRef.current],
+          { opacity: 0, y: 30 },
+          { opacity: 1, y: 0, duration: 0.8, stagger: 0.2 },
+          "-=0.4"
+        );
+    }
+  }, [loadingProfile]);
 
   if (loadingProfile) {
     return (
@@ -115,9 +147,21 @@ const AdminSettings = () => {
       await updateAdminProfilePhoto(file);
       const res = await viewAdminSettings();
       setAdmin(res.user);
-      Swal.fire("Success", "Profile photo updated successfully", "success");
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Profile photo updated successfully",
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: { popup: "premium-swal-popup" }
+      });
     } catch (err) {
-      Swal.fire("Error", err?.message || "Failed to update profile photo", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.message || "Failed to update profile photo",
+        customClass: { popup: "premium-swal-popup" }
+      });
     } finally {
       setLoading(false);
     }
@@ -125,7 +169,12 @@ const AdminSettings = () => {
 
   const handleSaveProfile = async () => {
     if (!profileData.name.trim() || !profileData.email.trim()) {
-      Swal.fire("Error", "Name and email are required", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Name and email are required",
+        customClass: { popup: "premium-swal-popup" }
+      });
       return;
     }
     try {
@@ -133,9 +182,21 @@ const AdminSettings = () => {
       await updateAdminProfile(profileData);
       const res = await viewAdminSettings();
       setAdmin(res.user);
-      Swal.fire("Success", "Profile updated successfully", "success");
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Profile updated successfully",
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: { popup: "premium-swal-popup" }
+      });
     } catch (err) {
-      Swal.fire("Error", err?.message || "Failed to update profile", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.message || "Failed to update profile",
+        customClass: { popup: "premium-swal-popup" }
+      });
     } finally {
       setLoading(false);
     }
@@ -143,11 +204,21 @@ const AdminSettings = () => {
 
   const handleChangePassword = async () => {
     if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
-      Swal.fire("Error", "All password fields are required", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "All password fields are required",
+        customClass: { popup: "premium-swal-popup" }
+      });
       return;
     }
     if (passwordData.new !== passwordData.confirm) {
-      Swal.fire("Error", "New password and confirmation do not match", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "New password and confirmation do not match",
+        customClass: { popup: "premium-swal-popup" }
+      });
       return;
     }
     try {
@@ -158,9 +229,21 @@ const AdminSettings = () => {
         new_password_confirmation: passwordData.confirm
       });
       setPasswordData({ current: "", new: "", confirm: "" });
-      Swal.fire("Success", "Password updated successfully", "success");
+      Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: "Password updated successfully",
+        timer: 1500,
+        showConfirmButton: false,
+        customClass: { popup: "premium-swal-popup" }
+      });
     } catch (err) {
-      Swal.fire("Error", err?.message || "Failed to update password", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: err?.message || "Failed to update password",
+        customClass: { popup: "premium-swal-popup" }
+      });
     } finally {
       setLoading(false);
     }
@@ -183,15 +266,17 @@ const AdminSettings = () => {
 
       <main className="admin-content">
         <div className="settings-container">
-          <h1 className="settings-title">Settings</h1>
-          <p className="settings-subtitle">
-            Manage your account settings and preferences
-          </p>
+          <header className="settings-header" ref={headerRef}>
+            <h1 className="settings-title">Settings</h1>
+            <p className="settings-subtitle">
+              Manage your account settings and preferences
+            </p>
+          </header>
 
-          {/* Profile */}
-          <div className="settings-card">
+          {/* Profile Card */}
+          <div className="settings-card" ref={profileCardRef}>
             <div className="settings-card-header">
-              <User size={22} />
+              <User size={24} />
               <h2>Profile Information</h2>
             </div>
 
@@ -201,7 +286,7 @@ const AdminSettings = () => {
                   {admin?.profile_photo ? (
                     <img src={admin.profile_photo} alt="Profile" />
                   ) : (
-                    <User size={28} />
+                    <User size={40} />
                   )}
                 </div>
 
@@ -211,7 +296,7 @@ const AdminSettings = () => {
                     onClick={handleUploadClick}
                     disabled={loading}
                   >
-                    <Upload size={16} /> Upload Photo
+                    <Upload size={18} /> Upload New Photo
                   </button>
                   <input
                     type="file"
@@ -230,6 +315,7 @@ const AdminSettings = () => {
                 <div className="form-group">
                   <label>Full Name</label>
                   <input
+                    placeholder="Enter your full name"
                     value={profileData.name}
                     onChange={(e) =>
                       setProfileData({
@@ -245,6 +331,7 @@ const AdminSettings = () => {
                   <label>Email Address</label>
                   <input
                     type="email"
+                    placeholder="Enter your email address"
                     value={profileData.email}
                     onChange={(e) =>
                       setProfileData({
@@ -263,35 +350,36 @@ const AdminSettings = () => {
                   disabled={isProfileUnchanged || loading}
                   onClick={handleSaveProfile}
                 >
-                  <Save size={16} /> Save Profile
+                  <Save size={20} /> Save Changes
                 </button>
               </div>
             </div>
           </div>
 
-          {/* Password */}
-          <div className="settings-card">
+          {/* Password Card */}
+          <div className="settings-card" ref={passwordCardRef}>
             <div className="settings-card-header">
-              <Lock size={22} />
-              <h2>Change Password</h2>
+              <Lock size={24} />
+              <h2>Security Settings</h2>
             </div>
 
             <div className="password-form">
-              {["current", "new", "confirm"].map((field) => (
-                <div className="form-group password-group" key={field}>
-                  <label>
-                    {field === "current" && "Current Password"}
-                    {field === "new" && "New Password"}
-                    {field === "confirm" && "Confirm New Password"}
-                  </label>
+              {[
+                { key: "current", label: "Current Password" },
+                { key: "new", label: "New Password" },
+                { key: "confirm", label: "Confirm New Password" }
+              ].map((field) => (
+                <div className="form-group" key={field.key}>
+                  <label>{field.label}</label>
                   <div className="password-input">
                     <input
-                      type={showPassword[field] ? "text" : "password"}
-                      value={passwordData[field]}
+                      type={showPassword[field.key] ? "text" : "password"}
+                      placeholder={`Enter ${field.label.toLowerCase()}`}
+                      value={passwordData[field.key]}
                       onChange={(e) =>
                         setPasswordData({
                           ...passwordData,
-                          [field]: e.target.value
+                          [field.key]: e.target.value
                         })
                       }
                       disabled={loading}
@@ -300,11 +388,11 @@ const AdminSettings = () => {
                       onClick={() =>
                         setShowPassword({
                           ...showPassword,
-                          [field]: !showPassword[field]
+                          [field.key]: !showPassword[field.key]
                         })
                       }
                     >
-                      {showPassword[field] ? (
+                      {showPassword[field.key] ? (
                         <EyeOff size={18} />
                       ) : (
                         <Eye size={18} />
@@ -321,7 +409,7 @@ const AdminSettings = () => {
                 disabled={isPasswordInvalid || loading}
                 onClick={handleChangePassword}
               >
-                <Lock size={16} /> Update Password
+                <Lock size={20} /> Update Password
               </button>
             </div>
           </div>
@@ -332,3 +420,4 @@ const AdminSettings = () => {
 };
 
 export default AdminSettings;
+
