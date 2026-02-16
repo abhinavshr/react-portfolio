@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FiX } from "react-icons/fi";
+import { X, User, Mail, MessageSquare, Clock, CheckCircle, Info } from "lucide-react";
 import "../../../css/admin/contacts/ViewContactModal.css";
 import {
     viewContactMessageById,
@@ -47,7 +47,7 @@ const ViewContactModal = ({ isOpen, onClose, contactId, onRefresh }) => {
                 <div className="view-contact-header">
                     <h2>Message Details</h2>
                     <button className="close-btn" onClick={handleClose}>
-                        <FiX size={22} />
+                        <X size={20} />
                     </button>
                 </div>
 
@@ -57,11 +57,15 @@ const ViewContactModal = ({ isOpen, onClose, contactId, onRefresh }) => {
                     ) : contact ? (
                         <>
                             <div className="info-row">
-                                <span className="label">From</span>
+                                <span className="label">
+                                    <User size={14} style={{ marginRight: '6px' }} />
+                                    From
+                                </span>
                                 <div className="value">
                                     <strong>{contact.name}</strong>
                                     <small>
                                         <a href={`mailto:${contact.email}`} className="email-link">
+                                            <Mail size={12} style={{ marginRight: '4px' }} />
                                             {contact.email}
                                         </a>
                                     </small>
@@ -69,24 +73,43 @@ const ViewContactModal = ({ isOpen, onClose, contactId, onRefresh }) => {
                             </div>
 
                             <div className="info-row">
-                                <span className="label">Subject</span>
+                                <span className="label">
+                                    <Info size={14} style={{ marginRight: '6px' }} />
+                                    Subject
+                                </span>
                                 <div className="value">{contact.subject}</div>
                             </div>
 
-                            <div className="message-box">
-                                <p>{contact.message}</p>
+                            <div className="info-row">
+                                <span className="label">
+                                    <MessageSquare size={14} style={{ marginRight: '6px' }} />
+                                    Message
+                                </span>
+                                <div className="message-box">
+                                    <p>{contact.message}</p>
+                                </div>
                             </div>
 
                             <div className="meta-row">
                                 <span
-                                    className={`status-badge ${contact.is_read ? "read" : "unread"
-                                        }`}
+                                    className={`status-badge ${contact.is_read ? "read" : "unread"}`}
                                 >
-                                    {contact.is_read ? "Read" : "Unread"}
+                                    {contact.is_read ? (
+                                        <><CheckCircle size={12} style={{ marginRight: '4px' }} /> Read</>
+                                    ) : (
+                                        <><Clock size={12} style={{ marginRight: '4px' }} /> Unread</>
+                                    )}
                                 </span>
 
                                 <span className="date">
-                                    {new Date(contact.created_at).toLocaleString()}
+                                    <Clock size={14} style={{ marginRight: '6px' }} />
+                                    {new Date(contact.created_at).toLocaleString("en-US", {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                    })}
                                 </span>
                             </div>
                         </>
