@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
-import { Eye, Trash2, Search } from "lucide-react";
+import { Eye, Trash2, Search, Mail, Calendar, MessageSquare } from "lucide-react";
 import "../../../css/admin/contacts/AdminContactMessages.css";
 import Swal from "sweetalert2";
 import {
@@ -9,7 +9,7 @@ import {
 } from "../../../services/contactMessagesService";
 import ViewContactModal from "./ViewContactModal";
 import Pagination from "../../../components/admin/Pagination";
-import { motion as Motion } from "framer-motion";
+import gsap from "gsap";
 
 /* ---------------- Skeleton Card ---------------- */
 const SkeletonContactCard = () => (
@@ -41,6 +41,9 @@ const AdminContactMessages = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef(null);
+  const headerRef = useRef(null);
+  const toolbarRef = useRef(null);
 
   const [modalState, setModalState] = useState({
     view: false,
@@ -74,7 +77,14 @@ const AdminContactMessages = () => {
       const { current_page, last_page, total, from, to } = res.data;
       setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (err) {
-      Swal.fire("Error", err.message || "Failed to load messages", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: err.message || "Failed to load messages",
+        customClass: {
+          popup: "premium-swal-popup",
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -83,6 +93,42 @@ const AdminContactMessages = () => {
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
+
+  // GSAP Entrance Animation
+  useEffect(() => {
+    if (!loading && messages.length > 0) {
+      const cards = containerRef.current.querySelectorAll(".contact-message-card");
+
+      gsap.fromTo(cards,
+        {
+          opacity: 0,
+          x: -30,
+        },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "power2.out"
+        }
+      );
+    }
+  }, [loading, messages]);
+
+  useEffect(() => {
+    if (headerRef.current) {
+      gsap.fromTo(headerRef.current,
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.6, ease: "power3.out" }
+      );
+    }
+    if (toolbarRef.current) {
+      gsap.fromTo(toolbarRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.2, ease: "power3.out" }
+      );
+    }
+  }, []);
 
   const unreadCount = messages.filter((m) => m.unread).length;
 
@@ -102,22 +148,33 @@ const AdminContactMessages = () => {
   const handleDelete = async (msg) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: `Delete message from "${msg.name}"?`,
+      text: `You are about to delete the message from "${msg.name}". This action cannot be undone!`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626",
-      cancelButtonColor: "#2563eb",
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#ef4444",
       confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      background: "#fff",
+      customClass: {
+        popup: "premium-swal-popup",
+      }
     });
 
-    if (result.isConfirmed) {
-      try {
-        await deleteContactMessage(msg.id);
-        Swal.fire("Deleted!", "Message has been deleted.", "success");
-        fetchMessages(pagination.currentPage);
-      } catch (err) {
-        Swal.fire("Error", err.message || "Failed to delete message", "error");
-      }
+    if (!result.isConfirmed) return;
+
+    try {
+      await deleteContactMessage(msg.id);
+      Swal.fire({
+        icon: "success",
+        title: "Deleted!",
+        text: "Message has been removed successfully.",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      fetchMessages(pagination.currentPage);
+    } catch (err) {
+      Swal.fire("Error", err.message || "Failed to delete message", "error");
     }
   };
 
@@ -127,18 +184,20 @@ const AdminContactMessages = () => {
 
       <main className="admin-content">
         <div className="contact-messages-container">
-          <div className="contact-messages-header">
-            <h1>Contact Messages</h1>
-            <p>{unreadCount} unread messages</p>
+          <div className="contact-messages-header" ref={headerRef}>
+            <div>
+              <h1>Contact Messages</h1>
+              <p>You have {unreadCount} unread messages waiting for your response</p>
+            </div>
           </div>
 
-          <div className="contact-toolbar-card">
+          <div className="contact-toolbar-card" ref={toolbarRef}>
             <div className="contact-toolbar-inner">
               <div className="contact-messages-search">
-                <Search size={18} />
+                <Search size={20} />
                 <input
                   type="text"
-                  placeholder="Search messages..."
+                  placeholder="Search by name, email or subject..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -174,58 +233,73 @@ const AdminContactMessages = () => {
               ))}
             </div>
           ) : (
-            <div className="contact-messages-list">
-              {filteredMessages.map((msg, index) => (
-                <Motion.div
-                  key={msg.id}
-                  className={`contact-message-card ${msg.unread ? "unread" : ""}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, boxShadow: "0 0 15px rgba(37,99,235,0.4)" }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <div className="message-left">
-                    <div className="message-avatar">{msg.name.charAt(0)}</div>
-                    <div className="message-content">
-                      <h3 className="message-name">
-                        {msg.name}
-                        {msg.unread && <span className="unread-dot" />}
-                      </h3>
-                      <p className="message-email">{msg.email}</p>
-                      <h4 className="message-subject">{msg.subject}</h4>
-                      <p className="message-text">{msg.message}</p>
+            <div className="contact-messages-list" ref={containerRef}>
+              {filteredMessages.length === 0 ? (
+                <div className="no-data">
+                  <Mail size={48} />
+                  <p>No messages found matching your criteria.</p>
+                </div>
+              ) : (
+                filteredMessages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`contact-message-card ${msg.unread ? "unread" : ""}`}
+                  >
+                    <div className="message-left">
+                      <div className="message-avatar">{msg.name.charAt(0)}</div>
+                      <div className="message-content">
+                        <h3 className="message-name">
+                          {msg.name}
+                          {msg.unread && <span className="unread-dot" />}
+                        </h3>
+                        <div className="message-email">
+                          <Mail size={14} style={{ marginRight: "6px", verticalAlign: "middle" }} />
+                          {msg.email}
+                        </div>
+                        <h4 className="message-subject">
+                          <MessageSquare size={14} style={{ marginRight: "6px", verticalAlign: "middle" }} />
+                          {msg.subject}
+                        </h4>
+                        <p className="message-text">{msg.message}</p>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="message-right">
-                    <span className="message-date">
-                      {new Date(msg.date).toLocaleDateString()}
-                    </span>
-                    <div className="message-actions">
-                      <button
-                        className="icon-btn view"
-                        onClick={() => setModalState({ view: true, selectedId: msg.id })}
-                      >
-                        <Eye size={18} />
-                      </button>
-                      <button
-                        className="icon-btn delete"
-                        onClick={() => handleDelete(msg)}
-                      >
-                        <Trash2 size={18} />
-                      </button>
+                    <div className="message-right">
+                      <span className="message-date">
+                        <Calendar size={14} style={{ marginRight: "6px", verticalAlign: "middle" }} />
+                        {new Date(msg.date).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </span>
+                      <div className="message-actions">
+                        <button
+                          className="icon-btn view"
+                          onClick={() => setModalState({ view: true, selectedId: msg.id })}
+                          title="View Message"
+                        >
+                          <Eye size={20} />
+                        </button>
+                        <button
+                          className="icon-btn delete"
+                          onClick={() => handleDelete(msg)}
+                          title="Delete Message"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </Motion.div>
-              ))}
+                ))
+              )}
             </div>
           )}
 
           {!loading && messages.length > 0 && (
             <div className="table-footer-contacts">
               <div className="table-summary-contacts">
-                Showing {pagination.from} to {pagination.to} of {pagination.total} messages
+                Showing <b>{pagination.from}</b> to <b>{pagination.to}</b> of <b>{pagination.total}</b> messages
               </div>
               <Pagination
                 currentPage={pagination.currentPage}
