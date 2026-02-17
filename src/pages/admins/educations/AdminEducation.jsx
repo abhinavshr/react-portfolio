@@ -21,6 +21,8 @@ const SkeletonEducation = () => (
   </div>
 );
 
+gsap.registerPlugin(useGSAP);
+
 const AdminEducation = () => {
   const [active, setActive] = useState("Education");
   const [educations, setEducations] = useState([]);
@@ -66,14 +68,35 @@ const AdminEducation = () => {
   }, [fetchEducations]);
 
   useGSAP(() => {
-    if (!loading && educations.length > 0) {
-      gsap.from(".education-card", {
-        y: 30,
+    if (!loading) {
+      // Header Animation
+      gsap.from(".education-header", {
+        y: -30,
         opacity: 0,
-        duration: 0.6,
-        stagger: 0.1,
-        ease: "power2.out",
+        duration: 0.8,
+        ease: "power3.out"
       });
+
+      // Cards Animation
+      if (educations.length > 0) {
+        gsap.from(".education-card", {
+          y: 30,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+          ease: "power2.out",
+          delay: 0.2
+        });
+
+        // Footer Animation
+        gsap.from(".table-footer-education", {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          delay: 0.4,
+          ease: "power2.out"
+        });
+      }
     }
   }, { dependencies: [loading, educations], scope: containerRef });
 
