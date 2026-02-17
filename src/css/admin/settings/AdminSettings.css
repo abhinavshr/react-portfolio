@@ -12,7 +12,8 @@
 
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: #f1f5f9;
   font-family: "Outfit", sans-serif;
 }
@@ -22,6 +23,8 @@
   padding: 2.5rem;
   max-width: 1200px;
   margin: 0 auto;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .settings-container {

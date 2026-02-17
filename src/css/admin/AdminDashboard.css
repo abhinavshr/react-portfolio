@@ -20,7 +20,8 @@
 
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
   font-family: 'Outfit', sans-serif;
   color: var(--text-primary);
@@ -30,6 +31,7 @@
   flex: 1;
   padding: 2.5rem;
   overflow-y: auto;
+  height: 100vh;
   position: relative;
 }
 
@@ -45,6 +47,7 @@
   margin-bottom: 0.5rem;
   background: linear-gradient(to right, #1e293b, #4f46e5);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
