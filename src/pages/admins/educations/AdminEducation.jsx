@@ -21,8 +21,6 @@ const SkeletonEducation = () => (
   </div>
 );
 
-gsap.registerPlugin(useGSAP);
-
 const AdminEducation = () => {
   const [active, setActive] = useState("Education");
   const [educations, setEducations] = useState([]);
@@ -69,33 +67,42 @@ const AdminEducation = () => {
 
   useGSAP(() => {
     if (!loading) {
-      // Header Animation
-      gsap.from(".education-header", {
-        y: -30,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out"
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out", duration: 0.8 }
       });
 
-      // Cards Animation
+      // Header Animation
+      tl.fromTo(".education-header",
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1 }
+      );
+
+      // Cards or Empty State Animation
       if (educations.length > 0) {
-        gsap.from(".education-card", {
-          y: 30,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.1,
-          ease: "power2.out",
-          delay: 0.2
-        });
+        tl.fromTo(".education-card",
+          { y: 30, opacity: 0 },
+          {
+            y: 0,
+            opacity: 1,
+            stagger: 0.1,
+            duration: 0.6,
+            ease: "power2.out",
+            clearProps: "transform,opacity"
+          },
+          "-=0.5"
+        );
 
         // Footer Animation
-        gsap.from(".table-footer-education", {
-          y: 20,
-          opacity: 0,
-          duration: 0.6,
-          delay: 0.4,
-          ease: "power2.out"
-        });
+        tl.fromTo(".table-footer-education",
+          { y: 20, opacity: 0 },
+          { y: 0, opacity: 1, duration: 0.6, ease: "power2.out" },
+          "-=0.4"
+        );
+      } else {
+        tl.fromTo(".empty-state",
+          { opacity: 0, scale: 0.95 },
+          { opacity: 1, scale: 1, duration: 0.6 }
+        );
       }
     }
   }, { dependencies: [loading, educations], scope: containerRef });

@@ -13,7 +13,8 @@
 
 .admin-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
   font-family: "Outfit", sans-serif;
   color: var(--text-primary);
@@ -25,6 +26,7 @@
   max-width: 1400px;
   margin: 0 auto;
   overflow-y: auto;
+  height: 100vh;
 }
 
 .admin-education-page {

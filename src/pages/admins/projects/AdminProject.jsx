@@ -23,8 +23,6 @@ import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-gsap.registerPlugin(useGSAP);
-
 const Skeleton = ({ className }) => (
   <div className={`skeleton ${className || ""}`} />
 );
@@ -147,30 +145,32 @@ const AdminProjects = () => {
 
   useGSAP(() => {
     if (!loading) {
-      gsap.from(".projects-header", {
-        y: -30,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out"
+      const tl = gsap.timeline({
+        defaults: { ease: "power3.out", duration: 0.8 }
       });
 
-      gsap.from(".search-card", {
-        y: 20,
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.2,
-        ease: "power3.out"
-      });
+      tl.fromTo(".projects-header",
+        { y: -30, opacity: 0 },
+        { y: 0, opacity: 1 }
+      );
 
-      gsap.from(".table-card", {
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        delay: 0.4,
-        ease: "power3.out"
-      });
+      tl.fromTo(".search-card",
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1 },
+        "-=0.6"
+      );
+
+      tl.fromTo(".table-card",
+        { y: 30, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          clearProps: "transform,opacity"
+        },
+        "-=0.4"
+      );
     }
-  }, [loading]);
+  }, { dependencies: [loading], scope: containerRef });
 
   return (
     <div className="admin-layout" ref={containerRef}>
