@@ -1,41 +1,38 @@
 import React, { useEffect, useState, useRef } from "react";
-import { FiX } from "react-icons/fi";
+import { X, Briefcase, MapPin, Calendar, AlignLeft, CheckCircle2 } from "lucide-react";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { viewExperienceById } from "../../../services/experienceService";
 import Swal from "sweetalert2";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
-  const modalContainerRef = useRef(null);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
   const [experience, setExperience] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useGSAP(() => {
+  useEffect(() => {
     if (isOpen) {
-      gsap.from(".experience-modal-overlay", { opacity: 0, duration: 0.3 });
-      gsap.from(".experience-modal-box", {
-        y: 50,
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.4,
-        ease: "power3.out"
-      });
+      const tl = gsap.timeline();
+      tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
+        .fromTo(modalRef.current,
+          { scale: 0.9, opacity: 0, y: 30 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" },
+          "-=0.1"
+        );
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
     }
-  }, { scope: modalContainerRef, dependencies: [isOpen] });
+    return () => { document.body.style.overflow = "auto"; };
+  }, [isOpen]);
 
   const handleClose = () => {
-    gsap.to(".experience-modal-box", {
-      y: 20,
-      opacity: 0,
-      duration: 0.2,
-      ease: "power3.in"
-    });
-    gsap.to(".experience-modal-overlay", {
-      opacity: 0,
-      duration: 0.2,
+    const tl = gsap.timeline({
       onComplete: onClose
     });
+    tl.to(modalRef.current, { scale: 0.9, opacity: 0, y: 20, duration: 0.3, ease: "power2.in" })
+      .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
   useEffect(() => {
@@ -45,9 +42,14 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
       try {
         setLoading(true);
         const response = await viewExperienceById(experienceId);
-        setExperience(response.data); // API returns { message, data }
+        setExperience(response.data);
       } catch (error) {
-        Swal.fire("Error", error.message || "Failed to fetch experience", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.message || "Failed to fetch experience",
+          confirmButtonColor: "#6366f1"
+        });
       } finally {
         setLoading(false);
       }
@@ -59,87 +61,114 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="experience-modal-overlay" ref={modalContainerRef}>
-      <div className="experience-modal-box">
+    <div className="experience-modal-overlay" ref={overlayRef} onClick={handleClose}>
+      <div className="experience-modal-box" ref={modalRef} onClick={(e) => e.stopPropagation()}>
         <div className="experience-modal-header">
-          <div>
-            <h2>Experience Details</h2>
-            <p>View the details of this work experience</p>
-          </div>
-          <button className="experience-close-btn" onClick={handleClose}>
-            <FiX size={20} />
+          <h2>Experience Details</h2>
+          <button
+            className="experience-close-btn"
+            onClick={handleClose}
+            aria-label="Close modal"
+          >
+            <X size={20} />
           </button>
         </div>
 
-        {loading ? (
-          <p>Loading...</p>
-        ) : experience ? (
-          <div className="experience-modal-form">
-            <label>
-              Company Name
-              <input type="text" value={experience.company_name} readOnly />
-            </label>
+        <div className="experience-modal-content">
+          <p className="experience-modal-subtitle">View the detailed information of this professional experience.</p>
 
-            <label>
-              Role
-              <input type="text" value={experience.role} readOnly />
-            </label>
+          {loading ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+              <p>Loading details...</p>
+            </div>
+          ) : experience ? (
+            <div className="experience-modal-form">
+              <div className="experience-row">
+                <div className="experience-form-group">
+                  <label><Briefcase size={14} /> Company Name</label>
+                  <input type="text" value={experience.company_name} readOnly />
+                </div>
 
-            <label>
-              Company Location
-              <input
-                type="text"
-                value={experience.company_location || "N/A"}
-                readOnly
-              />
-            </label>
+                <div className="experience-form-group">
+                  <label><CheckCircle2 size={14} /> Role</label>
+                  <input type="text" value={experience.role} readOnly />
+                </div>
+              </div>
 
-            <div className="experience-row">
-              <label>
-                Start Date
-                <input type="date" value={experience.start_date} readOnly />
-              </label>
-
-              <label>
-                End Date
+              <div className="experience-form-group">
+                <label><MapPin size={14} /> Company Location</label>
                 <input
                   type="text"
-                  value={
-                    experience.is_current
-                      ? "Present"
-                      : experience.end_date || "N/A"
-                  }
+                  value={experience.company_location || "N/A"}
                   readOnly
                 />
+              </div>
+
+              <div className="experience-row">
+                <div className="experience-form-group">
+                  <label><Calendar size={14} /> Start Date</label>
+                  <input type="text" value={experience.start_date} readOnly />
+                </div>
+
+                <div className="experience-form-group">
+                  <label><Calendar size={14} /> End Date</label>
+                  <input
+                    type="text"
+                    value={
+                      experience.is_current
+                        ? "Present"
+                        : experience.end_date || "N/A"
+                    }
+                    readOnly
+                  />
+                </div>
+              </div>
+
+              <label className="experience-checkbox" style={{ cursor: "default" }}>
+                <input type="checkbox" checked={experience.is_current} readOnly />
+                I currently work here
               </label>
+
+              <div className="experience-form-group">
+                <label><AlignLeft size={14} /> Description</label>
+                <textarea rows="4" value={experience.description} readOnly />
+              </div>
+
+              {experience.responsibilities && experience.responsibilities.length > 0 && (
+                <div className="experience-responsibilities">
+                  <label>Key Responsibilities</label>
+                  {experience.responsibilities.map((resp, index) => (
+                    <div key={index} className="responsibility-row">
+                      <input
+                        type="text"
+                        value={resp.responsibility || resp}
+                        readOnly
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            <label className="experience-checkbox">
-              <input type="checkbox" checked={experience.is_current} readOnly />
-              I currently work here
-            </label>
-
-            <label>
-              Description
-              <textarea rows="4" value={experience.description} readOnly />
-            </label>
-
-            <div className="experience-modal-actions">
-              <button
-                type="button"
-                className="experience-btn-cancel"
-                onClick={handleClose}
-              >
-                Close
-              </button>
+          ) : (
+            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+              <p>No experience data found.</p>
             </div>
-          </div>
-        ) : (
-          <p>No experience found.</p>
-        )}
+          )}
+        </div>
+
+        <div className="experience-modal-footer">
+          <button
+            type="button"
+            className="experience-btn-cancel"
+            onClick={handleClose}
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default ViewExperienceModal;
+

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FiX } from "react-icons/fi";
+import { X, Briefcase, MapPin, Calendar, AlignLeft, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
+import { addResponsibilities } from "../../../services/experienceResponsibilitiesService";
 import Swal from "sweetalert2";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 
 const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
-  const modalContainerRef = useRef(null);
+  const modalRef = useRef(null);
+  const overlayRef = useRef(null);
 
   const [formData, setFormData] = useState({
     companyName: "",
@@ -19,34 +20,32 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     description: "",
   });
 
+  const [responsibilities, setResponsibilities] = useState([""]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
-  useGSAP(() => {
+  useEffect(() => {
     if (isOpen) {
-      gsap.from(".experience-modal-overlay", { opacity: 0, duration: 0.3 });
-      gsap.from(".experience-modal-box", {
-        y: 50,
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.4,
-        ease: "power3.out"
-      });
+      const tl = gsap.timeline();
+      tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
+        .fromTo(modalRef.current,
+          { scale: 0.9, opacity: 0, y: 30 },
+          { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" },
+          "-=0.1"
+        );
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
     }
-  }, { scope: modalContainerRef, dependencies: [isOpen] });
+    return () => { document.body.style.overflow = "auto"; };
+  }, [isOpen]);
 
   const handleClose = () => {
-    gsap.to(".experience-modal-box", {
-      y: 20,
-      opacity: 0,
-      duration: 0.2,
-      ease: "power3.in"
-    });
-    gsap.to(".experience-modal-overlay", {
-      opacity: 0,
-      duration: 0.2,
+    const tl = gsap.timeline({
       onComplete: onClose
     });
+    tl.to(modalRef.current, { scale: 0.9, opacity: 0, y: 20, duration: 0.3, ease: "power2.in" })
+      .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
   useEffect(() => {
@@ -62,25 +61,24 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           companyName: exp.company_name || "",
           companyLocation: exp.company_location || "",
           role: exp.role || "",
-          start_date: exp.start_date || "",
-          end_date: exp.end_date || "",
-          is_current: !!exp.is_current,
-          description: exp.description || "",
-          // Note: State keys should match form inputs. 
-          // Previous code had mixed keys (startDate vs start_date in payload).
-          // Let's fix mapping below or in render.
-          // Wait, the previous code had:
-          // start_date: exp.start_date
-          // But input name="startDate".
-          // And handleChange updates "startDate".
-          // So I should map API snake_case to camelCase state here.
-          // Correcting keys:
           startDate: exp.start_date || "",
           endDate: exp.end_date || "",
           current: !!exp.is_current,
+          description: exp.description || "",
         });
+
+        if (exp.responsibilities && exp.responsibilities.length > 0) {
+          setResponsibilities(exp.responsibilities.map(r => r.responsibility || r));
+        } else {
+          setResponsibilities([""]);
+        }
       } catch (error) {
-        Swal.fire("Error", error.response?.data?.message || "Failed to fetch experience", "error");
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: error.response?.data?.message || "Failed to fetch experience",
+          confirmButtonColor: "#6366f1"
+        });
         onClose();
       } finally {
         setLoadingData(false);
@@ -98,8 +96,31 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     }));
   };
 
+  const handleResponsibilityChange = (index, value) => {
+    const updated = [...responsibilities];
+    updated[index] = value;
+    setResponsibilities(updated);
+  };
+
+  const addResponsibilityField = () => {
+    if (responsibilities.length >= 5) {
+      Swal.fire({
+        icon: "warning",
+        title: "Limit reached",
+        text: "Maximum 5 responsibilities allowed",
+        confirmButtonColor: "#6366f1"
+      });
+      return;
+    }
+    setResponsibilities([...responsibilities, ""]);
+  };
+
+  const removeResponsibilityField = (index) => {
+    setResponsibilities(responsibilities.filter((_, i) => i !== index));
+  };
+
   const validateForm = () => {
-    if (!formData.companyName.trim() || !formData.role.trim() || !formData.companyLocation.trim()) {
+    if (!formData.companyName.trim() || !formData.role.trim() || !formData.companyLocation.trim() || !formData.description.trim()) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
     }
     if (!formData.current && formData.startDate && formData.endDate && formData.endDate < formData.startDate) {
@@ -113,7 +134,12 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 
     const validationError = validateForm();
     if (validationError) {
-      Swal.fire({ icon: validationError.type, title: validationError.title, text: validationError.text });
+      Swal.fire({
+        icon: validationError.type,
+        title: validationError.title,
+        text: validationError.text,
+        confirmButtonColor: "#6366f1"
+      });
       return;
     }
 
@@ -131,17 +157,28 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       setLoading(true);
       await updateExperience(experienceId, payload);
 
+      const filtered = responsibilities.filter(r => r.trim() !== "");
+      if (filtered.length > 0) {
+        await addResponsibilities(experienceId, { responsibilities: filtered });
+      }
+
       Swal.fire({
         icon: "success",
         title: "Experience Updated",
-        timer: 1500,
+        text: "Your work experience has been successfully updated.",
+        timer: 2000,
         showConfirmButton: false,
       });
 
       onExperienceUpdated?.();
-      handleClose(); // Use animated close
+      handleClose();
     } catch (error) {
-      Swal.fire("Error", error.response?.data?.message || "Failed to update experience", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: error.response?.data?.message || error.message || "Failed to update experience",
+        confirmButtonColor: "#6366f1"
+      });
     } finally {
       setLoading(false);
     }
@@ -150,132 +187,184 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
   if (!isOpen) return null;
 
   return (
-    <div className="experience-modal-overlay" ref={modalContainerRef}>
-      <div className="experience-modal-box">
+    <div className="experience-modal-overlay" ref={overlayRef} onClick={handleClose}>
+      <div className="experience-modal-box" ref={modalRef} onClick={(e) => e.stopPropagation()}>
         <div className="experience-modal-header">
           <h2>Edit Experience</h2>
           <button
             className="experience-close-btn"
             onClick={handleClose}
             aria-label="Close modal"
-            disabled={loading}
+            disabled={loading || loadingData}
           >
-            <FiX size={20} />
+            <X size={20} />
           </button>
         </div>
 
-        {loadingData ? (
-          <p>Loading experience data...</p>
-        ) : (
-          <form className="experience-modal-form" onSubmit={handleSubmit}>
-            <div className="experience-row">
-              <label>
-                Company Name *
+        <div className="experience-modal-content">
+          <p className="experience-modal-subtitle">Update the details of your professional experience.</p>
+
+          {loadingData ? (
+            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+              <p>Loading experience data...</p>
+            </div>
+          ) : (
+            <form id="editExperienceForm" className="experience-modal-form" onSubmit={handleSubmit}>
+              <div className="experience-row">
+                <div className="experience-form-group">
+                  <label><Briefcase size={14} /> Company Name <span>*</span></label>
+                  <input
+                    type="text"
+                    name="companyName"
+                    value={formData.companyName}
+                    onChange={handleChange}
+                    placeholder="e.g. Google"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="experience-form-group">
+                  <label><CheckCircle2 size={14} /> Role <span>*</span></label>
+                  <input
+                    type="text"
+                    name="role"
+                    value={formData.role}
+                    onChange={handleChange}
+                    placeholder="e.g. Software Engineer"
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              <div className="experience-form-group">
+                <label><MapPin size={14} /> Company Location <span>*</span></label>
                 <input
                   type="text"
-                  name="companyName"
-                  value={formData.companyName}
+                  name="companyLocation"
+                  value={formData.companyLocation}
+                  onChange={handleChange}
+                  placeholder="e.g. Mountain View, CA"
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div className="experience-row">
+                <div className="experience-form-group">
+                  <label><Calendar size={14} /> Start Date <span>*</span></label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={formData.startDate}
+                    onChange={handleChange}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                <div className="experience-form-group">
+                  <label><Calendar size={14} /> End Date</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={formData.endDate}
+                    onChange={handleChange}
+                    disabled={formData.current || loading}
+                  />
+                </div>
+              </div>
+
+              <label className="experience-checkbox">
+                <input
+                  type="checkbox"
+                  name="current"
+                  checked={formData.current}
+                  onChange={handleChange}
+                  disabled={loading}
+                />
+                I currently work here
+              </label>
+
+              <div className="experience-form-group">
+                <label><AlignLeft size={14} /> Description <span>*</span></label>
+                <textarea
+                  name="description"
+                  rows={4}
+                  placeholder="Briefly describe your responsibilities and impact..."
+                  value={formData.description}
                   onChange={handleChange}
                   required
                   disabled={loading}
                 />
-              </label>
+              </div>
 
-              <label>
-                Role *
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
-            </div>
+              <div className="experience-responsibilities">
+                <label>
+                  <span>Key Responsibilities</span>
+                  <span style={{ fontSize: '0.8rem', fontWeight: 400 }}>Max 5</span>
+                </label>
 
-            <label>
-              Company Location *
-              <input
-                type="text"
-                name="companyLocation"
-                value={formData.companyLocation}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-            </label>
+                {responsibilities.map((item, index) => (
+                  <div key={index} className="responsibility-row">
+                    <input
+                      type="text"
+                      value={item}
+                      onChange={(e) => handleResponsibilityChange(index, e.target.value)}
+                      placeholder={`e.g. Led a team of 5 developers...`}
+                      disabled={loading}
+                    />
+                    {responsibilities.length > 1 && (
+                      <button
+                        type="button"
+                        className="remove-responsibility-btn"
+                        onClick={() => removeResponsibilityField(index)}
+                        title="Remove"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                ))}
 
-            <div className="experience-row">
-              <label>
-                Start Date *
-                <input
-                  type="date"
-                  name="startDate"
-                  value={formData.startDate}
-                  onChange={handleChange}
-                  required
-                  disabled={loading}
-                />
-              </label>
+                {responsibilities.length < 5 && (
+                  <button
+                    type="button"
+                    className="add-responsibility-btn"
+                    onClick={addResponsibilityField}
+                    disabled={loading}
+                  >
+                    <Plus size={16} /> Add Responsibility
+                  </button>
+                )}
+              </div>
+            </form>
+          )}
+        </div>
 
-              <label>
-                End Date
-                <input
-                  type="date"
-                  name="endDate"
-                  value={formData.endDate}
-                  onChange={handleChange}
-                  disabled={formData.current || loading}
-                />
-              </label>
-            </div>
-
-            <label className="experience-checkbox">
-              <input
-                type="checkbox"
-                name="current"
-                checked={formData.current}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              I currently work here
-            </label>
-
-            <label>
-              Description *
-              <textarea
-                name="description"
-                rows={4}
-                value={formData.description}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-            </label>
-
-            <div className="experience-modal-actions">
-              <button
-                type="button"
-                className="experience-btn-cancel"
-                onClick={handleClose}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="experience-btn-add"
-                disabled={loading}
-              >
-                {loading ? "Updating..." : "Update"}
-              </button>
-            </div>
-          </form>
-        )}
+        <div className="experience-modal-footer">
+          <button
+            type="button"
+            className="experience-btn-cancel"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="editExperienceForm"
+            className="experience-btn-add"
+            disabled={loading || loadingData}
+          >
+            {loading ? "Updating..." : "Update Experience"}
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
 export default EditExperienceModal;
+
