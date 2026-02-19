@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Briefcase, MapPin, Calendar, AlignLeft, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
-import { addResponsibilities } from "../../../services/experienceResponsibilitiesService";
+import { addResponsibilities, deleteResponsibility } from "../../../services/experienceResponsibilitiesService";
 import Swal from "sweetalert2";
 import gsap from "gsap";
 
@@ -20,7 +20,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     description: "",
   });
 
-  const [responsibilities, setResponsibilities] = useState([""]);
+  const [responsibilities, setResponsibilities] = useState([{ id: null, text: "" }]);
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(false);
 
@@ -68,9 +68,12 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
         });
 
         if (exp.responsibilities && exp.responsibilities.length > 0) {
-          setResponsibilities(exp.responsibilities.map(r => r.responsibility || r));
+          setResponsibilities(exp.responsibilities.map(r => ({
+            id: r.id,
+            text: r.responsibility || ""
+          })));
         } else {
-          setResponsibilities([""]);
+          setResponsibilities([{ id: null, text: "" }]);
         }
       } catch (error) {
         Swal.fire({
@@ -98,7 +101,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 
   const handleResponsibilityChange = (index, value) => {
     const updated = [...responsibilities];
-    updated[index] = value;
+    updated[index].text = value;
     setResponsibilities(updated);
   };
 
@@ -112,11 +115,47 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       });
       return;
     }
-    setResponsibilities([...responsibilities, ""]);
+    setResponsibilities([...responsibilities, { id: null, text: "" }]);
   };
 
-  const removeResponsibilityField = (index) => {
-    setResponsibilities(responsibilities.filter((_, i) => i !== index));
+  const removeResponsibilityField = async (index) => {
+    const item = responsibilities[index];
+
+    // If it has an ID, it means it's already in the database
+    if (item.id) {
+      const result = await Swal.fire({
+        title: "Delete responsibility?",
+        text: "This will permanently remove this item from your experience.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#ef4444",
+        cancelButtonColor: "#64748b",
+        confirmButtonText: "Yes, delete it!"
+      });
+
+      if (!result.isConfirmed) return;
+
+      try {
+        setLoading(true);
+        await deleteResponsibility(item.id);
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Responsibility removed.",
+          timer: 1500,
+          showConfirmButton: false
+        });
+        setResponsibilities(responsibilities.filter((_, i) => i !== index));
+        onExperienceUpdated?.(); // Refresh the main page data
+      } catch (error) {
+        Swal.fire("Error", error.message || "Failed to delete responsibility", "error");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Just remove from state if it's a new unsaved item
+      setResponsibilities(responsibilities.filter((_, i) => i !== index));
+    }
   };
 
   const validateForm = () => {
@@ -157,7 +196,11 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       setLoading(true);
       await updateExperience(experienceId, payload);
 
-      const filtered = responsibilities.filter(r => r.trim() !== "");
+      // Only add/update responsibilities that have text
+      const filtered = responsibilities
+        .map(r => r.text.trim())
+        .filter(t => t !== "");
+
       if (filtered.length > 0) {
         await addResponsibilities(experienceId, { responsibilities: filtered });
       }
@@ -310,7 +353,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
                   <div key={index} className="responsibility-row">
                     <input
                       type="text"
-                      value={item}
+                      value={item.text}
                       onChange={(e) => handleResponsibilityChange(index, e.target.value)}
                       placeholder={`e.g. Led a team of 5 developers...`}
                       disabled={loading}
@@ -367,4 +410,5 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 };
 
 export default EditExperienceModal;
+
 

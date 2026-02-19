@@ -13,3 +13,15 @@ export const addResponsibilities = async (experienceId, payload) => {
     };
   }
 };
+
+export const deleteResponsibility = async (id) => {
+  try {
+    const response = await api.delete(`/admin/responsibilities/${id}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Failed to delete responsibility",
+    };
+  }
+};
+
