@@ -2,8 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { X, Briefcase, MapPin, Calendar, AlignLeft, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
-import { addResponsibilities, deleteResponsibility } from "../../../services/experienceResponsibilitiesService";
+import { addResponsibilities, deleteResponsibility, updateResponsibility } from "../../../services/experienceResponsibilitiesService";
 import Swal from "sweetalert2";
+
 import gsap from "gsap";
 
 const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
@@ -196,19 +197,28 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       setLoading(true);
       await updateExperience(experienceId, payload);
 
-      // Only add/update responsibilities that have text
-      const filtered = responsibilities
-        .map(r => r.text.trim())
-        .filter(t => t !== "");
+      // Separate existing vs new responsibilities
+      const toUpdate = responsibilities.filter(r => r.id && r.text.trim() !== "");
+      const toAdd = responsibilities.filter(r => !r.id && r.text.trim() !== "");
 
-      if (filtered.length > 0) {
-        await addResponsibilities(experienceId, { responsibilities: filtered });
+      // Perform individual updates for existing ones
+      if (toUpdate.length > 0) {
+        await Promise.all(
+          toUpdate.map(r => updateResponsibility(r.id, { responsibility: r.text }))
+        );
+      }
+
+      // Perform batch add for new ones
+      if (toAdd.length > 0) {
+        await addResponsibilities(experienceId, {
+          responsibilities: toAdd.map(r => r.text)
+        });
       }
 
       Swal.fire({
         icon: "success",
         title: "Experience Updated",
-        text: "Your work experience has been successfully updated.",
+        text: "Your work experience and responsibilities have been successfully updated.",
         timer: 2000,
         showConfirmButton: false,
       });
