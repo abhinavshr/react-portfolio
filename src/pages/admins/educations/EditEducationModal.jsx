@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import { X, Save, AlertCircle } from "lucide-react";
+import { X, Save } from "lucide-react";
 import "../../../css/admin/educations/AddEducationModal.css";
 import { viewEducationById, updateEducation } from "../../../services/educationService";
 import Swal from "sweetalert2";
@@ -16,16 +16,41 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     board: "",
     description: "",
   });
-  const [loading, setLoading] = useState(false);
+
+  const [fetching, setFetching] = useState(false);
+  const [saving, setSaving] = useState(false);
+
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
+
+  const handleClose = useCallback(() => {
+    if (saving) return;
+
+    if (!modalRef.current || !overlayRef.current) {
+      onClose?.();
+      return;
+    }
+
+    gsap.to(modalRef.current, {
+      y: 50,
+      opacity: 0,
+      scale: 0.95,
+      duration: 0.25,
+      onComplete: onClose,
+    });
+
+    gsap.to(overlayRef.current, {
+      opacity: 0,
+      duration: 0.25,
+    });
+  }, [onClose, saving]);
 
   useEffect(() => {
     if (!isOpen || !educationId) return;
 
     const fetchEducation = async () => {
       try {
-        setLoading(true);
+        setFetching(true);
         const response = await viewEducationById(educationId);
         const edu = response.data;
 
@@ -47,48 +72,79 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
         });
         handleClose();
       } finally {
-        setLoading(false);
+        setFetching(false);
       }
     };
 
     fetchEducation();
   }, [isOpen, educationId, handleClose]);
 
-  useGSAP(() => {
-    if (isOpen) {
-      gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEsc = (e) => {
+      if (e.key === "Escape") handleClose();
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, handleClose]);
+
+  useGSAP(
+    () => {
+      if (!isOpen || !modalRef.current || !overlayRef.current) return;
+
+      gsap.fromTo(
+        overlayRef.current,
+        { opacity: 0 },
+        { opacity: 1, duration: 0.25 }
+      );
+
       gsap.fromTo(
         modalRef.current,
         { y: 50, opacity: 0, scale: 0.95 },
-        { y: 0, opacity: 1, scale: 1, duration: 0.4, ease: "back.out(1.7)" }
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          duration: 0.35,
+          ease: "back.out(1.7)",
+        }
       );
-    }
-  }, { dependencies: [isOpen] });
-
-  const handleClose = useCallback(() => {
-    gsap.to(modalRef.current, {
-      y: 50,
-      opacity: 0,
-      scale: 0.95,
-      duration: 0.3,
-      onComplete: onClose
-    });
-    gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
-  }, [onClose]);
+    },
+    { dependencies: [isOpen] }
+  );
 
   if (!isOpen) return null;
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
   };
 
   const validateForm = () => {
     if (!formData.institution.trim() || !formData.level.trim() || !formData.program.trim()) {
-      return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
+      return {
+        type: "warning",
+        title: "Missing Fields",
+        text: "Please fill in all required fields.",
+      };
     }
-    if (formData.startYear && formData.endYear && Number(formData.endYear) < Number(formData.startYear)) {
-      return { type: "error", title: "Invalid Years", text: "End year must be greater than or equal to start year." };
+
+    if (
+      formData.startYear &&
+      formData.endYear &&
+      Number(formData.endYear) < Number(formData.startYear)
+    ) {
+      return {
+        type: "error",
+        title: "Invalid Years",
+        text: "End year must be greater than or equal to start year.",
+      };
     }
+
     return null;
   };
 
@@ -117,7 +173,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     };
 
     try {
-      setLoading(true);
+      setSaving(true);
       const response = await updateEducation(educationId, payload);
 
       Swal.fire({
@@ -138,12 +194,18 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
         confirmButtonColor: "#2563eb",
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
   return (
-    <div className="edu-modal-overlay" ref={overlayRef} onClick={handleClose}>
+    <div
+      className="edu-modal-overlay"
+      ref={overlayRef}
+      onClick={(e) => {
+        if (e.target === overlayRef.current) handleClose();
+      }}
+    >
       <div
         className="edu-modal"
         ref={modalRef}
@@ -154,17 +216,18 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
             <h2>Edit Education</h2>
             <p>Modify your academic experience details</p>
           </div>
+
           <button
             className="close-btn"
             onClick={handleClose}
             aria-label="Close modal"
-            disabled={loading}
+            disabled={saving}
           >
             <X size={20} />
           </button>
         </div>
 
-        {loading && !formData.institution ? (
+        {fetching ? (
           <div className="modal-loading">
             <div className="spinner"></div>
             <p>Loading details...</p>
@@ -176,11 +239,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
               <input
                 type="text"
                 name="institution"
-                placeholder="e.g. Stanford University"
                 value={formData.institution}
                 onChange={handleChange}
                 required
-                disabled={loading}
+                disabled={saving}
               />
             </label>
 
@@ -190,11 +252,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="text"
                   name="level"
-                  placeholder="e.g. Master's"
                   value={formData.level}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={saving}
                 />
               </label>
 
@@ -203,11 +264,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="text"
                   name="program"
-                  placeholder="e.g. Software Engineering"
                   value={formData.program}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={saving}
                 />
               </label>
             </div>
@@ -218,11 +278,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="number"
                   name="startYear"
-                  placeholder="YYYY"
                   value={formData.startYear}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={saving}
                 />
               </label>
 
@@ -231,11 +290,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 <input
                   type="number"
                   name="endYear"
-                  placeholder="YYYY (or expected)"
                   value={formData.endYear}
                   onChange={handleChange}
                   required
-                  disabled={loading}
+                  disabled={saving}
                 />
               </label>
             </div>
@@ -245,10 +303,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
               <input
                 type="text"
                 name="board"
-                placeholder="e.g. National Board"
                 value={formData.board}
                 onChange={handleChange}
-                disabled={loading}
+                disabled={saving}
               />
             </label>
 
@@ -257,10 +314,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
               <textarea
                 rows="4"
                 name="description"
-                placeholder="Details about your studies..."
                 value={formData.description}
                 onChange={handleChange}
-                disabled={loading}
+                disabled={saving}
               />
             </label>
 
@@ -269,12 +325,13 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
                 type="button"
                 className="cancel-btn"
                 onClick={handleClose}
-                disabled={loading}
+                disabled={saving}
               >
                 Cancel
               </button>
-              <button type="submit" className="add-btn" disabled={loading}>
-                {loading ? (
+
+              <button type="submit" className="add-btn" disabled={saving}>
+                {saving ? (
                   "Saving..."
                 ) : (
                   <>
@@ -292,4 +349,3 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 };
 
 export default EditEducationModal;
-
