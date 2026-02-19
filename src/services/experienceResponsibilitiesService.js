@@ -25,3 +25,15 @@ export const deleteResponsibility = async (id) => {
   }
 };
 
+export const updateResponsibility = async (id, payload) => {
+  try {
+    const response = await api.put(`/admin/responsibilities/${id}`, payload);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || {
+      message: "Failed to update responsibility",
+    };
+  }
+};
+
+
