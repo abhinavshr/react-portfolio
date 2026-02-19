@@ -11,7 +11,12 @@ import {
   changeAdminPassword
 } from "../../../services/adminSettingService";
 
-/* ---------------- Skeleton Layout ---------------- */
+/**
+ * SkeletonSettings Component
+ * 
+ * Renders a placeholder UI structure that mimics the settings page layout.
+ * Used to enhance perceived performance during the initial data fetch.
+ */
 const SkeletonSettings = () => (
   <div className="settings-container skeleton-setting">
     <div className="settings-header">
@@ -60,12 +65,19 @@ const SkeletonSettings = () => (
   </div>
 );
 
-/* ---------------- Main Component ---------------- */
+/**
+ * AdminSettings Component
+ * 
+ * Provides a specialized interface for administrators to manage their profile
+ * information, including profile photo, personal details, and security credentials.
+ */
 const AdminSettings = () => {
+  // --- UI and State Management ---
   const [active, setActive] = useState("Settings");
   const [admin, setAdmin] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
+  // Form states for profile and security management
   const [profileData, setProfileData] = useState({ name: "", email: "" });
   const [passwordData, setPasswordData] = useState({
     current: "",
@@ -73,6 +85,7 @@ const AdminSettings = () => {
     confirm: ""
   });
 
+  // Controls visibility toggle for password fields
   const [showPassword, setShowPassword] = useState({
     current: false,
     new: false,
@@ -82,11 +95,15 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Animation Refs
+  // --- Animation References ---
   const headerRef = useRef(null);
   const profileCardRef = useRef(null);
   const passwordCardRef = useRef(null);
 
+  /**
+   * Initial effect to fetch current administrator settings.
+   * Synchronizes component state with the backend profile data.
+   */
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -97,8 +114,8 @@ const AdminSettings = () => {
       } catch {
         Swal.fire({
           icon: "error",
-          title: "Error",
-          text: "Failed to load profile",
+          title: "Extraction Error",
+          text: "Failed to load administrator profile settings.",
           customClass: { popup: "premium-swal-popup" }
         });
       } finally {
@@ -108,7 +125,10 @@ const AdminSettings = () => {
     fetchProfile();
   }, []);
 
-  // GSAP Animations
+  /**
+   * Orchestrates the entrance animations for the settings layout
+   * using GSAP when the profile data has finished loading.
+   */
   useEffect(() => {
     if (!loadingProfile) {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -136,8 +156,15 @@ const AdminSettings = () => {
     );
   }
 
+  /**
+   * Triggers the hidden file input click event for photo selection.
+   */
   const handleUploadClick = () => fileInputRef.current.click();
 
+  /**
+   * Handles the selection and immediate upload of a new profile photo.
+   * @param {Event} e - The change event from the file input.
+   */
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -149,8 +176,8 @@ const AdminSettings = () => {
       setAdmin(res.user);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Profile photo updated successfully",
+        title: "Photo Updated",
+        text: "Administrator profile photo has been successfully updated.",
         timer: 1500,
         showConfirmButton: false,
         customClass: { popup: "premium-swal-popup" }
@@ -158,8 +185,8 @@ const AdminSettings = () => {
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err?.message || "Failed to update profile photo",
+        title: "Upload Failed",
+        text: err?.message || "An error occurred while updating the profile photo.",
         customClass: { popup: "premium-swal-popup" }
       });
     } finally {
@@ -167,12 +194,15 @@ const AdminSettings = () => {
     }
   };
 
+  /**
+   * Validates and submits updated profile metadata (name, email).
+   */
   const handleSaveProfile = async () => {
     if (!profileData.name.trim() || !profileData.email.trim()) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "Name and email are required",
+        title: "Validation Error",
+        text: "Full name and email address are required fields.",
         customClass: { popup: "premium-swal-popup" }
       });
       return;
@@ -184,8 +214,8 @@ const AdminSettings = () => {
       setAdmin(res.user);
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Profile updated successfully",
+        title: "Profile Synchronized",
+        text: "Your profile details have been successfully updated.",
         timer: 1500,
         showConfirmButton: false,
         customClass: { popup: "premium-swal-popup" }
@@ -193,8 +223,8 @@ const AdminSettings = () => {
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err?.message || "Failed to update profile",
+        title: "Update Failed",
+        text: err?.message || "There was a problem synchronizing your profile details.",
         customClass: { popup: "premium-swal-popup" }
       });
     } finally {
@@ -202,25 +232,32 @@ const AdminSettings = () => {
     }
   };
 
+  /**
+   * Validates security credentials and initiates the password change process.
+   */
   const handleChangePassword = async () => {
+    // Validation: Check for presence of all required fields
     if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "All password fields are required",
+        title: "Incomplete Request",
+        text: "All credentials fields must be populated to proceed.",
         customClass: { popup: "premium-swal-popup" }
       });
       return;
     }
+
+    // Validation: Ensure the new password matches the confirmation
     if (passwordData.new !== passwordData.confirm) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: "New password and confirmation do not match",
+        title: "Mismatch Detected",
+        text: "The new password and confirmation entry do not match.",
         customClass: { popup: "premium-swal-popup" }
       });
       return;
     }
+
     try {
       setLoading(true);
       await changeAdminPassword({
@@ -228,11 +265,14 @@ const AdminSettings = () => {
         new_password: passwordData.new,
         new_password_confirmation: passwordData.confirm
       });
+
+      // Clear password fields upon successful rotation
       setPasswordData({ current: "", new: "", confirm: "" });
+
       Swal.fire({
         icon: "success",
-        title: "Success",
-        text: "Password updated successfully",
+        title: "Security Updated",
+        text: "Your account password has been successfully rotated.",
         timer: 1500,
         showConfirmButton: false,
         customClass: { popup: "premium-swal-popup" }
@@ -240,8 +280,8 @@ const AdminSettings = () => {
     } catch (err) {
       Swal.fire({
         icon: "error",
-        title: "Error",
-        text: err?.message || "Failed to update password",
+        title: "Rotation Failed",
+        text: err?.message || "Credential update failed. Please verify your current password.",
         customClass: { popup: "premium-swal-popup" }
       });
     } finally {
@@ -249,11 +289,13 @@ const AdminSettings = () => {
     }
   };
 
+  // Logic to determine if save button should be active for profile
   const isProfileUnchanged =
     admin &&
     profileData.name === admin.name &&
     profileData.email === admin.email;
 
+  // Logic to determine if update button should be active for security
   const isPasswordInvalid =
     !passwordData.current ||
     !passwordData.new ||
@@ -262,18 +304,20 @@ const AdminSettings = () => {
 
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
         <div className="settings-container">
+          {/* Header Section */}
           <header className="settings-header" ref={headerRef}>
             <h1 className="settings-title">Settings</h1>
             <p className="settings-subtitle">
-              Manage your account settings and preferences
+              Manage your account configurations and security preferences
             </p>
           </header>
 
-          {/* Profile Card */}
+          {/* Profile Configuration Card */}
           <div className="settings-card" ref={profileCardRef}>
             <div className="settings-card-header">
               <User size={24} />
@@ -281,6 +325,7 @@ const AdminSettings = () => {
             </div>
 
             <div className="profile-section">
+              {/* Profile Avatar Management */}
               <div className="profile-photo">
                 <div className="photo-circle">
                   {admin?.profile_photo ? (
@@ -311,6 +356,7 @@ const AdminSettings = () => {
                 </div>
               </div>
 
+              {/* Personal Details Form */}
               <div className="profile-form">
                 <div className="form-group">
                   <label>Full Name</label>
@@ -356,7 +402,7 @@ const AdminSettings = () => {
             </div>
           </div>
 
-          {/* Password Card */}
+          {/* Security and Password Card */}
           <div className="settings-card" ref={passwordCardRef}>
             <div className="settings-card-header">
               <Lock size={24} />
@@ -385,6 +431,7 @@ const AdminSettings = () => {
                       disabled={loading}
                     />
                     <span
+                      className="visibility-toggle"
                       onClick={() =>
                         setShowPassword({
                           ...showPassword,
