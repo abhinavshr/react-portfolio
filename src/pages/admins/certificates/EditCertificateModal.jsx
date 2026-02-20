@@ -5,7 +5,17 @@ import Swal from "sweetalert2";
 import { viewCertificateById, updateCertificate } from "../../../services/certificatesService";
 import gsap from "gsap";
 
+/**
+ * EditCertificateModal Component
+ * A modal window that allows administrators to edit an existing certificate's details.
+ * Fetches existing data on mount and provides form validation for updates.
+ * 
+ * @param {string|number} certificateId - The ID of the certificate to edit.
+ * @param {function} onClose - function to close the modal.
+ * @param {function} onSuccess - callback to refresh parent list after successful update.
+ */
 const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
+  // --- State Management ---
   const [formData, setFormData] = useState({
     title: "",
     issuer: "",
@@ -14,11 +24,14 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
     verification_url: ""
   });
 
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(false);
+  const [loading, setLoading] = useState(false); // Update submission state
+  const [loadingData, setLoadingData] = useState(false); // Initial data fetch state
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  /**
+   * Effect Hook: Fetches the existing certificate details when the modal opens.
+   */
   useEffect(() => {
     if (!certificateId) return;
 
@@ -51,6 +64,9 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
     fetchCertificate();
   }, [certificateId, onClose]);
 
+  /**
+   * Entrance animation using GSAP
+   */
   useEffect(() => {
     const tl = gsap.timeline();
     tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
@@ -61,17 +77,27 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
       );
   }, []);
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = () => {
     const tl = gsap.timeline({ onComplete: onClose });
     tl.to(modalRef.current, { scale: 0.9, opacity: 0, y: 20, duration: 0.3, ease: "power2.in" })
       .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
+  /**
+   * Updates state on input change.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Validates form fields.
+   * @returns {Object|null} Error object or null.
+   */
   const validateForm = () => {
     if (!formData.title.trim() || !formData.issuer.trim() || !formData.issue_date) {
       return { type: "error", title: "Missing Fields", text: "Please fill all required fields." };
@@ -82,6 +108,9 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
     return null;
   };
 
+  /**
+   * Handles the update submission.
+   */
   const handleSubmit = async () => {
     const validationError = validateForm();
     if (validationError) {
@@ -125,7 +154,7 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
   return (
     <div className="add-certificate-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div className="add-certificate-modal" ref={modalRef} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
+        {/* Modal Header */}
         <div className="add-certificate-modal-header">
           <div>
             <h2>Edit Certificate</h2>
@@ -141,7 +170,7 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
           </button>
         </div>
 
-        {/* Body */}
+        {/* Modal Body with dynamic loading state */}
         {loadingData ? (
           <div className="loading-data">
             <div className="spinner"></div>
@@ -210,7 +239,7 @@ const EditCertificateModal = ({ certificateId, onClose, onSuccess }) => {
           </div>
         )}
 
-        {/* Footer */}
+        {/* Modal Footer / Actions */}
         <div className="add-certificate-modal-footer">
           <button
             className="add-certificate-cancel-btn"

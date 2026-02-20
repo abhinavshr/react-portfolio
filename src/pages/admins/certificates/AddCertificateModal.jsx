@@ -5,7 +5,16 @@ import Swal from "sweetalert2";
 import { addCertificate } from "../../../services/certificatesService";
 import gsap from "gsap";
 
+/**
+ * AddCertificateModal Component
+ * A modal window that allows administrators to add a new professional certificate.
+ * Includes form validation and GSAP animations for entrance/exit.
+ * 
+ * @param {function} onClose - function to close the modal.
+ * @param {function} onSuccess - callback to refresh the parent list upon successful addition.
+ */
 const AddCertificateModal = ({ onClose, onSuccess }) => {
+  // --- State Management ---
   const [formData, setFormData] = useState({
     title: "",
     issuer: "",
@@ -14,10 +23,13 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
     verification_url: ""
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Submitting state
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  /**
+   * Entrance Animation using GSAP on mount
+   */
   useEffect(() => {
     const tl = gsap.timeline();
     tl.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 })
@@ -28,17 +40,27 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
       );
   }, []);
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = () => {
     const tl = gsap.timeline({ onComplete: onClose });
     tl.to(modalRef.current, { scale: 0.9, opacity: 0, y: 20, duration: 0.3, ease: "power2.in" })
       .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
+  /**
+   * Handles input changes and updates the form state.
+   */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  /**
+   * Validates the form data before submission.
+   * @returns {Object|null} Error object with type, title, and text, or null if valid.
+   */
   const validateForm = () => {
     if (!formData.title.trim() || !formData.issuer.trim() || !formData.issue_date) {
       return { type: "error", title: "Missing Fields", text: "Please fill all required fields." };
@@ -49,6 +71,9 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
     return null;
   };
 
+  /**
+   * Submits the form data to the backend.
+   */
   const handleSubmit = async () => {
     const validationError = validateForm();
     if (validationError) {
@@ -90,7 +115,7 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
   return (
     <div className="add-certificate-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div className="add-certificate-modal" ref={modalRef} onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
+        {/* Modal Header Section */}
         <div className="add-certificate-modal-header">
           <div>
             <h2>Add New Certificate</h2>
@@ -106,7 +131,7 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
           </button>
         </div>
 
-        {/* Body */}
+        {/* Modal Body / Form Fields */}
         <div className="add-certificate-modal-body">
           <div className="add-certificate-form-group">
             <label><Award size={14} style={{ marginRight: '6px' }} /> Certificate Name <span>*</span></label>
@@ -168,7 +193,7 @@ const AddCertificateModal = ({ onClose, onSuccess }) => {
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Modal Footer / Actions */}
         <div className="add-certificate-modal-footer">
           <button
             className="add-certificate-cancel-btn"
