@@ -11,7 +11,10 @@ import ViewContactModal from "./ViewContactModal";
 import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 
-/* ---------------- Skeleton Card ---------------- */
+/**
+ * SkeletonContactCard component
+ * Displays a loading state for individual contact message cards.
+ */
 const SkeletonContactCard = () => (
   <div className="contact-message-card skeleton-contact">
     <div className="message-left">
@@ -34,22 +37,31 @@ const SkeletonContactCard = () => (
   </div>
 );
 
-/* ---------------- Main Component ---------------- */
+/**
+ * AdminContactMessages Component
+ * Manages and displays the list of contact messages received from users.
+ * Features: Filtering, Searching, Pagination, Viewing Details, and Deletion.
+ */
 const AdminContactMessages = () => {
-  const [active, setActive] = useState("Contacts");
-  const [filter, setFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // --- State Management ---
+  const [active, setActive] = useState("Contacts"); // Active sidebar menu item
+  const [filter, setFilter] = useState("all"); // Current filter: all, unread, read
+  const [searchTerm, setSearchTerm] = useState(""); // Search query
+  const [messages, setMessages] = useState([]); // List of messages
+  const [loading, setLoading] = useState(true); // Loading state for data fetching
+
+  // --- Refs for Animations ---
   const containerRef = useRef(null);
   const headerRef = useRef(null);
   const toolbarRef = useRef(null);
 
+  // --- Modal State ---
   const [modalState, setModalState] = useState({
     view: false,
     selectedId: null,
   });
 
+  // --- Pagination State ---
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -58,11 +70,16 @@ const AdminContactMessages = () => {
     to: 0,
   });
 
+  /**
+   * Fetches contact messages from the service based on the specified page.
+   * @param {number} page - The page number to fetch.
+   */
   const fetchMessages = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const res = await viewAllContactMessages(page);
 
+      // Formating the API response to match component needs
       const formatted = res.data.data.map((msg) => ({
         id: msg.id,
         name: msg.name,
@@ -74,6 +91,8 @@ const AdminContactMessages = () => {
       }));
 
       setMessages(formatted);
+
+      // Update pagination state
       const { current_page, last_page, total, from, to } = res.data;
       setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
     } catch (err) {
@@ -90,11 +109,15 @@ const AdminContactMessages = () => {
     }
   }, []);
 
+  // Initial data fetch
   useEffect(() => {
     fetchMessages();
   }, [fetchMessages]);
 
-  // GSAP Entrance Animation
+  /**
+   * GSAP Entrance Animation for Message Cards
+   * Triggers whenever the loading finishes or messages list changes.
+   */
   useEffect(() => {
     if (!loading && messages.length > 0) {
       const cards = containerRef.current.querySelectorAll(".contact-message-card");
@@ -115,6 +138,10 @@ const AdminContactMessages = () => {
     }
   }, [loading, messages]);
 
+  /**
+   * GSAP Animation for Header and Toolbar
+   * Runs once on component mount.
+   */
   useEffect(() => {
     if (headerRef.current) {
       gsap.fromTo(headerRef.current,
@@ -130,8 +157,13 @@ const AdminContactMessages = () => {
     }
   }, []);
 
+  // Total count of unread messages currently in state
   const unreadCount = messages.filter((m) => m.unread).length;
 
+  /**
+   * Filter and Search Logic
+   * Filters the messages based on the search term and current filter status.
+   */
   const filteredMessages = messages.filter((msg) => {
     const matchesSearch =
       msg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -145,6 +177,10 @@ const AdminContactMessages = () => {
     return true;
   });
 
+  /**
+   * Handles message deletion with a confirmation dialog.
+   * @param {Object} msg - The message object to delete.
+   */
   const handleDelete = async (msg) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -172,6 +208,7 @@ const AdminContactMessages = () => {
         timer: 1500,
         showConfirmButton: false,
       });
+      // Refresh the current page after deletion
       fetchMessages(pagination.currentPage);
     } catch (err) {
       Swal.fire("Error", err.message || "Failed to delete message", "error");
@@ -180,10 +217,12 @@ const AdminContactMessages = () => {
 
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
         <div className="contact-messages-container">
+          {/* Header Section */}
           <div className="contact-messages-header" ref={headerRef}>
             <div>
               <h1>Contact Messages</h1>
@@ -191,6 +230,7 @@ const AdminContactMessages = () => {
             </div>
           </div>
 
+          {/* Toolbar: Search and Filters */}
           <div className="contact-toolbar-card" ref={toolbarRef}>
             <div className="contact-toolbar-inner">
               <div className="contact-messages-search">
@@ -226,6 +266,7 @@ const AdminContactMessages = () => {
             </div>
           </div>
 
+          {/* Messages List Area */}
           {loading ? (
             <div className="contact-messages-list">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -296,6 +337,7 @@ const AdminContactMessages = () => {
             </div>
           )}
 
+          {/* Pagination Footer */}
           {!loading && messages.length > 0 && (
             <div className="table-footer-contacts">
               <div className="table-summary-contacts">
@@ -310,6 +352,7 @@ const AdminContactMessages = () => {
           )}
         </div>
 
+        {/* View Details Modal overlay */}
         {modalState.view && modalState.selectedId && (
           <ViewContactModal
             isOpen={modalState.view}
