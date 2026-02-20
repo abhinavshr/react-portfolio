@@ -9,7 +9,10 @@ import EditCertificateModal from "./EditCertificateModal";
 import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 
-/* ------------ SKELETON CARD ------------ */
+/**
+ * SkeletonCertificateCard component
+ * Displays a loading state for individual certificate cards.
+ */
 const SkeletonCertificateCard = () => (
   <div className="certificate-card skeleton-certificate">
     <div className="certificate-top">
@@ -32,19 +35,29 @@ const SkeletonCertificateCard = () => (
   </div>
 );
 
+/**
+ * AdminCertificates Component
+ * This is the main management page for personal certificates and professional achievements.
+ * It provides functionality for viewing, adding, editing, and deleting certificates.
+ */
 const AdminCertificates = () => {
-  const [active, setActive] = useState("Certificates");
-  const [certificates, setCertificates] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // --- State Management ---
+  const [active, setActive] = useState("Certificates"); // Sidebar active state
+  const [certificates, setCertificates] = useState([]); // List of certificates
+  const [loading, setLoading] = useState(true); // Loading state for data fetching
+
+  // --- Animation Refs ---
   const containerRef = useRef(null);
   const headerRef = useRef(null);
 
+  // --- Modal Management State ---
   const [modalState, setModalState] = useState({
     add: false,
     edit: false,
     selectedId: null,
   });
 
+  // --- Pagination State ---
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -53,11 +66,16 @@ const AdminCertificates = () => {
     to: 0,
   });
 
+  /**
+   * Fetches certificates from the service for a specific page.
+   * @param {number} page - The page number to fetch.
+   */
   const fetchCertificates = useCallback(async (page = 1) => {
     try {
       setLoading(true);
       const res = await viewAllCertificates(page);
       setCertificates(res.data || []);
+
       if (res.pagination) {
         const { current_page, last_page, total, from, to } = res.pagination;
         setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
@@ -76,11 +94,15 @@ const AdminCertificates = () => {
     }
   }, []);
 
+  // Initial data fetch on mount
   useEffect(() => {
     fetchCertificates();
   }, [fetchCertificates]);
 
-  // GSAP Entrance Animation
+  /**
+   * GSAP Entrance Animation for Certificate Cards
+   * Triggers whenever the load is finished and data is present.
+   */
   useEffect(() => {
     if (!loading && certificates.length > 0) {
       const cards = containerRef.current.querySelectorAll(".certificate-card");
@@ -103,6 +125,9 @@ const AdminCertificates = () => {
     }
   }, [loading, certificates]);
 
+  /**
+   * Header entrance animation with GSAP
+   */
   useEffect(() => {
     if (headerRef.current) {
       gsap.fromTo(headerRef.current,
@@ -112,6 +137,11 @@ const AdminCertificates = () => {
     }
   }, []);
 
+  /**
+   * Handles the deletion of a single certificate.
+   * Prompts user with a confirmation dialog before proceeding.
+   * @param {Object} cert - The certificate object to delete.
+   */
   const handleDelete = async (cert) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -139,6 +169,7 @@ const AdminCertificates = () => {
         timer: 1500,
         showConfirmButton: false,
       });
+      // Refresh current page list
       fetchCertificates(pagination.currentPage);
     } catch (error) {
       Swal.fire("Error", error.message || "Failed to delete certificate", "error");
@@ -147,10 +178,12 @@ const AdminCertificates = () => {
 
   return (
     <div className="admin-layout">
+      {/* Sidebar navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
         <div className="certificates-container">
+          {/* Dashboard Header */}
           <div className="certificates-header" ref={headerRef}>
             <div>
               <h1>Certificates</h1>
@@ -164,7 +197,7 @@ const AdminCertificates = () => {
             </button>
           </div>
 
-          {/* ---------- SKELETON ---------- */}
+          {/* Skeleton loading display */}
           {loading && (
             <div className="certificates-grid">
               {Array.from({ length: 6 }).map((_, i) => (
@@ -173,7 +206,7 @@ const AdminCertificates = () => {
             </div>
           )}
 
-          {/* ---------- REAL GRID ---------- */}
+          {/* Certificate grid display */}
           {!loading && (
             <div className="certificates-grid" ref={containerRef}>
               {certificates.length === 0 && (
@@ -240,6 +273,7 @@ const AdminCertificates = () => {
             </div>
           )}
 
+          {/* Pagination Controls */}
           {!loading && certificates.length > 0 && (
             <div className="table-footer-certificates">
               <div className="table-summary-certificates">
@@ -254,6 +288,7 @@ const AdminCertificates = () => {
           )}
         </div>
 
+        {/* Action Modals */}
         {modalState.add && (
           <AddCertificateModal
             onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
