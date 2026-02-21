@@ -5,6 +5,18 @@ import "../../../css/admin/softskills/AddSoftSkillModal.css";
 import { addSoftSkill } from "../../../services/softSkillService";
 import { gsap } from "gsap";
 
+/**
+ * AddSoftSkillModal Component
+ * 
+ * Provides a modal interface to create a new soft skill entry.
+ * Includes form validation, proficiency level management, and GSAP animations.
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Controls the visibility of the modal.
+ * @param {Function} props.onClose - Callback function to close the modal.
+ * @param {Function} props.onSkillAdded - Callback function triggered after a skill is successfully added.
+ * @returns {JSX.Element|null} The rendered modal or null if not open.
+ */
 const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -13,6 +25,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  // Manage modal animations and body scroll lock
   useEffect(() => {
     if (isOpen) {
       gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
@@ -32,6 +45,9 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
   if (!isOpen) return null;
 
+  /**
+   * Closes the modal with a fade-out animation.
+   */
   const handleClose = () => {
     gsap.to(modalRef.current, {
       opacity: 0,
@@ -43,15 +59,24 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   };
 
+  /**
+   * Resets form fields to their initial state.
+   */
   const resetForm = () => {
     setName("");
     setDescription("");
     setLevel(50);
   };
 
+  /**
+   * Handles form submission to add a new soft skill.
+   * 
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Basic validation
     if (!name.trim() || !description.trim()) {
       Swal.fire("Warning", "Name and description are required.", "warning");
       return;
@@ -142,6 +167,7 @@ const AddSoftSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
             />
           </label>
 
+          {/* Proficiency level slider for better UX */}
           <div className="softskill-level-slider-wrapper">
             <input
               type="range"
