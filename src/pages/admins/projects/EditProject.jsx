@@ -1,3 +1,9 @@
+/**
+ * @file EditProject.jsx
+ * @description Administrative interface for updating existing portfolio projects.
+ * Loads project data and allows refining its details.
+ */
+
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
@@ -10,10 +16,15 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP);
 
+/**
+ * EditProject Component
+ * @description Provides a form-based interface to modify existing project records.
+ */
 const EditProject = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  // --- State Management ---
   const [active, setActive] = useState("Projects");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +42,19 @@ const EditProject = () => {
     github_link: "",
   });
 
+  /**
+   * Helper to format API date strings to YYYY-MM-DD for input fields.
+   * @param {string} dateString - Date from API.
+   * @returns {string} Formatted date.
+   */
   const formatDate = (dateString) =>
     dateString ? new Date(dateString).toISOString().split("T")[0] : "";
 
+  // --- Data Fetching ---
+
+  /**
+   * Loads the specific project data and category list.
+   */
   const fetchProjectAndCategories = useCallback(async () => {
     try {
       setLoading(true);
@@ -54,8 +75,12 @@ const EditProject = () => {
         live_link: project.live_link || "",
         github_link: project.github_link || "",
       });
-    } catch (error) {
-      Swal.fire({ icon: "error", title: "Error", text: "Failed to load project data", error }).then(() =>
+    } catch {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load project data"
+      }).then(() =>
         navigate("/admin/projects")
       );
     } finally {
@@ -67,6 +92,12 @@ const EditProject = () => {
     fetchProjectAndCategories();
   }, [fetchProjectAndCategories]);
 
+  // --- Handlers ---
+
+  /**
+   * Updates state on field change. 
+   * Resets end_date if status is changed from completed.
+   */
   const handleChange = ({ target: { name, value } }) => {
     setForm((prev) => ({
       ...prev,
@@ -75,8 +106,15 @@ const EditProject = () => {
     }));
   };
 
+  /**
+   * Navigates back.
+   */
   const handleBackClick = () => navigate(-1);
 
+  /**
+   * Local validation rules.
+   * @returns {Object|null}
+   */
   const validateForm = () => {
     if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
@@ -90,6 +128,9 @@ const EditProject = () => {
     return null;
   };
 
+  /**
+   * Handles form submission to update the project.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setUpdating(true);
@@ -106,13 +147,14 @@ const EditProject = () => {
       Swal.fire({ icon: "success", title: "Updated", text: "Project updated successfully!" }).then(() =>
         navigate("/admin/projects")
       );
-    } catch (error) {
-      Swal.fire({ icon: "error", title: "Failed", text: error.message || "Failed to update project" });
+    } catch (err) {
+      Swal.fire({ icon: "error", title: "Failed", text: err.message || "Failed to update project" });
     } finally {
       setUpdating(false);
     }
   };
 
+  // --- Animations ---
   useGSAP(() => {
     if (!loading) {
       gsap.from(".header", {
@@ -131,6 +173,7 @@ const EditProject = () => {
     }
   }, [loading]);
 
+  // --- Loading State Render ---
   if (loading) {
     return (
       <div className="admin-layout">
@@ -142,10 +185,14 @@ const EditProject = () => {
     );
   }
 
+  // --- Main Render ---
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
+
       <main className="admin-content">
+        {/* Page Header */}
         <div className="header">
           <button className="back-btn" onClick={handleBackClick} title="Go Back">
             <ChevronLeft size={24} />
@@ -156,9 +203,11 @@ const EditProject = () => {
           </div>
         </div>
 
+        {/* Update Form Section */}
         <div className="section">
           <h2><Briefcase size={18} /> Update Details</h2>
           <form className="project-form" onSubmit={handleSubmit}>
+            {/* Name and Category Selection */}
             <div className="form-row">
               <div className="form-group">
                 <label>Project Name *</label>
@@ -175,6 +224,7 @@ const EditProject = () => {
               </div>
             </div>
 
+            {/* Status and Tech Stack Badges */}
             <div className="form-row">
               <div className="form-group">
                 <label>Status *</label>
@@ -192,6 +242,7 @@ const EditProject = () => {
               </div>
             </div>
 
+            {/* Timeline Row */}
             <div className="form-row">
               <div className="form-group">
                 <label>Start Date</label>
@@ -203,11 +254,13 @@ const EditProject = () => {
               </div>
             </div>
 
+            {/* Multi-line Description */}
             <div className="form-group">
               <label>Description *</label>
               <textarea name="description" value={form.description} onChange={handleChange} placeholder="Enter project description" required rows="6" />
             </div>
 
+            {/* External Repository/Live Links */}
             <div className="form-row">
               <div className="form-group">
                 <label>Live URL</label>
@@ -219,6 +272,7 @@ const EditProject = () => {
               </div>
             </div>
 
+            {/* Form Actions */}
             <div className="action-buttons">
               <button className="create-btn" type="submit" disabled={updating}>
                 {updating ? (
@@ -237,3 +291,4 @@ const EditProject = () => {
 };
 
 export default EditProject;
+

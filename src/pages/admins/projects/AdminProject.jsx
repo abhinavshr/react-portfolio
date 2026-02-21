@@ -1,3 +1,9 @@
+/**
+ * @file AdminProject.jsx
+ * @description Administrative dashboard for managing professional projects.
+ * Features search, pagination, and full CRUD operations for project entries.
+ */
+
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AdminProjects.css";
@@ -23,10 +29,16 @@ import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+/**
+ * Skeleton component for loading states.
+ */
 const Skeleton = ({ className }) => (
   <div className={`skeleton ${className || ""}`} />
 );
 
+/**
+ * SkeletonRow component for table loading states.
+ */
 const SkeletonRow = () => (
   <tr>
     {Array.from({ length: 7 }).map((_, i) => (
@@ -37,7 +49,12 @@ const SkeletonRow = () => (
   </tr>
 );
 
+/**
+ * AdminProjects Main Component
+ * @description Manages the project list with filtering and administrative actions.
+ */
 const AdminProjects = () => {
+  // --- State Management ---
   const [active, setActive] = useState("Projects");
   const [search, setSearch] = useState("");
   const [projects, setProjects] = useState([]);
@@ -55,6 +72,7 @@ const AdminProjects = () => {
 
   const navigate = useNavigate();
 
+  // Mapping of status keys to CSS class names
   const statusColors = useMemo(
     () => ({
       active: "status-active",
@@ -65,6 +83,12 @@ const AdminProjects = () => {
     []
   );
 
+  // --- Data Fetching ---
+
+  /**
+   * Fetches projects from the API with pagination.
+   * @param {number} page - The page number to fetch.
+   */
   const fetchProjects = useCallback(async (page = 1) => {
     setLoading(true);
     try {
@@ -84,10 +108,17 @@ const AdminProjects = () => {
     }
   }, []);
 
+  // Initial load
   useEffect(() => {
     fetchProjects();
   }, [fetchProjects]);
 
+  // --- Handlers ---
+
+  /**
+   * Fetches and displays project details in a modal.
+   * @param {number|string} id - Project ID.
+   */
   const handleViewProject = async (id) => {
     try {
       const response = await viewProjectById(id);
@@ -98,6 +129,11 @@ const AdminProjects = () => {
     }
   };
 
+  /**
+   * Deletes a project with confirmation dialog.
+   * @param {number|string} id - Project ID.
+   * @param {string} title - Project title for the confirmation message.
+   */
   const handleDeleteProject = async (id, title) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -129,6 +165,11 @@ const AdminProjects = () => {
     }
   };
 
+  // --- Transformation ---
+
+  /**
+   * Filtered list of projects based on search query.
+   */
   const filteredProjects = useMemo(
     () =>
       projects.filter(
@@ -143,6 +184,7 @@ const AdminProjects = () => {
     [projects, search]
   );
 
+  // --- Animations ---
   useGSAP(() => {
     if (!loading) {
       const tl = gsap.timeline({
@@ -172,11 +214,15 @@ const AdminProjects = () => {
     }
   }, { dependencies: [loading], scope: containerRef });
 
+  // --- Render ---
   return (
     <div className="admin-layout" ref={containerRef}>
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
+
       <main className="admin-content">
         <div className="projects-container">
+          {/* Header Section */}
           <div className="projects-header">
             <div>
               <div className="title-with-icon">
@@ -193,6 +239,7 @@ const AdminProjects = () => {
             </button>
           </div>
 
+          {/* Search/Filtering Section */}
           <div className="search-card">
             <div className="search-wrapper">
               <Search className="search-icon" size={18} />
@@ -205,6 +252,7 @@ const AdminProjects = () => {
             </div>
           </div>
 
+          {/* Projects Table Section */}
           <div className="table-card">
             {loading ? (
               <div className="table-responsive">
@@ -227,6 +275,7 @@ const AdminProjects = () => {
                 </table>
               </div>
             ) : filteredProjects.length === 0 ? (
+              /* Empty State */
               <div className="empty-state">
                 <Layout size={48} className="empty-icon" />
                 <h3>No projects found</h3>
@@ -239,6 +288,7 @@ const AdminProjects = () => {
                 </button>
               </div>
             ) : (
+              /* Data Table */
               <div className="table-responsive">
                 <table>
                   <thead>
@@ -322,6 +372,7 @@ const AdminProjects = () => {
                   </tbody>
                 </table>
 
+                {/* Pagination and Summary */}
                 <div className="table-footer">
                   <div className="table-summary">
                     Showing <span>{pagination.from || 0}</span> to <span>{pagination.to || 0}</span> of <span>{pagination.total}</span> projects
@@ -337,6 +388,7 @@ const AdminProjects = () => {
           </div>
         </div>
 
+        {/* Detail Modal Integration */}
         {showModal && selectedProject && (
           <ViewProjectModal
             project={selectedProject}
@@ -350,3 +402,4 @@ const AdminProjects = () => {
 };
 
 export default AdminProjects;
+
