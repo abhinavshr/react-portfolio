@@ -6,6 +6,20 @@ import { addSkill } from "../../../services/skillService";
 import "../../../css/admin/skills/AddSkillModal.css";
 import { gsap } from "gsap";
 
+/**
+ * AddSkillModal Component
+ * 
+ * Provides a modal interface to create new technical skills.
+ * Features:
+ * - Skill name and category selection
+ * - Proficiency level slider (0-100%)
+ * - GSAP-powered animations for appearance/disappearance
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Visibility toggle
+ * @param {Function} props.onClose - Modal close handler
+ * @param {Function} props.onSkillAdded - Callback after successful addition
+ */
 const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const [form, setForm] = useState({ name: "", level: 50, category: null });
   const [categories, setCategories] = useState([]);
@@ -13,6 +27,9 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  /**
+   * Fetches available categories for the skill from the project service.
+   */
   const loadCategories = useCallback(async () => {
     try {
       setLoadingCategories(true);
@@ -26,6 +43,7 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
     }
   }, []);
 
+  // Handle modal lifecycle and animations
   useEffect(() => {
     if (isOpen) {
       loadCategories();
@@ -46,10 +64,16 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
 
   if (!isOpen) return null;
 
+  /**
+   * Updates specific form fields.
+   */
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  /**
+   * Closes the modal with a smooth exit animation.
+   */
   const handleClose = () => {
     gsap.to(modalRef.current, {
       opacity: 0,
@@ -61,6 +85,9 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   };
 
+  /**
+   * Submits the new skill to the backend.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.category) return;
@@ -120,6 +147,7 @@ const AddSkillModal = ({ isOpen, onClose, onSkillAdded }) => {
             />
           </label>
 
+          {/* Proficiency Slider UX */}
           <div className="level-slider-wrapper">
             <input
               type="range"

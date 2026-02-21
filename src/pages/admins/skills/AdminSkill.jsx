@@ -11,6 +11,9 @@ import { gsap } from "gsap";
 
 const PER_SKILL_PAGE = 6;
 
+/**
+ * Skeleton component for skill cards to show during initial data load.
+ */
 const SkeletonSkillCard = () => (
   <div className="skill-card skeleton-skill">
     <div className="skeleton-pulse title" />
@@ -22,6 +25,12 @@ const SkeletonSkillCard = () => (
   </div>
 );
 
+/**
+ * AdminSkill Component
+ * 
+ * Manages the technical skills section of the admin dashboard.
+ * Categorizes skills (e.g., Frontend, Backend) and provides CRUD operations.
+ */
 const AdminSkill = () => {
   const [active, setActive] = useState("Skills");
   const [categories, setCategories] = useState([]);
@@ -29,6 +38,8 @@ const AdminSkill = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedSkillId, setSelectedSkillId] = useState(null);
+
+  // Pagination for categories and nested skills
   const [categoryPagination, setCategoryPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -38,6 +49,9 @@ const AdminSkill = () => {
   const [skillPagination, setSkillPagination] = useState({});
   const containerRef = useRef(null);
 
+  /**
+   * Fetches skills grouped by categories.
+   */
   const fetchSkills = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -58,10 +72,12 @@ const AdminSkill = () => {
     }
   }, []);
 
+  // Initial load
   useEffect(() => {
     fetchSkills(1);
   }, [fetchSkills]);
 
+  // Entrance animations for skill cards
   useEffect(() => {
     if (!loading && categories.length > 0) {
       gsap.fromTo(
@@ -79,6 +95,9 @@ const AdminSkill = () => {
     }
   }, [loading, categories]);
 
+  /**
+   * Handles individual skill deletion with confirmation.
+   */
   const handleDelete = useCallback(
     async (skillId, skillName) => {
       const result = await Swal.fire({
@@ -112,6 +131,9 @@ const AdminSkill = () => {
     [fetchSkills, categoryPagination.currentPage]
   );
 
+  /**
+   * Logic for client-side pagination of skills within a category.
+   */
   const getPaginatedSkills = useCallback(
     (category) => {
       const skills = category.skills || [];
@@ -149,6 +171,7 @@ const AdminSkill = () => {
           </button>
         </div>
 
+        {/* Global Add Skill Modal */}
         <AddSkillModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
@@ -173,6 +196,7 @@ const AdminSkill = () => {
             return (
               <div key={category.id} className="skill-card">
                 <h3 className="skill-category">
+                  {/* Dynamic Icons based on category name */}
                   {category.name === "Frontend" && <Sparkles size={20} className="text-blue-500" />}
                   {category.name === "Backend" && <Cpu size={20} className="text-blue-500" />}
                   {category.name === "Other" && <Layers size={20} className="text-blue-500" />}
@@ -231,6 +255,7 @@ const AdminSkill = () => {
                   </table>
                 </div>
 
+                {/* Local pagination for skills within this card */}
                 {totalPages > 1 && (
                   <div className="table-footer-skills">
                     <div className="table-summary-skills">
@@ -254,6 +279,7 @@ const AdminSkill = () => {
           })
         )}
 
+        {/* Global category-level pagination */}
         {categoryPagination.lastPage > 1 && (
           <div className="table-footer-skills mt-8">
             <div className="table-summary-skills">
@@ -275,6 +301,7 @@ const AdminSkill = () => {
           </div>
         )}
 
+        {/* Modal for editing existing skills */}
         {isEditModalOpen && (
           <EditSkillModal
             isOpen={isEditModalOpen}

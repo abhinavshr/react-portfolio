@@ -7,6 +7,21 @@ import Swal from "sweetalert2";
 import "../../../css/admin/skills/AddSkillModal.css";
 import { gsap } from "gsap";
 
+/**
+ * EditSkillModal Component
+ * 
+ * Provides a modal interface to modify existing technical skills.
+ * Features:
+ * - Pre-loads current skill data based on skillId
+ * - Updates name, proficiency level, and category
+ * - GSAP animations for smooth transition
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Controls modal visibility
+ * @param {Function} props.onClose - Modal close handler
+ * @param {number|string} props.skillId - ID of the skill to edit
+ * @param {Function} props.onSkillUpdated - Success callback
+ */
 const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const [form, setForm] = useState({ name: "", level: 50, category: null });
   const [categories, setCategories] = useState([]);
@@ -15,6 +30,9 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  /**
+   * Fetches skill categories from the database.
+   */
   const loadCategories = useCallback(async () => {
     try {
       setLoadingCategories(true);
@@ -37,6 +55,9 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
     }
   }, []);
 
+  /**
+   * Loads the existing skill details to populate the form.
+   */
   const loadSkill = useCallback(async () => {
     if (!skillId) return;
     try {
@@ -60,6 +81,7 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
     }
   }, [skillId]);
 
+  // Modal initialization and animations
   useEffect(() => {
     if (isOpen) {
       loadCategories();
@@ -81,6 +103,9 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
 
   if (!isOpen) return null;
 
+  /**
+   * Exit animation handler before closing.
+   */
   const handleClose = () => {
     gsap.to(modalRef.current, {
       opacity: 0,
@@ -92,10 +117,16 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   };
 
+  /**
+   * Updates local form state.
+   */
   const handleChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  /**
+   * Submits the updated skill data.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim() || !form.category) {
@@ -143,6 +174,7 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
         <p className="modal-subtitle">Refine the details of your technical expertise</p>
 
         {loadingSkill ? (
+          // Loading spinner for fetching specific skill data
           <div className="flex items-center justify-center p-12 text-blue-500">
             <Loader2 className="animate-spin" size={32} />
           </div>
@@ -172,6 +204,7 @@ const EditSkillModal = ({ isOpen, onClose, skillId, onSkillUpdated }) => {
               />
             </label>
 
+            {/* Range slider for proficiency */}
             <div className="level-slider-wrapper">
               <input
                 type="range"
