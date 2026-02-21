@@ -11,7 +11,10 @@ import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-/* ------------------ SKELETON CARD ------------------ */
+/**
+ * SkeletonExperienceCard component
+ * Renders a placeholder card while experience data is loading.
+ */
 const SkeletonExperienceCard = () => {
   return (
     <div className="experience-card skeleton-experience">
@@ -37,13 +40,20 @@ const SkeletonExperienceCard = () => {
   );
 };
 
+/**
+ * AdminExperience Component
+ * Manages the display and administration of work experience entries.
+ * Features: Pagination, CRUD operations (via modals), and GSAP-powered animations.
+ */
 const AdminExperience = () => {
-  const [active, setActive] = useState("Experience");
-  const [experiences, setExperiences] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // --- State Management ---
+  const [active, setActive] = useState("Experience"); // Active sidebar menu item
+  const [experiences, setExperiences] = useState([]); // List of work experiences
+  const [loading, setLoading] = useState(true); // Loading state for API calls
 
-  const containerRef = useRef(null);
+  const containerRef = useRef(null); // Ref for GSAP animation scope
 
+  // --- Modal Visibility State ---
   const [modalState, setModalState] = useState({
     add: false,
     view: false,
@@ -51,6 +61,7 @@ const AdminExperience = () => {
     selectedId: null,
   });
 
+  // --- Pagination State ---
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -59,6 +70,10 @@ const AdminExperience = () => {
     to: 0,
   });
 
+  /**
+   * Fetches work experience records from the server.
+   * @param {number} page - The page number to retrieve.
+   */
   const fetchExperiences = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -73,10 +88,15 @@ const AdminExperience = () => {
     }
   }, []);
 
+  // Initial data load
   useEffect(() => {
     fetchExperiences();
   }, [fetchExperiences]);
 
+  /**
+   * GSAP entrance animation for experience cards.
+   * Triggers when the loader hides and data is available.
+   */
   useGSAP(() => {
     if (!loading && experiences.length > 0) {
       gsap.fromTo(
@@ -94,6 +114,9 @@ const AdminExperience = () => {
     }
   }, { scope: containerRef, dependencies: [loading, experiences] });
 
+  /**
+   * Handles scroll lock and positioning when modals are active.
+   */
   useEffect(() => {
     const content = document.querySelector(".admin-content");
 
@@ -111,6 +134,11 @@ const AdminExperience = () => {
     };
   }, [modalState]);
 
+  /**
+   * Orchestrates the deletion of an experience entry.
+   * Includes optimistic UI update and background re-sync.
+   * @param {Object} exp - The experience object to delete.
+   */
   const handleDelete = async (exp) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -136,15 +164,14 @@ const AdminExperience = () => {
           showConfirmButton: false,
         });
 
-        // Re-fetch to sync pagination if needed, but not strictly necessary for visual if we are okay with count being off until next page load
-        // But let's fetch silently without setting loading to true to avoid layout shift
+        // Silently re-sync data to ensure pagination consistency
         const response = await viewAllExperiences(pagination.currentPage);
         const { data, current_page, last_page, total, from, to } = response.data;
         setExperiences(data || []);
         setPagination({ currentPage: current_page, lastPage: last_page, total, from, to });
 
       } catch (error) {
-        // Revert on error
+        // Revert UI to previous state on failure
         fetchExperiences(pagination.currentPage);
         Swal.fire("Error", error.message || "Failed to delete experience", "error");
       }
@@ -153,10 +180,12 @@ const AdminExperience = () => {
 
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
         <div className="experience-container" ref={containerRef}>
+          {/* Main Header */}
           <div className="experience-header">
             <div>
               <h1>Experience</h1>
@@ -170,16 +199,14 @@ const AdminExperience = () => {
             </button>
           </div>
 
-          {/* ---------- SKELETON LOADING ---------- */}
+          {/* Conditional Rendering: Loading, Empty, or Data */}
           {loading &&
             Array.from({ length: 5 }).map((_, i) => (
               <SkeletonExperienceCard key={i} />
             ))}
 
-          {/* ---------- EMPTY ---------- */}
-          {!loading && experiences.length === 0 && <p>No experiences found.</p>}
+          {!loading && experiences.length === 0 && <p className="no-data">No experiences found.</p>}
 
-          {/* ---------- REAL DATA ---------- */}
           {!loading &&
             experiences.map((exp) => (
               <div key={exp.id} className="experience-card">
@@ -194,6 +221,7 @@ const AdminExperience = () => {
                       onClick={() =>
                         setModalState({ view: true, selectedId: exp.id, add: false, edit: false })
                       }
+                      title="View Details"
                     >
                       <Eye size={18} />
                     </button>
@@ -202,10 +230,15 @@ const AdminExperience = () => {
                       onClick={() =>
                         setModalState({ edit: true, selectedId: exp.id, add: false, view: false })
                       }
+                      title="Edit Experience"
                     >
                       <Edit size={18} />
                     </button>
-                    <button className="icon-btn delete" onClick={() => handleDelete(exp)}>
+                    <button
+                      className="icon-btn delete"
+                      onClick={() => handleDelete(exp)}
+                      title="Delete Experience"
+                    >
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -239,6 +272,7 @@ const AdminExperience = () => {
               </div>
             ))}
 
+          {/* Pagination Footer */}
           {!loading && experiences.length > 0 && (
             <div className="table-footer-experience">
               <div className="table-summary-experience">
@@ -253,6 +287,7 @@ const AdminExperience = () => {
           )}
         </div>
 
+        {/* Modals for Adding, Viewing, and Editing */}
         <AddExperienceModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
