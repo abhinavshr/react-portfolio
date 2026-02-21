@@ -1,3 +1,9 @@
+/**
+ * @file AddProjectImage.jsx
+ * @description Component for uploading new project images/artifacts.
+ * Features drag-and-drop support, project selection, and real-time image preview.
+ */
+
 import React, { useEffect, useState, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +13,12 @@ import { fetchProjectsDropdown, uploadProjectImage } from "../../../services/pro
 import Swal from "sweetalert2";
 import gsap from "gsap";
 
+/**
+ * AddProjectImage Component
+ * @description Provides a form-based interface for adding new visual artifacts to specific projects.
+ */
 const AddProjectImage = () => {
+  // --- State Management ---
   const [active, setActive] = useState("Project Images");
   const [form, setForm] = useState({ project_id: "", image_name: "", image: null });
   const [preview, setPreview] = useState(null);
@@ -19,7 +30,12 @@ const AddProjectImage = () => {
   const containerRef = useRef(null);
   const cardRef = useRef(null);
 
+  // --- Side Effects ---
+
   useEffect(() => {
+    /**
+     * Loads the list of projects for the dropdown selection.
+     */
     const loadProjects = async () => {
       try {
         const res = await fetchProjectsDropdown();
@@ -36,7 +52,7 @@ const AddProjectImage = () => {
     };
     loadProjects();
 
-    // Animations
+    // Entry animations for the header and form card
     gsap.fromTo(
       containerRef.current,
       { opacity: 0, x: -20 },
@@ -49,17 +65,26 @@ const AddProjectImage = () => {
     );
   }, []);
 
+  // --- Form Handlers ---
 
+  /**
+   * Handles generic input changes and file selection.
+   * @param {React.ChangeEvent} e - The change event.
+   */
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files?.[0]) {
       setForm((prev) => ({ ...prev, image: files[0] }));
-      setPreview(URL.createObjectURL(files[0]));
+      setPreview(URL.createObjectURL(files[0])); // Generate local preview URL
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  /**
+   * Handles file drop events in the upload area.
+   * @param {React.DragEvent} e - The drag/drop event.
+   */
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -69,9 +94,14 @@ const AddProjectImage = () => {
     }
   };
 
+  /**
+   * Submits the form data to the server.
+   * @param {React.FormEvent} e - The form submission event.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validation
     if (!form.project_id || !form.image || !form.image_name) {
       Swal.fire({
         icon: "warning",
@@ -109,15 +139,19 @@ const AddProjectImage = () => {
     }
   };
 
-
+  // --- Render ---
   return (
     <div className="add-project-image-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
+
       <main className="add-project-image-content">
+        {/* Page Header */}
         <div className="add-project-image-header" ref={containerRef}>
           <button
             className="add-project-image-back-btn"
             onClick={() => navigate(-1)}
+            aria-label="Go back"
           >
             <ChevronLeft size={24} />
           </button>
@@ -127,8 +161,10 @@ const AddProjectImage = () => {
           </div>
         </div>
 
+        {/* Upload Form Card */}
         <div className="add-project-image-card" ref={cardRef}>
           <form onSubmit={handleSubmit}>
+            {/* Project Selection */}
             <div className="add-project-image-group">
               <label>
                 <Briefcase size={16} color="#6366f1" />
@@ -151,6 +187,7 @@ const AddProjectImage = () => {
               </select>
             </div>
 
+            {/* Image Name/Label */}
             <div className="add-project-image-group">
               <label>
                 <Tag size={16} color="#6366f1" />
@@ -165,6 +202,7 @@ const AddProjectImage = () => {
               />
             </div>
 
+            {/* Asset Upload Area */}
             <div className="add-project-image-group">
               <label>
                 <ImageIcon size={16} color="#6366f1" />
@@ -200,12 +238,14 @@ const AddProjectImage = () => {
               </div>
             </div>
 
+            {/* Selection Preview */}
             {preview && (
               <div className="add-project-image-preview">
                 <img src={preview} alt="Asset Preview" />
               </div>
             )}
 
+            {/* Form Actions */}
             <div className="add-project-image-actions">
               <button type="submit" disabled={loading}>
                 {loading ? "Processing..." : "Publish to Gallery"}
@@ -226,3 +266,4 @@ const AddProjectImage = () => {
 };
 
 export default AddProjectImage;
+
