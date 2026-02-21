@@ -1,3 +1,8 @@
+/**
+ * @file ViewProjectModal.jsx
+ * @description Modal component for displaying comprehensive project details in a read-only format.
+ */
+
 import React, { useRef } from "react";
 import {
   X,
@@ -13,10 +18,20 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import "../../../css/admin/ViewProjectModal.css";
 
+/**
+ * ViewProjectModal Component
+ * @description A premium modal that overlays the project dashboard to show deep-dive information.
+ * 
+ * @param {Object} props
+ * @param {boolean} props.isOpen - Whether the modal is visible.
+ * @param {Function} props.onClose - Triggered when the user requests to dismiss.
+ * @param {Object} props.project - The project data object to visualize.
+ */
 const ViewProjectModal = ({ isOpen, onClose, project }) => {
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
+  // --- Animations ---
   useGSAP(() => {
     if (isOpen) {
       gsap.from(overlayRef.current, {
@@ -35,6 +50,13 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
 
   if (!isOpen || !project) return null;
 
+  // --- Utility Functions ---
+
+  /**
+   * Formats a date string for display.
+   * @param {string} dateStr - Raw date string.
+   * @param {string} fallback - String to show if date is missing.
+   */
   const formatDate = (dateStr, fallback = "-") => {
     if (!dateStr) return fallback;
     return new Date(dateStr).toLocaleDateString('en-US', {
@@ -44,6 +66,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
     });
   };
 
+  // UI helpers
   const statusColors = {
     active: "status-active",
     completed: "status-completed",
@@ -55,6 +78,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
     ? project.tech_stack.split(",").map((tech) => tech.trim())
     : [];
 
+  // --- Render ---
   return (
     <div className="project-modal-overlay" ref={overlayRef} onClick={onClose}>
       <div
@@ -62,7 +86,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Modal Header */}
+        {/* Modal Header Section */}
         <div className="project-modal-header">
           <div className="header-title">
             <div className="header-icon-box">
@@ -79,6 +103,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
         </div>
 
         <div className="project-modal-content">
+          {/* Section: Basic Identity */}
           <div className="project-section">
             <div className="section-header">
               <Info size={16} />
@@ -97,6 +122,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
           </div>
 
           <div className="project-grid-fields">
+            {/* Section: Categorization and Status */}
             <div className="project-section">
               <div className="section-header">
                 <Tag size={16} />
@@ -117,6 +143,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
               </div>
             </div>
 
+            {/* Section: Timeline and Deadlines */}
             <div className="project-section">
               <div className="section-header">
                 <Calendar size={16} />
@@ -137,6 +164,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
             </div>
           </div>
 
+          {/* Section: Technological Stack */}
           <div className="project-section">
             <div className="section-header">
               <Activity size={16} />
@@ -153,6 +181,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
             </div>
           </div>
 
+          {/* Section: Asset Links */}
           <div className="project-section no-border">
             <div className="section-header">
               <ExternalLink size={16} />
@@ -202,6 +231,7 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
           </div>
         </div>
 
+        {/* Modal Footer Section */}
         <div className="project-modal-footer">
           <button className="modal-close-action" onClick={onClose}>
             Done
@@ -213,3 +243,4 @@ const ViewProjectModal = ({ isOpen, onClose, project }) => {
 };
 
 export default ViewProjectModal;
+

@@ -1,3 +1,9 @@
+/**
+ * @file AddProject.jsx
+ * @description Administrative interface for creating new portfolio projects.
+ * Includes form validation and dynamic fields based on project status.
+ */
+
 import React, { useState, useEffect, useCallback } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import "../../../css/admin/AddProject.css";
@@ -10,7 +16,12 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP);
 
+/**
+ * AddProject Component
+ * @description Provides a comprehensive form to register new projects into the system.
+ */
 const AddProject = () => {
+  // --- State Management ---
   const [active, setActive] = useState("Projects");
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,16 +40,20 @@ const AddProject = () => {
 
   const navigate = useNavigate();
 
+  // --- Data Loading ---
+
+  /**
+   * Fetches available categories for project classification.
+   */
   const getCategories = useCallback(async () => {
     try {
       const cats = await fetchCategories();
       setCategories(cats);
-    } catch (error) {
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error",
         text: "Failed to load categories",
-        error
       });
     }
   }, []);
@@ -47,6 +62,12 @@ const AddProject = () => {
     getCategories();
   }, [getCategories]);
 
+  // --- Handlers ---
+
+  /**
+   * Updates form state on input change.
+   * Handles conditional logic for end_date based on status.
+   */
   const handleChange = ({ target: { name, value } }) => {
     setForm((prev) => ({
       ...prev,
@@ -55,8 +76,15 @@ const AddProject = () => {
     }));
   };
 
+  /**
+   * Navigates back to the previous page.
+   */
   const handleBackClick = () => navigate(-1);
 
+  /**
+   * Validates form inputs before submission.
+   * @returns {Object|null} Error object if validation fails, else null.
+   */
   const validateForm = () => {
     if (!form.title || !form.category_id || !form.tech_stack || !form.description) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
@@ -70,6 +98,10 @@ const AddProject = () => {
     return null;
   };
 
+  /**
+   * Handles form submission and project creation.
+   * @param {Event} e - Form submission event.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -91,6 +123,7 @@ const AddProject = () => {
     }
   };
 
+  // --- Animations ---
   useGSAP(() => {
     gsap.from(".header", {
       x: -30,
@@ -107,10 +140,14 @@ const AddProject = () => {
     });
   }, []);
 
+  // --- Render ---
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
+
       <main className="admin-content">
+        {/* Header Section */}
         <div className="header">
           <button className="back-btn" onClick={handleBackClick} title="Go Back">
             <ChevronLeft size={24} />
@@ -121,9 +158,11 @@ const AddProject = () => {
           </div>
         </div>
 
+        {/* Form Section */}
         <div className="section">
           <h2><Briefcase size={18} /> Project Details</h2>
           <form className="project-form" onSubmit={handleSubmit}>
+            {/* Project Title and Category */}
             <div className="form-row">
               <div className="form-group">
                 <label>Project Name *</label>
@@ -140,6 +179,7 @@ const AddProject = () => {
               </div>
             </div>
 
+            {/* Status and Tech Stack */}
             <div className="form-row">
               <div className="form-group">
                 <label>Status *</label>
@@ -157,6 +197,7 @@ const AddProject = () => {
               </div>
             </div>
 
+            {/* Timeline Selection */}
             <div className="form-row">
               <div className="form-group">
                 <label>Start Date</label>
@@ -168,11 +209,13 @@ const AddProject = () => {
               </div>
             </div>
 
+            {/* Project Description */}
             <div className="form-group">
               <label>Description *</label>
               <textarea name="description" value={form.description} onChange={handleChange} placeholder="Enter project description" required />
             </div>
 
+            {/* External Links */}
             <div className="form-row">
               <div className="form-group">
                 <label>Live URL</label>
@@ -184,6 +227,7 @@ const AddProject = () => {
               </div>
             </div>
 
+            {/* Submission Actions */}
             <div className="action-buttons">
               <button className="create-btn" type="submit" disabled={loading}>
                 {loading ? (
@@ -202,3 +246,4 @@ const AddProject = () => {
 };
 
 export default AddProject;
+
