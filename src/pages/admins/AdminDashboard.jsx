@@ -17,6 +17,10 @@ import { motion as Motion, AnimatePresence, useMotionValue, useTransform, animat
 
 // -- Helper Components & Constants --
 
+/**
+ * Framer Motion transition variants for the main content container.
+ * Implements staggered entrance for children items.
+ */
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -27,6 +31,9 @@ const containerVariants = {
   },
 };
 
+/**
+ * Entrance animation for individual dashboard items (cards, headers).
+ */
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
@@ -40,12 +47,22 @@ const itemVariants = {
   },
 };
 
+/**
+ * AnimatedNumber Component
+ * 
+ * Provides a high-performance counting animation for numeric values
+ * using Framer Motion's useMotionValue and animate.
+ * 
+ * @param {Object} props
+ * @param {number|string} props.value - The final number to animate to.
+ */
 const AnimatedNumber = ({ value }) => {
   const count = useMotionValue(0);
   const rounded = useTransform(count, (latest) => Math.round(latest));
 
   useEffect(() => {
     const end = parseInt(value, 10) || 0;
+    // Animate from current to target over 1 second
     const controls = animate(count, end, { duration: 1 });
     return controls.stop;
   }, [value, count]);
@@ -53,22 +70,36 @@ const AnimatedNumber = ({ value }) => {
   return <Motion.span>{rounded}</Motion.span>;
 };
 
-// -- Main Component --
-
+/**
+ * AdminDashboard Component
+ * 
+ * The main administration hub. Aggregates data from various services
+ * to provide a high-level overview of portfolio content and interactions.
+ * 
+ * @returns {JSX.Element} The rendered dashboard.
+ */
 const AdminDashboard = () => {
+  // --- UI State ---
   const [active, setActive] = useState("Dashboard");
   const [loading, setLoading] = useState(true);
 
+  // --- Statistics State ---
   const [totalProjects, setTotalProjects] = useState(0);
   const [totalSkills, setTotalSkills] = useState(0);
   const [totalExperience, setTotalExperience] = useState(0);
   const [totalCertificates, setTotalCertificates] = useState(0);
   const [totalContacts, setTotalContacts] = useState(0);
+
+  // --- Recent Data Lists ---
   const [recentProjects, setRecentProjects] = useState([]);
   const [recentContacts, setRecentContacts] = useState([]);
 
   const navigate = useNavigate();
 
+  /**
+   * Orchestrates the fetching of all dashboard metrics in parallel.
+   * Handles API response variations to ensure robust data mapping.
+   */
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -90,12 +121,14 @@ const AdminDashboard = () => {
           getRecentContacts(),
         ]);
 
+        // Mapping responses based on API structure (handling nested 'data' wrappers where present)
         setTotalProjects(projectsRes.data?.total_projects || projectsRes.total_projects || 0);
         setTotalSkills(skillsRes.data?.grand_total || 0);
         setTotalExperience(experienceRes.years_of_experience || 0);
         setTotalCertificates(certificatesRes.data?.total_certificates || 0);
         setTotalContacts(contactsRes.data?.total_contacts || 0);
 
+        // Setting recent data arrays with fallback to empty arrays
         setRecentProjects(
           Array.isArray(recentProjectsRes.projects) ? recentProjectsRes.projects : []
         );
@@ -103,7 +136,7 @@ const AdminDashboard = () => {
           Array.isArray(recentContactsRes.data) ? recentContactsRes.data : []
         );
       } catch (error) {
-        console.error("Failed to fetch dashboard stats", error);
+        console.error("Dashboard: All-Stats fetch failed", error);
       } finally {
         setLoading(false);
       }
@@ -112,6 +145,10 @@ const AdminDashboard = () => {
     fetchStats();
   }, []);
 
+  /**
+   * Configuration for the top metric cards.
+   * Centralizing this allows for easy additions or reordering.
+   */
   const stats = [
     {
       title: "Projects",
@@ -162,6 +199,7 @@ const AdminDashboard = () => {
       <main className="admin-content">
         <AnimatePresence mode="wait">
           {loading ? (
+            /* Loading State: Atom Indicator */
             <Motion.div
               key="loader"
               initial={{ opacity: 0 }}
@@ -172,19 +210,20 @@ const AdminDashboard = () => {
               <Atom color="#4f46e5" size="medium" text="" textColor="" />
             </Motion.div>
           ) : (
+            /* Main Content State */
             <Motion.div
               key="content"
               variants={containerVariants}
               initial="hidden"
               animate="visible"
             >
-              {/* Header */}
+              {/* Dashboard Header */}
               <Motion.div className="dashboard-header" variants={itemVariants}>
                 <h1>Dashboard Overview</h1>
                 <p>Welcome back! Here's what's happening efficiently.</p>
               </Motion.div>
 
-              {/* Stats Grid */}
+              {/* Top Statistics Grid: Interactive cards for navigation */}
               <Motion.div className="stats-grid" variants={containerVariants}>
                 {stats.map((stat, index) => (
                   <Motion.div
@@ -204,9 +243,10 @@ const AdminDashboard = () => {
                 ))}
               </Motion.div>
 
+              {/* Data Detail Section: Recent activity logs */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "2rem" }}>
 
-                {/* Recent Projects */}
+                {/* Recent Projects Table Preview */}
                 <Motion.div className="card" variants={itemVariants}>
                   <div className="card-header">
                     <h2>Recent Projects</h2>
@@ -252,7 +292,7 @@ const AdminDashboard = () => {
                   </table>
                 </Motion.div>
 
-                {/* Recent Messages */}
+                {/* Recent Contact Messages Feed */}
                 <Motion.div className="card" variants={itemVariants}>
                   <div className="card-header">
                     <h2>Recent Messages</h2>
@@ -295,5 +335,6 @@ const AdminDashboard = () => {
     </div>
   );
 };
+
 
 export default AdminDashboard;

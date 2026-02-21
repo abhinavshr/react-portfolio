@@ -30,13 +30,27 @@ const Skeleton = ({ className }) => (
   <div className={`skeleton ${className || ""}`} />
 );
 
+/**
+ * AdminProfileAbout Component
+ * 
+ * Provides a comprehensive interface for managing admin profile details,
+ * including identity, basic information, portfolio statistics, and social links.
+ * Features GSAP animations, skeleton loaders, and dirty-state checking.
+ * 
+ * @returns {JSX.Element} The rendered admin profile management page.
+ */
 const AdminProfileAbout = () => {
-  const [active, setActive] = useState("Profile");
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
+  // --- UI & Content State ---
+  const [active, setActive] = useState("Profile"); // Current active sidebar item
+  const [loading, setLoading] = useState(true);   // Global loading state for initial fetch
+  const [user, setUser] = useState(null);          // Stores core user identity (name, email, photo)
 
-  const containerRef = useRef(null);
+  const containerRef = useRef(null);               // Ref for GSAP animation context
 
+  // --- Form Data States ---
+  // We keep track of both current values (for inputs) and initial values (to check for changes)
+
+  // Basic info (Title, Tagline, About Me, Phone)
   const [basicInfo, setBasicInfo] = useState({
     phone_number: "",
     professional_title: "",
@@ -45,6 +59,7 @@ const AdminProfileAbout = () => {
   });
   const [initialBasicInfo, setInitialBasicInfo] = useState(null);
 
+  // Portfolio stats (Experience years, Projects, Clients, Tech count)
   const [stats, setStats] = useState({
     years_of_experience: "",
     projects_completed: "",
@@ -53,6 +68,7 @@ const AdminProfileAbout = () => {
   });
   const [initialStats, setInitialStats] = useState(null);
 
+  // Social & Resume Links
   const [socialLinks, setSocialLinks] = useState({
     github_url: "",
     linkedin_url: "",
@@ -61,13 +77,23 @@ const AdminProfileAbout = () => {
   });
   const [initialSocialLinks, setInitialSocialLinks] = useState(null);
 
+  // --- Submission States ---
   const [savingBasic, setSavingBasic] = useState(false);
   const [savingStats, setSavingStats] = useState(false);
   const [savingSocial, setSavingSocial] = useState(false);
 
+  /**
+   * Helper function to determine if a form section has unsaved changes.
+   * Compares the current state against the initial data fetched from the API.
+   * 
+   * @param {Object} current - Current form state.
+   * @param {Object} initial - Data originally loaded from the server.
+   * @returns {boolean} True if changes exist.
+   */
   const isDirty = (current, initial) =>
     initial && Object.keys(current).some((k) => current[k] !== initial[k]);
 
+  // Memoized change detection for UI performance
   const isBasicInfoChanged = useMemo(
     () => isDirty(basicInfo, initialBasicInfo),
     [basicInfo, initialBasicInfo]
@@ -83,6 +109,10 @@ const AdminProfileAbout = () => {
     [socialLinks, initialSocialLinks]
   );
 
+  /**
+   * Fetches all profile-related data from the backend and initializes the form states.
+   * Nullish coalescing (??) is used to ensure form inputs are never uncontrolled (undefined).
+   */
   const fetchProfileAbout = async () => {
     setLoading(true);
     try {
@@ -91,6 +121,7 @@ const AdminProfileAbout = () => {
 
       setUser(response.user);
 
+      // Initialize Basic Info
       const basicData = {
         phone_number: profile.phone_number ?? "",
         professional_title: profile.professional_title ?? "",
@@ -98,6 +129,7 @@ const AdminProfileAbout = () => {
         about_me: profile.about_me ?? "",
       };
 
+      // Initialize Statistics
       const statsData = {
         years_of_experience: profile.years_of_experience ?? "",
         projects_completed: profile.projects_completed ?? "",
@@ -105,6 +137,7 @@ const AdminProfileAbout = () => {
         technologies_used: profile.technologies_used ?? "",
       };
 
+      // Initialize Social Links
       const socialData = {
         github_url: profile.github_url ?? "",
         linkedin_url: profile.linkedin_url ?? "",
@@ -112,6 +145,7 @@ const AdminProfileAbout = () => {
         twitter_url: profile.twitter_url ?? "",
       };
 
+      // Set both current and reference states
       setBasicInfo(basicData);
       setInitialBasicInfo(basicData);
 
@@ -127,10 +161,17 @@ const AdminProfileAbout = () => {
     }
   };
 
+  /**
+   * Initial mount effect to load data.
+   */
   useEffect(() => {
     fetchProfileAbout();
   }, []);
 
+  /**
+   * GSAP Animations
+   * Fires when loading state completes to animate the cards into view.
+   */
   useGSAP(() => {
     if (!loading) {
       gsap.from(".profile-card", {
@@ -150,6 +191,7 @@ const AdminProfileAbout = () => {
     }
   }, [loading]);
 
+  // --- Change Handlers (Memoized) ---
   const handleBasicChange = useCallback((e) => {
     const { name, value } = e.target;
     setBasicInfo((prev) => ({ ...prev, [name]: value }));
@@ -165,7 +207,16 @@ const AdminProfileAbout = () => {
     setSocialLinks((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  // Generic Save Handler with Animation
+  /**
+   * Generic Save Handler with Animation and Toast Feedback
+   * Orchestrates the API call, loading state management, and success/error notifications.
+   * 
+   * @param {Function} fn - The service function to call (API method).
+   * @param {Object} data - The data payload to send.
+   * @param {Function} setSaving - State setter for loading feedback.
+   * @param {Function} setInitial - State setter to update reference data upon success.
+   * @param {string} successMsg - Message to display on success.
+   */
   const handleSave = async (fn, data, setSaving, setInitial, successMsg) => {
     try {
       setSaving(true);
@@ -178,6 +229,7 @@ const AdminProfileAbout = () => {
         color: "#fff",
         confirmButtonColor: "#3b82f6"
       });
+      // Update the reference initial state so the "dirty" check resets
       setInitial(data);
     } catch (error) {
       Swal.fire({
@@ -199,6 +251,7 @@ const AdminProfileAbout = () => {
       <main className="admin-content">
         <div className="profile-container">
           {loading ? (
+            /* Skeleton Loader State */
             <>
               <div className="profile-header skeleton-header">
                 <Skeleton className="skeleton-title" />
@@ -230,12 +283,15 @@ const AdminProfileAbout = () => {
               ))}
             </>
           ) : (
+            /* Loaded Content State */
             <>
+              {/* Header Section */}
               <div className="profile-header">
                 <h1>Profile & About</h1>
                 <p>Manage your professional profile and portfolio information</p>
               </div>
 
+              {/* Identity Card: Visual confirmation of logged-in user (Read Only) */}
               <div className="profile-card identity-card">
                 <div className="card-header">
                   <h2>Identity Confirmation</h2>
@@ -260,6 +316,7 @@ const AdminProfileAbout = () => {
                 </div>
               </div>
 
+              {/* Basic Information Card: Main professional details */}
               <div className="profile-card basic-info-card">
                 <div className="card-header">
                   <h2>Basic Information</h2>
@@ -329,6 +386,7 @@ const AdminProfileAbout = () => {
                 </button>
               </div>
 
+              {/* Portfolio Statistics Card: Quantifiable metrics */}
               <div className="profile-card stats-card">
                 <div className="card-header">
                   <h2>Portfolio Statistics</h2>
@@ -361,12 +419,14 @@ const AdminProfileAbout = () => {
                 </button>
               </div>
 
+              {/* Social Links Card: External connection points */}
               <div className="profile-card social-card">
                 <div className="card-header">
                   <h2>Social Links</h2>
                   <span className="subtitle">Connect your profiles</span>
                 </div>
                 <div className="grid-2">
+                  {/* GitHub */}
                   <div className="form-group">
                     <label><Github size={14} /> GitHub URL</label>
                     <div className="input-wrapper">
@@ -378,6 +438,7 @@ const AdminProfileAbout = () => {
                       />
                     </div>
                   </div>
+                  {/* LinkedIn */}
                   <div className="form-group">
                     <label><Linkedin size={14} /> LinkedIn URL</label>
                     <div className="input-wrapper">
@@ -389,8 +450,9 @@ const AdminProfileAbout = () => {
                       />
                     </div>
                   </div>
+                  {/* CV / Resume */}
                   <div className="form-group">
-                    <label><FileText size={14} /> CV / Resume URL</label>
+                    <label><Globe size={14} /> CV / Resume URL</label>
                     <div className="input-wrapper">
                       <input
                         name="cv_url"
@@ -400,6 +462,7 @@ const AdminProfileAbout = () => {
                       />
                     </div>
                   </div>
+                  {/* Twitter / X */}
                   <div className="form-group">
                     <label><Twitter size={14} /> Twitter / X URL</label>
                     <div className="input-wrapper">
@@ -429,5 +492,6 @@ const AdminProfileAbout = () => {
     </div>
   );
 };
+
 
 export default AdminProfileAbout;
