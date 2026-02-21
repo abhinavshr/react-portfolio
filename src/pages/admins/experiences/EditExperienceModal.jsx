@@ -4,10 +4,20 @@ import "../../../css/admin/experiences/AddExperienceModal.css";
 import { updateExperience, viewExperienceById } from "../../../services/experienceService";
 import { addResponsibilities, deleteResponsibility, updateResponsibility } from "../../../services/experienceResponsibilitiesService";
 import Swal from "sweetalert2";
-
 import gsap from "gsap";
 
+/**
+ * EditExperienceModal Component
+ * Facilitates the editing of an existing work experience record.
+ * Handles meta-data updates and granular responsibility management (add/edit/delete).
+ * 
+ * @param {boolean} isOpen - Controls modal visibility.
+ * @param {function} onClose - function to close the modal.
+ * @param {string|number} experienceId - ID of the experience to edit.
+ * @param {function} onExperienceUpdated - Callback to refresh data in parent component.
+ */
 const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdated }) => {
+  // --- Refs & State ---
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
@@ -21,10 +31,13 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     description: "",
   });
 
-  const [responsibilities, setResponsibilities] = useState([{ id: null, text: "" }]);
-  const [loading, setLoading] = useState(false);
-  const [loadingData, setLoadingData] = useState(false);
+  const [responsibilities, setResponsibilities] = useState([{ id: null, text: "" }]); // Combined existing and new items
+  const [loading, setLoading] = useState(false); // Update submission state
+  const [loadingData, setLoadingData] = useState(false); // Initial fetch state
 
+  /**
+   * Animation & Body Scroll Lock
+   */
   useEffect(() => {
     if (isOpen) {
       const tl = gsap.timeline();
@@ -41,6 +54,9 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
+  /**
+   * Gracefully closes the modal.
+   */
   const handleClose = () => {
     const tl = gsap.timeline({
       onComplete: onClose
@@ -49,6 +65,9 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
       .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
+  /**
+   * Data Fetching: Retrieves existing experience details when opened.
+   */
   useEffect(() => {
     if (!isOpen || !experienceId) return;
 
@@ -68,6 +87,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           description: exp.description || "",
         });
 
+        // Set responsibilities: map response objects to local state format
         if (exp.responsibilities && exp.responsibilities.length > 0) {
           setResponsibilities(exp.responsibilities.map(r => ({
             id: r.id,
@@ -92,6 +112,9 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     fetchExperience();
   }, [isOpen, experienceId, onClose]);
 
+  /**
+   * Updates meta form data state.
+   */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -100,12 +123,18 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     }));
   };
 
+  /**
+   * Updates specific responsibility text by index.
+   */
   const handleResponsibilityChange = (index, value) => {
     const updated = [...responsibilities];
     updated[index].text = value;
     setResponsibilities(updated);
   };
 
+  /**
+   * Appends a new empty responsibility object to the state.
+   */
   const addResponsibilityField = () => {
     if (responsibilities.length >= 5) {
       Swal.fire({
@@ -119,10 +148,14 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     setResponsibilities([...responsibilities, { id: null, text: "" }]);
   };
 
+  /**
+   * Handles the removal of a responsibility.
+   * If the item is already saved, it calls the delete API; otherwise, it just updates the state.
+   */
   const removeResponsibilityField = async (index) => {
     const item = responsibilities[index];
 
-    // If it has an ID, it means it's already in the database
+    // Case 1: Existing Responsibility (needs API call)
     if (item.id) {
       const result = await Swal.fire({
         title: "Delete responsibility?",
@@ -147,18 +180,21 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           showConfirmButton: false
         });
         setResponsibilities(responsibilities.filter((_, i) => i !== index));
-        onExperienceUpdated?.(); // Refresh the main page data
+        onExperienceUpdated?.(); // Refresh parent to reflect deletion
       } catch (error) {
         Swal.fire("Error", error.message || "Failed to delete responsibility", "error");
       } finally {
         setLoading(false);
       }
     } else {
-      // Just remove from state if it's a new unsaved item
+      // Case 2: New unsaved item
       setResponsibilities(responsibilities.filter((_, i) => i !== index));
     }
   };
 
+  /**
+   * Validates form inputs.
+   */
   const validateForm = () => {
     if (!formData.companyName.trim() || !formData.role.trim() || !formData.companyLocation.trim() || !formData.description.trim()) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
@@ -169,6 +205,10 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
     return null;
   };
 
+  /**
+   * Handles the submission of all changes.
+   * Synchronizes meta updates and handles separate logic for updating existing vs adding new responsibilities.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -195,20 +235,22 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
 
     try {
       setLoading(true);
+
+      // 1. Update the main experience meta details
       await updateExperience(experienceId, payload);
 
-      // Separate existing vs new responsibilities
+      // 2. Synchronize responsibilities
       const toUpdate = responsibilities.filter(r => r.id && r.text.trim() !== "");
       const toAdd = responsibilities.filter(r => !r.id && r.text.trim() !== "");
 
-      // Perform individual updates for existing ones
+      // Perform individual updates for existing items
       if (toUpdate.length > 0) {
         await Promise.all(
           toUpdate.map(r => updateResponsibility(r.id, { responsibility: r.text }))
         );
       }
 
-      // Perform batch add for new ones
+      // Perform batch add for new items
       if (toAdd.length > 0) {
         await addResponsibilities(experienceId, {
           responsibilities: toAdd.map(r => r.text)
@@ -242,6 +284,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
   return (
     <div className="experience-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div className="experience-modal-box" ref={modalRef} onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header */}
         <div className="experience-modal-header">
           <h2>Edit Experience</h2>
           <button
@@ -254,11 +297,12 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           </button>
         </div>
 
+        {/* Modal Content */}
         <div className="experience-modal-content">
           <p className="experience-modal-subtitle">Update the details of your professional experience.</p>
 
           {loadingData ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+            <div className="loading-state">
               <p>Loading experience data...</p>
             </div>
           ) : (
@@ -396,6 +440,7 @@ const EditExperienceModal = ({ isOpen, onClose, experienceId, onExperienceUpdate
           )}
         </div>
 
+        {/* Modal Footer / Actions */}
         <div className="experience-modal-footer">
           <button
             type="button"

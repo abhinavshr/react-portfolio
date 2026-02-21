@@ -6,7 +6,17 @@ import { addResponsibilities } from "../../../services/experienceResponsibilitie
 import Swal from "sweetalert2";
 import gsap from "gsap";
 
+/**
+ * AddExperienceModal Component
+ * A modal window for administrators to add new work experience entries.
+ * Features: Form validation, dynamic responsibility fields, and GSAP animations.
+ * 
+ * @param {boolean} isOpen - Controls visibility of the modal.
+ * @param {function} onClose - function to close the modal.
+ * @param {function} onExperienceAdded - Callback to refresh parent list after successful addition.
+ */
 const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
+  // --- Refs & State ---
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
 
@@ -20,9 +30,13 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     description: "",
   });
 
-  const [responsibilities, setResponsibilities] = useState([""]);
-  const [loading, setLoading] = useState(false);
+  const [responsibilities, setResponsibilities] = useState([""]); // Array of responsibility strings
+  const [loading, setLoading] = useState(false); // Submission state
 
+  /**
+   * Animation & Body Scroll Lock
+   * Triggers entrance animation and prevents background scrolling when open.
+   */
   useEffect(() => {
     if (isOpen) {
       const tl = gsap.timeline();
@@ -39,6 +53,9 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = () => {
     const tl = gsap.timeline({
       onComplete: () => {
@@ -50,8 +67,9 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
       .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
-  if (!isOpen) return null;
-
+  /**
+   * Updates form state on input change.
+   */
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -60,6 +78,9 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     }));
   };
 
+  /**
+   * Resets form to its initial state.
+   */
   const resetForm = () => {
     setFormData({
       companyName: "",
@@ -73,6 +94,10 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     setResponsibilities([""]);
   };
 
+  /**
+   * Validates form fields before submission.
+   * @returns {Object|null} Error details or null if valid.
+   */
   const validateForm = () => {
     if (!formData.companyName.trim() || !formData.role.trim() || !formData.companyLocation.trim() || !formData.description.trim()) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
@@ -83,6 +108,9 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     return null;
   };
 
+  /**
+   * Adds a new empty responsibility field, up to a maximum of 5.
+   */
   const addResponsibilityField = () => {
     if (responsibilities.length >= 5) {
       Swal.fire({
@@ -96,16 +124,27 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     setResponsibilities([...responsibilities, ""]);
   };
 
+  /**
+   * Removes a specific responsibility field.
+   * @param {number} index - Index of the field to remove.
+   */
   const removeResponsibilityField = (index) => {
     setResponsibilities(responsibilities.filter((_, i) => i !== index));
   };
 
+  /**
+   * Updates a specific responsibility string in the state.
+   */
   const handleResponsibilityChange = (index, value) => {
     const updated = [...responsibilities];
     updated[index] = value;
     setResponsibilities(updated);
   };
 
+  /**
+   * Handles the submission of the entire experience entry.
+   * First adds the experience meta, then adds responsibilities using the new ID.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -133,9 +172,11 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     try {
       setLoading(true);
 
+      // 1. Create the main experience record
       const res = await addExperience(payload);
       const experienceId = res.data?.id || res.data?.data?.id;
 
+      // 2. Attach responsibilities if any exist
       const filtered = responsibilities.filter(r => r.trim() !== "");
       if (filtered.length > 0 && experienceId) {
         await addResponsibilities(experienceId, { responsibilities: filtered });
@@ -164,9 +205,12 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
     }
   };
 
+  if (!isOpen) return null;
+
   return (
     <div className="experience-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div className="experience-modal-box" ref={modalRef} onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header Section */}
         <div className="experience-modal-header">
           <h2>Add New Experience</h2>
           <button
@@ -179,6 +223,7 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
           </button>
         </div>
 
+        {/* Modal Body / Form Fields */}
         <div className="experience-modal-content">
           <p className="experience-modal-subtitle">Fill in the details of your professional experience to showcase on your portfolio.</p>
 
@@ -315,6 +360,7 @@ const AddExperienceModal = ({ isOpen, onClose, onExperienceAdded }) => {
           </form>
         </div>
 
+        {/* Modal Footer / Actions */}
         <div className="experience-modal-footer">
           <button
             type="button"

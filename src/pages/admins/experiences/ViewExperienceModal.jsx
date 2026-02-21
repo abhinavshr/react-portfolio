@@ -5,12 +5,25 @@ import { viewExperienceById } from "../../../services/experienceService";
 import Swal from "sweetalert2";
 import gsap from "gsap";
 
+/**
+ * ViewExperienceModal Component
+ * A read-only modal window for viewing the full details of a work experience entry.
+ * Includes entrance/exit animations and displays both meta info and responsibilities.
+ * 
+ * @param {boolean} isOpen - Controls visibility.
+ * @param {function} onClose - function to close the modal.
+ * @param {string|number} experienceId - ID of the record to fetch and display.
+ */
 const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
+  // --- Refs & State ---
   const modalRef = useRef(null);
   const overlayRef = useRef(null);
-  const [experience, setExperience] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [experience, setExperience] = useState(null); // Fetched record details
+  const [loading, setLoading] = useState(false); // Data fetching state
 
+  /**
+   * Animation & Scroll Management
+   */
   useEffect(() => {
     if (isOpen) {
       const tl = gsap.timeline();
@@ -27,6 +40,9 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
     return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
+  /**
+   * Gracefully closes the modal.
+   */
   const handleClose = () => {
     const tl = gsap.timeline({
       onComplete: onClose
@@ -35,6 +51,9 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
       .to(overlayRef.current, { opacity: 0, duration: 0.2 }, "-=0.1");
   };
 
+  /**
+   * Data Fetching: Retrieves the full experience record via ID.
+   */
   useEffect(() => {
     if (!isOpen || !experienceId) return;
 
@@ -63,6 +82,7 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
   return (
     <div className="experience-modal-overlay" ref={overlayRef} onClick={handleClose}>
       <div className="experience-modal-box" ref={modalRef} onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header */}
         <div className="experience-modal-header">
           <h2>Experience Details</h2>
           <button
@@ -74,11 +94,12 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
           </button>
         </div>
 
+        {/* Modal Content */}
         <div className="experience-modal-content">
           <p className="experience-modal-subtitle">View the detailed information of this professional experience.</p>
 
           {loading ? (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+            <div className="loading-state">
               <p>Loading details...</p>
             </div>
           ) : experience ? (
@@ -150,12 +171,13 @@ const ViewExperienceModal = ({ isOpen, onClose, experienceId }) => {
               )}
             </div>
           ) : (
-            <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-muted)" }}>
+            <div className="no-data-state">
               <p>No experience data found.</p>
             </div>
           )}
         </div>
 
+        {/* Modal Footer */}
         <div className="experience-modal-footer">
           <button
             type="button"
