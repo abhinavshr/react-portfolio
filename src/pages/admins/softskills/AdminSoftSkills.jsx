@@ -19,10 +19,24 @@ const SkeletonSoftSkill = () => (
   </div>
 );
 
+/**
+ * AdminSoftSkills Component
+ * 
+ * Provides a management interface for soft skills in the admin dashboard.
+ * Features include:
+ * - List viewing with pagination
+ * - GSAP-powered entry animations
+ * - Adding, editing, and deleting soft skills
+ * - Loading states with skeleton screens
+ * 
+ * @returns {JSX.Element} The rendered soft skills administration page.
+ */
 const AdminSoftSkills = () => {
   const [active, setActive] = useState("Soft Skills");
   const [softSkills, setSoftSkills] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination state management
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -31,6 +45,7 @@ const AdminSoftSkills = () => {
     to: 0,
   });
 
+  // Modal visibility and selection state
   const [modalState, setModalState] = useState({
     add: false,
     view: false,
@@ -40,6 +55,11 @@ const AdminSoftSkills = () => {
 
   const containerRef = useRef(null);
 
+  /**
+   * Fetches soft skills from the server for a specific page.
+   * 
+   * @param {number} [page=1] - The page number to retrieve.
+   */
   const fetchSoftSkills = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -52,7 +72,7 @@ const AdminSoftSkills = () => {
         lastPage: last_page,
         total,
         from: (current_page - 1) * per_page + 1,
-        to: (current_page - 1) * per_page + response.data.length,
+        to: (current_page - 1) * per_page + (response.data?.length || 0),
       });
     } catch (error) {
       Swal.fire("Error!", error.message || "Failed to fetch soft skills.", "error");
@@ -61,10 +81,12 @@ const AdminSoftSkills = () => {
     }
   }, []);
 
+  // Initial data fetch
   useEffect(() => {
     fetchSoftSkills();
   }, [fetchSoftSkills]);
 
+  // Trigger entrance animations when data is loaded
   useEffect(() => {
     if (!loading && softSkills.length > 0) {
       gsap.fromTo(
@@ -82,6 +104,12 @@ const AdminSoftSkills = () => {
     }
   }, [loading, softSkills]);
 
+  /**
+   * Handles the deletion of a soft skill with user confirmation.
+   * 
+   * @param {number|string} id - The ID of the skill to delete.
+   * @param {string} title - The name of the skill for the confirmation dialog.
+   */
   const handleDeleteSoftSkill = async (id, title) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -188,6 +216,7 @@ const AdminSoftSkills = () => {
             ))}
         </div>
 
+        {/* Footer with pagination info and controls */}
         {!loading && softSkills.length > 0 && (
           <div className="table-footer-soft-skill">
             <div className="table-summary-soft-skill">
@@ -202,7 +231,7 @@ const AdminSoftSkills = () => {
         )}
       </main>
 
-      {/* Modals */}
+      {/* Action Modals */}
       <AddSoftSkillModal
         isOpen={modalState.add}
         onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
