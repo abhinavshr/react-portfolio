@@ -1,3 +1,9 @@
+/**
+ * @file AdminProjectImages.jsx
+ * @description Administrative interface for managing project showcase images (gallery).
+ * Includes functionality for viewing, filtering, uploading, editing, and deleting project artifacts.
+ */
+
 import { useEffect, useState, useRef } from "react";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
 import { Upload, Edit, Trash2, X, Image as ImageIcon, Plus } from "lucide-react";
@@ -11,6 +17,10 @@ import Swal from "sweetalert2";
 import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 
+/**
+ * Skeleton Loader Component
+ * @description Displays a placeholder UI while image data is being fetched.
+ */
 const SkeletonProjectImage = () => (
   <div className="project-card skeleton-project-image">
     <div className="skeleton-image skeleton-input" />
@@ -25,7 +35,12 @@ const SkeletonProjectImage = () => (
   </div>
 );
 
+/**
+ * AdminProjectImages Main Component
+ * @description Manages the gallery of project images with full CRUD capabilities.
+ */
 const AdminProjectImages = () => {
+  // --- State Management ---
   const [active, setActive] = useState("Project Images");
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -43,10 +58,14 @@ const AdminProjectImages = () => {
   const gridRef = useRef(null);
   const headerRef = useRef(null);
 
+  // --- Side Effects ---
+
+  // Initial data fetch
   useEffect(() => {
     fetchProjectImages();
   }, []);
 
+  // Staggered entry animation for project cards
   useEffect(() => {
     if (!loading && images.length > 0) {
       gsap.fromTo(
@@ -63,6 +82,7 @@ const AdminProjectImages = () => {
     }
   }, [loading, images]);
 
+  // Header slide-in animation
   useEffect(() => {
     gsap.fromTo(
       headerRef.current,
@@ -71,23 +91,25 @@ const AdminProjectImages = () => {
     );
   }, []);
 
+  // --- Handler Functions ---
+
+  /**
+   * Fetches project images from the server with pagination support.
+   * @param {number} page - The page number to fetch.
+   */
   const fetchProjectImages = async (page = 1) => {
     try {
       setLoading(true);
       const response = await viewAllProjectImages(page);
       setImages(response.data || []);
+
+      // Calculate pagination metadata
       setPagination({
         currentPage: response.pagination.current_page,
         lastPage: response.pagination.last_page,
         total: response.pagination.total,
-        from:
-          (response.pagination.current_page - 1) *
-          response.pagination.per_page +
-          1,
-        to:
-          (response.pagination.current_page - 1) *
-          response.pagination.per_page +
-          response.data.length,
+        from: (response.pagination.current_page - 1) * response.pagination.per_page + 1,
+        to: (response.pagination.current_page - 1) * response.pagination.per_page + response.data.length,
       });
     } catch (err) {
       setError(err.message || "Failed to fetch project images");
@@ -96,10 +118,18 @@ const AdminProjectImages = () => {
     }
   };
 
+  /**
+   * Navigates to the upload page.
+   */
   const handleClickUpload = () => {
     navigate("/admin/add/project-images");
   };
 
+  /**
+   * Handles the deletion of a project image with a confirmation dialog.
+   * @param {number|string} id - The ID of the image to delete.
+   * @param {Object} image - The image object for display in the confirmation dialog.
+   */
   const handleDelete = async (id, image) => {
     const title = `${image.project?.title} - ${image.image_name}`;
     const result = await Swal.fire({
@@ -138,12 +168,15 @@ const AdminProjectImages = () => {
     }
   };
 
+  // --- Render ---
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content">
         <div className="admin-project-images-page">
+          {/* Page Header */}
           <header className="projectimage-header" ref={headerRef}>
             <div>
               <h1>Project Gallery</h1>
@@ -155,6 +188,7 @@ const AdminProjectImages = () => {
             </button>
           </header>
 
+          {/* Filtering Section (Note: Filtering currently placeholder) */}
           <div className="filter">
             <ImageIcon size={18} color="#6366f1" />
             <span>Filter by project:</span>
@@ -163,21 +197,26 @@ const AdminProjectImages = () => {
             </select>
           </div>
 
+          {/* Main Content Area */}
           {loading ? (
+            // Loading State
             <div className="projects-grid">
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonProjectImage key={i} />
               ))}
             </div>
           ) : error ? (
+            // Error State
             <div className="empty-state error">
               <p>{error}</p>
             </div>
           ) : images.length > 0 ? (
+            // Success State: Gallery Grid
             <>
               <div className="projects-grid" ref={gridRef}>
                 {images.map((image) => (
                   <div key={image.id} className="project-card">
+                    {/* Image Preview */}
                     <img
                       src={image.image_path}
                       alt={image.image_name}
@@ -186,11 +225,13 @@ const AdminProjectImages = () => {
                       loading="lazy"
                     />
 
+                    {/* Image Information */}
                     <div className="project-info">
                       <p className="project-name">{image.project?.title}</p>
                       <p className="project-caption">{image.image_name}</p>
                     </div>
 
+                    {/* Control Actions */}
                     <div className="project-actions">
                       <button
                         className="edit-btn"
@@ -211,6 +252,7 @@ const AdminProjectImages = () => {
                 ))}
               </div>
 
+              {/* Pagination Controls */}
               <div className="table-footer-project-image">
                 <div className="table-summary-project-image">
                   Showing <b>{pagination.from}–{pagination.to}</b> of <b>{pagination.total}</b> artifacts
@@ -223,12 +265,14 @@ const AdminProjectImages = () => {
               </div>
             </>
           ) : (
+            // Empty State
             <div className="empty-state">
               <ImageIcon size={48} style={{ marginBottom: "16px", opacity: 0.5 }} />
               <p>No project images found. Start by uploading one!</p>
             </div>
           )}
 
+          {/* Full-Screen Image Lightbox */}
           {selectedImage && (
             <div className="image-modal" onClick={() => setSelectedImage(null)}>
               <div className="image-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -250,3 +294,4 @@ const AdminProjectImages = () => {
 };
 
 export default AdminProjectImages;
+

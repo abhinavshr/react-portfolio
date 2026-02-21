@@ -1,3 +1,9 @@
+/**
+ * @file EditProjectImage.jsx
+ * @description Component for updating existing project images/artifacts.
+ * Allows changing the project association, image label, or the image file itself.
+ */
+
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AdminSidebar from "../../../components/admin/AdminSidebar";
@@ -7,10 +13,15 @@ import { fetchProjectsDropdown, getProjectImageById, editProjectImage } from "..
 import Swal from "sweetalert2";
 import gsap from "gsap";
 
+/**
+ * EditProjectImage Component
+ * @description Provides an interface to refine details of a previously uploaded project artifact.
+ */
 const EditProjectImage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    // --- State Management ---
     const [active, setActive] = useState("Project Images");
     const [form, setForm] = useState({ project_id: "", image_name: "", image: null });
     const [preview, setPreview] = useState(null);
@@ -21,19 +32,26 @@ const EditProjectImage = () => {
     const containerRef = useRef(null);
     const cardRef = useRef(null);
 
+    // --- Side Effects ---
+
     useEffect(() => {
+        /**
+         * Loads existing image data and the list of available projects.
+         */
         const loadData = async () => {
             try {
+                // Fetch the specific image details
                 const res = await getProjectImageById(id);
                 const img = res.data;
 
                 setForm({
                     project_id: img.project_id || "",
                     image_name: img.image_name || "",
-                    image: null
+                    image: null // Reset file input
                 });
                 setPreview(img.image_path || "");
 
+                // Fetch projects for the dropdown
                 const projectsRes = await fetchProjectsDropdown();
                 setProjects(projectsRes.projects || []);
             } catch (err) {
@@ -49,7 +67,7 @@ const EditProjectImage = () => {
 
         loadData();
 
-        // Animations
+        // Entry animations
         gsap.fromTo(
             containerRef.current,
             { opacity: 0, x: -20 },
@@ -62,7 +80,12 @@ const EditProjectImage = () => {
         );
     }, [id]);
 
+    // --- Form Handlers ---
 
+    /**
+     * Handles input changes and file selection for preview.
+     * @param {React.ChangeEvent} e - The change event.
+     */
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "image" && files?.[0]) {
@@ -73,6 +96,10 @@ const EditProjectImage = () => {
         }
     };
 
+    /**
+     * Handles file drops onto the upload box.
+     * @param {React.DragEvent} e - The drag event.
+     */
     const handleDrop = (e) => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
@@ -82,9 +109,14 @@ const EditProjectImage = () => {
         }
     };
 
+    /**
+     * Submits the updated image data.
+     * @param {React.FormEvent} e - The submission event.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Basic validation
         if (!form.project_id || !form.image_name) {
             Swal.fire({
                 icon: "warning",
@@ -102,7 +134,7 @@ const EditProjectImage = () => {
                 id,
                 project_id: form.project_id,
                 image_name: form.image_name,
-                image: form.image || undefined,
+                image: form.image || undefined, // Only send if a new image was selected
             });
 
             Swal.fire({
@@ -125,13 +157,20 @@ const EditProjectImage = () => {
         }
     };
 
+    // --- Render ---
     return (
         <div className="add-project-image-layout">
+            {/* Sidebar Navigation */}
             <AdminSidebar active={active} setActive={setActive} />
 
             <main className="add-project-image-content">
+                {/* Page Header with Back Button */}
                 <div className="add-project-image-header" ref={containerRef}>
-                    <button className="add-project-image-back-btn" onClick={() => navigate(-1)}>
+                    <button
+                        className="add-project-image-back-btn"
+                        onClick={() => navigate(-1)}
+                        aria-label="Back to gallery"
+                    >
                         <ChevronLeft size={24} />
                     </button>
                     <div>
@@ -140,8 +179,10 @@ const EditProjectImage = () => {
                     </div>
                 </div>
 
+                {/* Edit Form Card */}
                 <div className="add-project-image-card" ref={cardRef}>
                     <form onSubmit={handleSubmit}>
+                        {/* Project Reference Selection */}
                         <div className="add-project-image-group">
                             <label>
                                 <Briefcase size={16} color="#6366f1" />
@@ -162,6 +203,7 @@ const EditProjectImage = () => {
                             </select>
                         </div>
 
+                        {/* Image Label Input */}
                         <div className="add-project-image-group">
                             <label>
                                 <Tag size={16} color="#6366f1" />
@@ -176,6 +218,7 @@ const EditProjectImage = () => {
                             />
                         </div>
 
+                        {/* Asset Replacement Area */}
                         <div className="add-project-image-group">
                             <label>
                                 <ImageIcon size={16} color="#6366f1" />
@@ -205,12 +248,14 @@ const EditProjectImage = () => {
                             </div>
                         </div>
 
+                        {/* Current/New Image Preview */}
                         {preview && (
                             <div className="add-project-image-preview">
                                 <img src={preview} alt="Asset Preview" />
                             </div>
                         )}
 
+                        {/* Form Actions */}
                         <div className="add-project-image-actions">
                             <button type="submit" disabled={loading}>
                                 {loading ? "Saving Changes..." : "Apply Updates"}
@@ -227,3 +272,4 @@ const EditProjectImage = () => {
 };
 
 export default EditProjectImage;
+
