@@ -5,12 +5,25 @@ import { viewEducationById } from "../../../services/educationService";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+/**
+ * ViewEducationModal Component
+ * A read-only modal window for viewing the full details of an education record.
+ * Includes entrance/exit animations and displays academic details.
+ * 
+ * @param {boolean} isOpen - Controls visibility of the modal.
+ * @param {function} onClose - function to close the modal.
+ * @param {string|number} educationId - ID of the record to fetch and display.
+ */
 const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
-  const [education, setEducation] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const modalRef = useRef(null);
-  const overlayRef = useRef(null);
+  // --- Refs & State ---
+  const [education, setEducation] = useState(null); // Fetched record details
+  const [loading, setLoading] = useState(false); // Data fetching state
+  const modalRef = useRef(null); // Ref for GSAP animation
+  const overlayRef = useRef(null); // Ref for GSAP animation
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = useCallback(() => {
     gsap.to(modalRef.current, {
       y: 50,
@@ -22,6 +35,9 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   }, [onClose]);
 
+  /**
+   * Data Fetching: Retrieves the full education record via ID.
+   */
   useEffect(() => {
     if (!isOpen || !educationId) return;
 
@@ -40,6 +56,10 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
     fetchEducation();
   }, [isOpen, educationId]);
 
+  /**
+   * Animation & Body Scroll Lock
+   * Triggers entrance animation when open.
+   */
   useGSAP(() => {
     if (isOpen) {
       gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
@@ -60,6 +80,7 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Modal Header Section */}
         <div className="edu-modal-header">
           <div>
             <h2>Education Details</h2>
@@ -70,6 +91,7 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
           </button>
         </div>
 
+        {/* Modal Content */}
         {loading ? (
           <div className="modal-loading">
             <div className="spinner"></div>
@@ -116,6 +138,7 @@ const ViewEducationModal = ({ isOpen, onClose, educationId }) => {
               <textarea rows="4" value={education.description || "No additional description provided."} readOnly className="read-only-input" />
             </label>
 
+            {/* Modal Footer / Actions */}
             <div className="edu-actions">
               <button type="button" className="cancel-btn" style={{ background: '#f8fafc', width: '100px' }} onClick={handleClose}>
                 Close

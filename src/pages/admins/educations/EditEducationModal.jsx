@@ -6,7 +6,18 @@ import Swal from "sweetalert2";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+/**
+ * EditEducationModal Component
+ * Facilitates the editing of an existing education record.
+ * Handles data fetching on open and form submission for updates.
+ * 
+ * @param {boolean} isOpen - Controls visibility of the modal.
+ * @param {function} onClose - function to close the modal.
+ * @param {string|number} educationId - ID of the education record to edit.
+ * @param {function} onEducationUpdated - Callback to refresh data in parent component.
+ */
 const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }) => {
+  // --- Form State ---
   const [formData, setFormData] = useState({
     institution: "",
     level: "",
@@ -17,14 +28,17 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     description: "",
   });
 
-  const [fetching, setFetching] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [fetching, setFetching] = useState(false); // Initial data load state
+  const [saving, setSaving] = useState(false); // Update submission state
 
-  const modalRef = useRef(null);
-  const overlayRef = useRef(null);
+  const modalRef = useRef(null); // Ref for GSAP animation
+  const overlayRef = useRef(null); // Ref for GSAP animation
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = useCallback(() => {
-    if (saving) return;
+    if (saving) return; // Prevent closing while saving
 
     if (!modalRef.current || !overlayRef.current) {
       onClose?.();
@@ -45,6 +59,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     });
   }, [onClose, saving]);
 
+  /**
+   * Data Fetching: Retrieves existing education details when opened.
+   */
   useEffect(() => {
     if (!isOpen || !educationId) return;
 
@@ -79,6 +96,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     fetchEducation();
   }, [isOpen, educationId, handleClose]);
 
+  /**
+   * Accessibility: Close on Escape key
+   */
   useEffect(() => {
     if (!isOpen) return;
 
@@ -90,6 +110,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, handleClose]);
 
+  /**
+   * Animation & Body Scroll Lock
+   * Triggers entrance animation when open.
+   */
   useGSAP(
     () => {
       if (!isOpen || !modalRef.current || !overlayRef.current) return;
@@ -117,6 +141,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
 
   if (!isOpen) return null;
 
+  /**
+   * Updates form state on input change.
+   */
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -124,6 +151,10 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     }));
   };
 
+  /**
+   * Validates form fields before submission.
+   * @returns {Object|null} Error details or null if valid.
+   */
   const validateForm = () => {
     if (!formData.institution.trim() || !formData.level.trim() || !formData.program.trim()) {
       return {
@@ -148,6 +179,9 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
     return null;
   };
 
+  /**
+   * Handles the submission of the updated education entry.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -211,6 +245,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Modal Header Section */}
         <div className="edu-modal-header">
           <div>
             <h2>Edit Education</h2>
@@ -227,6 +262,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
           </button>
         </div>
 
+        {/* Conditional Rendering: Loading or Form */}
         {fetching ? (
           <div className="modal-loading">
             <div className="spinner"></div>
@@ -320,6 +356,7 @@ const EditEducationModal = ({ isOpen, onClose, educationId, onEducationUpdated }
               />
             </label>
 
+            {/* Modal Footer / Actions */}
             <div className="edu-actions">
               <button
                 type="button"
