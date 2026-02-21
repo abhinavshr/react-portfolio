@@ -6,7 +6,17 @@ import Swal from "sweetalert2";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+/**
+ * AddEducationModal Component
+ * A modal window for administrators to add new education records.
+ * Features: Form validation, layout responsiveness, and GSAP animations.
+ * 
+ * @param {boolean} isOpen - Controls visibility of the modal.
+ * @param {function} onClose - function to close the modal.
+ * @param {function} onEducationAdded - Callback to refresh parent list after successful addition.
+ */
 const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
+  // --- Form State ---
   const [formData, setFormData] = useState({
     institution: "",
     level: "",
@@ -17,10 +27,13 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
     description: "",
   });
 
-  const [loading, setLoading] = useState(false);
-  const modalRef = useRef(null);
-  const overlayRef = useRef(null);
+  const [loading, setLoading] = useState(false); // Submission state
+  const modalRef = useRef(null); // Ref for GSAP animation
+  const overlayRef = useRef(null); // Ref for GSAP animation
 
+  /**
+   * Gracefully closes the modal with an exit animation.
+   */
   const handleClose = useCallback(() => {
     gsap.to(modalRef.current, {
       y: 50,
@@ -32,6 +45,10 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
     gsap.to(overlayRef.current, { opacity: 0, duration: 0.3 });
   }, [onClose]);
 
+  /**
+   * Animation & Body Scroll Lock
+   * Triggers entrance animation when open.
+   */
   useGSAP(() => {
     if (isOpen) {
       gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
@@ -43,10 +60,16 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
     }
   }, { dependencies: [isOpen] });
 
+  /**
+   * Updates form state on input change.
+   */
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  /**
+   * Resets form to its initial state.
+   */
   const resetForm = () => {
     setFormData({
       institution: "",
@@ -59,6 +82,10 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
     });
   };
 
+  /**
+   * Validates form fields before submission.
+   * @returns {Object|null} Error details or null if valid.
+   */
   const validateForm = () => {
     if (!formData.institution.trim() || !formData.level.trim() || !formData.program.trim()) {
       return { type: "warning", title: "Missing Fields", text: "Please fill in all required fields." };
@@ -71,6 +98,9 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
 
   if (!isOpen) return null;
 
+  /**
+   * Handles the submission of the entire education entry.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -129,6 +159,7 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
         ref={modalRef}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Modal Header Section */}
         <div className="edu-modal-header">
           <div>
             <h2>Add New Education</h2>
@@ -144,6 +175,7 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
           </button>
         </div>
 
+        {/* Modal Body / Form Fields */}
         <form onSubmit={handleSubmit} className="edu-form">
           <label>
             Institution / University *
@@ -238,6 +270,7 @@ const AddEducationModal = ({ isOpen, onClose, onEducationAdded }) => {
             />
           </label>
 
+          {/* Modal Footer / Actions */}
           <div className="edu-actions">
             <button
               type="button"

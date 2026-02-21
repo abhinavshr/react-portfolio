@@ -11,7 +11,10 @@ import Pagination from "../../../components/admin/Pagination";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
-/* ---------- Skeleton Card ---------- */
+/**
+ * SkeletonEducation component
+ * Renders a placeholder card while education data is loading.
+ */
 const SkeletonEducation = () => (
   <div className="education-card skeleton-education">
     <div className="skeleton-input title" />
@@ -21,12 +24,19 @@ const SkeletonEducation = () => (
   </div>
 );
 
+/**
+ * AdminEducation Component
+ * Manages the display and administration of education records.
+ * Features: Pagination, CRUD operations (via modals), and GSAP-powered entrance animations.
+ */
 const AdminEducation = () => {
-  const [active, setActive] = useState("Education");
-  const [educations, setEducations] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const containerRef = useRef(null);
+  // --- State Management ---
+  const [active, setActive] = useState("Education"); // Active sidebar menu item
+  const [educations, setEducations] = useState([]); // List of education records
+  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const containerRef = useRef(null); // Ref for GSAP animation scope
 
+  // --- Modal Visibility State ---
   const [modalState, setModalState] = useState({
     add: false,
     view: false,
@@ -34,6 +44,7 @@ const AdminEducation = () => {
     selectedId: null,
   });
 
+  // --- Pagination State ---
   const [pagination, setPagination] = useState({
     currentPage: 1,
     lastPage: 1,
@@ -42,6 +53,10 @@ const AdminEducation = () => {
     to: 0,
   });
 
+  /**
+   * Fetches education records from the server.
+   * @param {number} page - The page number to retrieve.
+   */
   const fetchEducations = useCallback(async (page = 1) => {
     try {
       setLoading(true);
@@ -61,10 +76,15 @@ const AdminEducation = () => {
     }
   }, []);
 
+  // Initial data load
   useEffect(() => {
     fetchEducations();
   }, [fetchEducations]);
 
+  /**
+   * GSAP entrance animations for header, cards, and footer.
+   * Triggers when the loader hides and data state changes.
+   */
   useGSAP(() => {
     if (!loading) {
       const tl = gsap.timeline({
@@ -107,6 +127,10 @@ const AdminEducation = () => {
     }
   }, { dependencies: [loading, educations], scope: containerRef });
 
+  /**
+   * Orchestrates the deletion of an education record.
+   * @param {Object} edu - The education object to delete.
+   */
   const handleDelete = async (edu) => {
     const result = await Swal.fire({
       title: "Delete Education?",
@@ -147,10 +171,12 @@ const AdminEducation = () => {
 
   return (
     <div className="admin-layout">
+      {/* Sidebar Navigation */}
       <AdminSidebar active={active} setActive={setActive} />
 
       <main className="admin-content" ref={containerRef}>
         <div className="admin-education-page">
+          {/* Main Header */}
           <header className="education-header">
             <div>
               <h1>Education</h1>
@@ -164,7 +190,7 @@ const AdminEducation = () => {
             </button>
           </header>
 
-          {/* ---------- Skeletons ---------- */}
+          {/* Conditional Rendering: Loading, Empty, or Data */}
           {loading ? (
             <div className="education-skeleton-wrapper">
               {Array.from({ length: 3 }).map((_, i) => (
@@ -248,6 +274,7 @@ const AdminEducation = () => {
             </div>
           )}
 
+          {/* Pagination Footer */}
           {!loading && educations.length > 0 && (
             <footer className="table-footer-education">
               <div className="table-summary">
@@ -262,7 +289,7 @@ const AdminEducation = () => {
           )}
         </div>
 
-        {/* ---------- Modals ---------- */}
+        {/* Modals for Adding, Viewing, and Editing */}
         <AddEducationModal
           isOpen={modalState.add}
           onClose={() => setModalState((prev) => ({ ...prev, add: false }))}
